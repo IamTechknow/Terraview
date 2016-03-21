@@ -1,6 +1,8 @@
 package com.iamtechknow.worldview.model;
 
-import java.net.URL;
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -9,7 +11,7 @@ import java.util.Locale;
 /**
  * POGO (Plain old Java object) that represents the XML structure for a layer in WMTSCapabilities.xml
  */
-public class Layer {
+public class Layer implements Parcelable {
     //First string is title/identifier, second is time, third is tile matrix set
     public static final String URLtemplate = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/%s/default/%s/%s/";
 
@@ -28,6 +30,24 @@ public class Layer {
         tileMatrixSet = matrixSet;
         format = _format;
     }
+
+    protected Layer(Parcel in) {
+        title = in.readString();
+        tileMatrixSet = in.readString();
+        format = in.readString();
+    }
+
+    public static final Creator<Layer> CREATOR = new Creator<Layer>() {
+        @Override
+        public Layer createFromParcel(Parcel in) {
+            return new Layer(in);
+        }
+
+        @Override
+        public Layer[] newArray(int size) {
+            return new Layer[size];
+        }
+    };
 
     public String getTitle() {
         return title;
@@ -61,5 +81,17 @@ public class Layer {
     public String generateURL(Date d) {
         String str = String.format(Locale.US, URLtemplate, title, dateFormat.format(d), tileMatrixSet);
         return str + "/%d/%d/%d";
+    }
+
+    @Override
+    public int describeContents() {
+        return hashCode();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(title);
+        dest.writeString(tileMatrixSet);
+        dest.writeString(format);
     }
 }

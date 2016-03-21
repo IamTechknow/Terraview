@@ -40,8 +40,9 @@ public class WMTSHandler extends DefaultHandler {
                     currLayer = new Layer();
                     inLayerTag = true;
                     break;
-                case "Style":
+                case "Style": //ignore these three tags and everything within
                 case "Dimension":
+                case "TileMatrix":
                     inLayerTag = false;
                     break;
                 case "Identifier":
@@ -57,7 +58,7 @@ public class WMTSHandler extends DefaultHandler {
         //At the end of an element, we just need to know if we're finished with a Layer element
         if(localName.equals("Layer"))
             contents.add(currLayer);
-        else if(localName.equals("Style") || localName.equals("Dimension"))
+        else if(localName.equals("Style") || localName.equals("Dimension") || localName.equals("TileMatrixSet"))
             inLayerTag = true;
     }
 

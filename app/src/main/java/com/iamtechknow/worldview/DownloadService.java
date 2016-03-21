@@ -3,6 +3,7 @@ package com.iamtechknow.worldview;
 import android.app.IntentService;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.Bundle;
 
 import com.iamtechknow.worldview.model.WMTSReader;
 
@@ -17,8 +18,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class DownloadService extends IntentService {
-    public static final String URL_EXTRA = "url";
-    public static final String PENDING_RESULT_EXTRA = "result";
+    public static final String URL_EXTRA = "url", PENDING_RESULT_EXTRA = "result", RESULT_LIST = "list";
 
     private static final String TAG = DownloadService.class.getSimpleName();
 
@@ -28,8 +28,6 @@ public class DownloadService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        PendingIntent p = intent.getParcelableExtra(PENDING_RESULT_EXTRA);
-
         OkHttpClient client = new OkHttpClient();
 
         try {
@@ -40,8 +38,16 @@ public class DownloadService extends IntentService {
             WMTSReader reader = new WMTSReader();
             reader.run(response.body().byteStream());
 
-            //p.send(this, , );
-        } catch (IOException | ParserConfigurationException | SAXException e) {
+            //run() calls WMTSHandler.parse() which is noy async, so we may get result when we're done
+
+
+            PendingIntent p = intent.getParcelableExtra(PENDING_RESULT_EXTRA);
+            Bundle b = new Bundle();
+            b.putParcelableArrayList(RESULT_LIST, reader.getResult());
+            Intent i = new Intent().putExtras(b);
+
+            p.send(this, android.app.Activity.RESULT_OK, i);
+        } catch (IOException | ParserConfigurationException | SAXException | PendingIntent.CanceledException e) {
             e.printStackTrace();
         }
     }

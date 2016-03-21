@@ -1,5 +1,6 @@
 package com.iamtechknow.worldview;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -8,7 +9,7 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.app.ActionBar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toolbar;
@@ -19,21 +20,12 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.UrlTileProvider;
-import com.iamtechknow.worldview.model.WMTSReader;
+import com.iamtechknow.worldview.model.Layer;
 
-import org.xml.sax.SAXException;
-
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Locale;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import retrofit2.Retrofit;
 
 public class WorldActivity extends Activity implements OnMapReadyCallback {
     public static final String METADATA = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml";
@@ -119,6 +111,15 @@ public class WorldActivity extends Activity implements OnMapReadyCallback {
         TileOverlay overlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(provider));
 
         getLayerData();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(resultCode == RESULT_OK) {
+            ArrayList<Layer> layers = data.getParcelableArrayListExtra(DownloadService.RESULT_LIST);
+            for(Layer l: layers)
+                Log.i("System.out", l.getTitle());
+        }
     }
 
     public void getLayerData() {
