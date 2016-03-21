@@ -23,7 +23,9 @@ import java.net.URL;
 import java.util.Locale;
 
 public class WorldActivity extends Activity implements OnMapReadyCallback {
+    public static final String METADATA = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml";
     public static final String URL_STRING = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/MODIS_Terra_Aerosol/default/2016-03-02/GoogleMapsCompatible_Level6/%d/%d/%d.png";
+    public static final int TILE_SIZE = 256;
 
     //UI fields
     private DrawerLayout mDrawerLayout;
@@ -47,10 +49,10 @@ public class WorldActivity extends Activity implements OnMapReadyCallback {
         setActionBar(mToolbar);
 
         // Adding menu icon to Toolbar
-        ActionBar ActionBar = getActionBar();
-        if (ActionBar != null) {
-            ActionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
-            ActionBar.setDisplayHomeAsUpEnabled(true);
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
+            actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
         //Request the map
@@ -85,7 +87,7 @@ public class WorldActivity extends Activity implements OnMapReadyCallback {
         mMap = googleMap;
 
         //Make a tile overlay
-        UrlTileProvider provider = new UrlTileProvider(256, 256) {
+        UrlTileProvider provider = new UrlTileProvider(TILE_SIZE, TILE_SIZE) {
             @Override
             public URL getTileUrl(int x, int y, int zoom) {
                 String s = String.format(Locale.US, URL_STRING, zoom, y, x);
@@ -102,5 +104,9 @@ public class WorldActivity extends Activity implements OnMapReadyCallback {
         };
 
         TileOverlay overlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(provider));
+    }
+
+    public void getLayerData() {
+        //Get input stream then use parser
     }
 }
