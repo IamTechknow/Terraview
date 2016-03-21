@@ -22,13 +22,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 
-public class WorldActivity extends Activity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener {
+public class WorldActivity extends Activity implements OnMapReadyCallback {
     public static final String URL_STRING = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/MODIS_Terra_Aerosol/default/2016-03-02/GoogleMapsCompatible_Level6/%d/%d/%d.png";
 
     //UI fields
     private DrawerLayout mDrawerLayout;
     private CoordinatorLayout mCoordinatorLayout;
-    private NavigationView mNavView;
+    private NavigationView mNavLayers, mNavDate;
 
     //Map fields
     private GoogleMap mMap;
@@ -41,10 +41,10 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Navig
         //Setup UI
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.thelayout);
-        mNavView = (NavigationView) findViewById(R.id.nav_view);
+        mNavLayers = (NavigationView) findViewById(R.id.nav_layers);
+        mNavDate = (NavigationView) findViewById(R.id.nav_date);
         Toolbar mToolbar = (Toolbar) findViewById(R.id.tool_bar);
         setActionBar(mToolbar);
-        mNavView.setNavigationItemSelectedListener(this);
 
         // Adding menu icon to Toolbar
         ActionBar ActionBar = getActionBar();
@@ -74,12 +74,6 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Navig
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(MenuItem menuItem) {
-        mDrawerLayout.closeDrawers(); //always close drawer when option is selected
-        return true;
     }
 
     /**
