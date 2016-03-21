@@ -2,6 +2,14 @@ package com.iamtechknow.worldview;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.app.ActionBar;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toolbar;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -14,9 +22,15 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 
-public class WorldActivity extends Activity implements OnMapReadyCallback {
+public class WorldActivity extends Activity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener {
     public static final String URL_STRING = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/MODIS_Terra_Aerosol/default/2016-03-02/GoogleMapsCompatible_Level6/%d/%d/%d.png";
 
+    //UI fields
+    private DrawerLayout mDrawerLayout;
+    private CoordinatorLayout mCoordinatorLayout;
+    private NavigationView mNavView;
+
+    //Map fields
     private GoogleMap mMap;
 
     @Override
@@ -24,8 +38,48 @@ public class WorldActivity extends Activity implements OnMapReadyCallback {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Setup UI
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
+        mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.thelayout);
+        mNavView = (NavigationView) findViewById(R.id.nav_view);
+        Toolbar mToolbar = (Toolbar) findViewById(R.id.tool_bar);
+        setActionBar(mToolbar);
+        mNavView.setNavigationItemSelectedListener(this);
+
+        // Adding menu icon to Toolbar
+        ActionBar ActionBar = getActionBar();
+        if (ActionBar != null) {
+            ActionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
+            ActionBar.setDisplayHomeAsUpEnabled(true);
+        }
+
+        //Request the map
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) { //Code to create menu
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(GravityCompat.START);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem menuItem) {
+        mDrawerLayout.closeDrawers(); //always close drawer when option is selected
+        return true;
     }
 
     /**

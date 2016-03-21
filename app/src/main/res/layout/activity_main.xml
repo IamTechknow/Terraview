@@ -1,7 +1,33 @@
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/map"
-    android:name="com.google.android.gms.maps.MapFragment"
+    android:id="@+id/drawer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.iamtechknow.worldview.WorldActivity" />
+    android:fitsSystemWindows="true">
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/thelayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <include layout="@layout/tool_bar"/>
+        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.MapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context="com.iamtechknow.worldview.WorldActivity" />
+    </android.support.design.widget.CoordinatorLayout>
+    <android.support.design.widget.NavigationView
+        android:id="@+id/nav_view"
+        android:background="#eeeeee"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:itemTextColor="@color/abc_primary_text_material_light"
+        app:menu="@menu/menu_navigation" />
+</android.support.v4.widget.DrawerLayout>
