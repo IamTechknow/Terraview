@@ -19,11 +19,11 @@ public class Layer {
     private String format;
 
     //ISO 8601 date format
-    private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+    private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
     public Layer() {}
 
-    public Layer(String _title, String matrixSet, URL url, String _format) {
+    public Layer(String _title, String matrixSet, String _format) {
         title = _title;
         tileMatrixSet = matrixSet;
         format = _format;

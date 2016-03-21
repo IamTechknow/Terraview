@@ -1,6 +1,8 @@
 package com.iamtechknow.worldview;
 
 import android.app.Activity;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
@@ -17,15 +19,26 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.UrlTileProvider;
+import com.iamtechknow.worldview.model.WMTSReader;
 
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import retrofit2.Retrofit;
+
 public class WorldActivity extends Activity implements OnMapReadyCallback {
     public static final String METADATA = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml";
     public static final String URL_STRING = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/MODIS_Terra_Aerosol/default/2016-03-02/GoogleMapsCompatible_Level6/%d/%d/%d.png";
-    public static final int TILE_SIZE = 256;
+    public static final int TILE_SIZE = 256, DOWNLOAD_CODE = 0;
 
     //UI fields
     private DrawerLayout mDrawerLayout;
@@ -104,9 +117,16 @@ public class WorldActivity extends Activity implements OnMapReadyCallback {
         };
 
         TileOverlay overlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(provider));
+
+        getLayerData();
     }
 
     public void getLayerData() {
-        //Get input stream then use parser
+        //Start an intent to a service that downloads in the background
+        PendingIntent p = createPendingResult(DOWNLOAD_CODE, new Intent(), 0);
+        Intent i = new Intent(this, DownloadService.class)
+            .putExtra(DownloadService.URL_EXTRA, METADATA)
+            .putExtra(DownloadService.PENDING_RESULT_EXTRA, p);
+        startService(i);
     }
 }
