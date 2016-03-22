@@ -24,7 +24,7 @@ public class LayerDatabase extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         //create the "trail" table, each entry has a title, image format, and tile matrix set
-        db.execSQL("create table " + TABLE_LAYER + " ( title text, title format, title matrix)");
+        db.execSQL("create table " + TABLE_LAYER + " ( title text, format text, matrix text)");
     }
 
     @Override
@@ -38,7 +38,8 @@ public class LayerDatabase extends SQLiteOpenHelper {
      */
     public void insertLayers(ArrayList<Layer> layers) {
         SQLiteDatabase DB = getWritableDatabase();
-        SQLiteStatement st = DB.compileStatement("insert into " + TABLE_LAYER + " (title, title, title) values (?, ?, ?);");
+        DB.beginTransaction();
+        SQLiteStatement st = DB.compileStatement("insert into " + TABLE_LAYER + " (title, format, matrix) values (?, ?, ?);");
         for(Layer l: layers)
             insertLayer(l.getTitle(), l.getFormat(), l.getTileMatrixSet(), st);
         DB.setTransactionSuccessful();
@@ -72,7 +73,7 @@ public class LayerDatabase extends SQLiteOpenHelper {
         c.moveToFirst();
 
         while(!c.isAfterLast()) {
-            Layer l = new Layer(c.getString(c.getColumnIndex(COL_LAYER_TITLE)), c.getString(c.getColumnIndex(COL_LAYER_FORMAT)), c.getString(c.getColumnIndex(COL_LAYER_MATRIX)));
+            Layer l = new Layer(c.getString(c.getColumnIndex(COL_LAYER_TITLE)), c.getString(c.getColumnIndex(COL_LAYER_MATRIX)), c.getString(c.getColumnIndex(COL_LAYER_FORMAT)));
             a.add(l);
             c.moveToNext();
         }

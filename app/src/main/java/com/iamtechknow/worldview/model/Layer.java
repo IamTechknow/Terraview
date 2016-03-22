@@ -80,7 +80,7 @@ public class Layer implements Parcelable {
      */
     public String generateURL(Date d) {
         String str = String.format(Locale.US, URLtemplate, title, dateFormat.format(d), tileMatrixSet);
-        return str + "/%d/%d/%d";
+        return str + "%d/%d/%d." + format;
     }
 
     @Override

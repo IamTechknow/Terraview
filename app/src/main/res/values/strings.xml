@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Worldview</string>
-    <string name="title_activity_world">Worldview</string>
+    <string name="title_activity_world">@string/app_name</string>
+    <string name="layers">Layers</string>
 </resources>

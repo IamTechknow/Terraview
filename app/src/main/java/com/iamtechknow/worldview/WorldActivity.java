@@ -11,7 +11,9 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toolbar;
@@ -22,12 +24,14 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.UrlTileProvider;
+import com.iamtechknow.worldview.adapter.LayerAdapter;
 import com.iamtechknow.worldview.model.Layer;
 import com.iamtechknow.worldview.model.LayerLoader;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Locale;
 
 public class WorldActivity extends Activity implements OnMapReadyCallback, LoaderManager.LoaderCallbacks<ArrayList<Layer>> {
@@ -35,11 +39,13 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
                                JSON_METADATA = "https://worldview.sit.earthdata.nasa.gov/config/wv.json";
     public static final String TILE_URL = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/MODIS_Terra_Aerosol/default/2016-03-02/GoogleMapsCompatible_Level6/%d/%d/%d.png";
     public static final int TILE_SIZE = 256, DOWNLOAD_CODE = 0;
+    public static final long TWO_DAYS = 86400 * 2 * 1000;
 
     //UI fields
     private DrawerLayout mDrawerLayout;
     private CoordinatorLayout mCoordinatorLayout;
     private NavigationView mNavLayers, mNavDate;
+    private RecyclerView mRecyclerView;
 
     //Map fields
     private GoogleMap mMap;
@@ -67,6 +73,23 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+
+        //Setup the RecyclerView with an empty adapter
+        mRecyclerView = (RecyclerView) findViewById(R.id.layer_list);
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        LayerAdapter l = new LayerAdapter();
+        l.setItemListener(new LayerAdapter.ItemOnClickListener() {
+            @Override
+            public void onClick(Layer layer, boolean checked) {
+                if(checked)
+                    addTileOverlay(layer.generateURL(new Date(System.currentTimeMillis() - TWO_DAYS)));
+                else
+                    removeTileOverlay();
+                mDrawerLayout.closeDrawers();
+            }
+        });
+        mRecyclerView.setAdapter(l);
 
         //Request the map
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
@@ -112,8 +135,7 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
         //Result comes from sending back the PendingIntent in the service
         if(resultCode == RESULT_OK) {
             layers = data.getParcelableArrayListExtra(DownloadService.RESULT_LIST);
-            for(Layer l: layers)
-                Log.i("System.out", l.getTitle());
+            ((LayerAdapter) (mRecyclerView.getAdapter())).insertList(layers);
         }
     }
 
@@ -125,6 +147,7 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
     @Override
     public void onLoadFinished(Loader<ArrayList<Layer>> loader, ArrayList<Layer> lists) {
         layers = lists;
+        ((LayerAdapter) (mRecyclerView.getAdapter())).insertList(layers);
     }
 
     @Override
@@ -150,9 +173,13 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
             }
         };
 
+        removeTileOverlay();
+        mCurrOverlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(provider));
+    }
+
+    public void removeTileOverlay() {
         if(mCurrOverlay != null)
             mCurrOverlay.remove();
-        mCurrOverlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(provider));
     }
 
     public void getLayerData() {
