@@ -12,7 +12,6 @@ import javax.xml.parsers.ParserConfigurationException;
  * Parses WMTSCapabilities.xml to obtain layer data. Uses the online version which is the most up-to-date.
  */
 public class WMTSHandler extends DefaultHandler {
-
     //Container for layers
     private ArrayList<Layer> contents;
 
@@ -80,11 +79,6 @@ public class WMTSHandler extends DefaultHandler {
             }
             currentElement = null; //we are done, reset current element and wait for next one
         }
-    }
-
-    @Override
-    public void endDocument() throws SAXException {
-        //TODO: Save data to database, use callback to get result?
     }
 
     public ArrayList<Layer> getResult() {

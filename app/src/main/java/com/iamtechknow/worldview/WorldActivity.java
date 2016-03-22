@@ -2,8 +2,10 @@ package com.iamtechknow.worldview;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.LoaderManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.Loader;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
@@ -21,13 +23,14 @@ import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.UrlTileProvider;
 import com.iamtechknow.worldview.model.Layer;
+import com.iamtechknow.worldview.model.LayerLoader;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Locale;
 
-public class WorldActivity extends Activity implements OnMapReadyCallback {
+public class WorldActivity extends Activity implements OnMapReadyCallback, LoaderManager.LoaderCallbacks<ArrayList<Layer>> {
     public static final String METADATA = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml";
     public static final String URL_STRING = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/MODIS_Terra_Aerosol/default/2016-03-02/GoogleMapsCompatible_Level6/%d/%d/%d.png";
     public static final int TILE_SIZE = 256, DOWNLOAD_CODE = 0;
@@ -39,6 +42,9 @@ public class WorldActivity extends Activity implements OnMapReadyCallback {
 
     //Map fields
     private GoogleMap mMap;
+
+    //Worldview Data
+    private ArrayList<Layer> layers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +72,7 @@ public class WorldActivity extends Activity implements OnMapReadyCallback {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) { //Code to create menu
+    public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
@@ -110,20 +116,40 @@ public class WorldActivity extends Activity implements OnMapReadyCallback {
 
         TileOverlay overlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(provider));
 
-        getLayerData();
+        if(getSharedPreferences(DownloadService.PREFS_FILE, MODE_PRIVATE).getBoolean(DownloadService.PREFS_DB_KEY, false))
+            getLoaderManager().initLoader(0, null, this);
+        else
+            getLayerData();
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //Result comes from sending back the PendingIntent in the service
         if(resultCode == RESULT_OK) {
-            ArrayList<Layer> layers = data.getParcelableArrayListExtra(DownloadService.RESULT_LIST);
+            layers = data.getParcelableArrayListExtra(DownloadService.RESULT_LIST);
             for(Layer l: layers)
                 Log.i("System.out", l.getTitle());
         }
     }
 
+    @Override
+    public Loader<ArrayList<Layer>> onCreateLoader(int id, Bundle args) {
+        return new LayerLoader(WorldActivity.this);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<ArrayList<Layer>> loader, ArrayList<Layer> lists) {
+        layers = lists;
+    }
+
+    @Override
+    public void onLoaderReset(Loader<ArrayList<Layer>> loader) {
+
+    }
+
     public void getLayerData() {
         //Start an intent to a service that downloads in the background
+        //Pass in an PendingIntent which will be used to send back the data
         PendingIntent p = createPendingResult(DOWNLOAD_CODE, new Intent(), 0);
         Intent i = new Intent(this, DownloadService.class)
             .putExtra(DownloadService.URL_EXTRA, METADATA)
