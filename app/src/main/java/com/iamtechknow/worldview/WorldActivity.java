@@ -31,8 +31,9 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 public class WorldActivity extends Activity implements OnMapReadyCallback, LoaderManager.LoaderCallbacks<ArrayList<Layer>> {
-    public static final String METADATA = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml";
-    public static final String URL_STRING = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/MODIS_Terra_Aerosol/default/2016-03-02/GoogleMapsCompatible_Level6/%d/%d/%d.png";
+    public static final String XML_METADATA = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml",
+                               JSON_METADATA = "https://worldview.sit.earthdata.nasa.gov/config/wv.json";
+    public static final String TILE_URL = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/MODIS_Terra_Aerosol/default/2016-03-02/GoogleMapsCompatible_Level6/%d/%d/%d.png";
     public static final int TILE_SIZE = 256, DOWNLOAD_CODE = 0;
 
     //UI fields
@@ -42,6 +43,7 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
 
     //Map fields
     private GoogleMap mMap;
+    private TileOverlay mCurrOverlay;
 
     //Worldview Data
     private ArrayList<Layer> layers;
@@ -97,24 +99,7 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        //Make a tile overlay
-        UrlTileProvider provider = new UrlTileProvider(TILE_SIZE, TILE_SIZE) {
-            @Override
-            public URL getTileUrl(int x, int y, int zoom) {
-                String s = String.format(Locale.US, URL_STRING, zoom, y, x);
-                URL url = null;
-
-                try {
-                    url = new URL(s);
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
-
-                return url;
-            }
-        };
-
-        TileOverlay overlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(provider));
+        addTileOverlay(TILE_URL);
 
         if(getSharedPreferences(DownloadService.PREFS_FILE, MODE_PRIVATE).getBoolean(DownloadService.PREFS_DB_KEY, false))
             getLoaderManager().initLoader(0, null, this);
@@ -147,12 +132,35 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
 
     }
 
+    public void addTileOverlay(final String url) {
+        //Make a tile overlay
+        UrlTileProvider provider = new UrlTileProvider(TILE_SIZE, TILE_SIZE) {
+            @Override
+            public URL getTileUrl(int x, int y, int zoom) {
+                String s = String.format(Locale.US, url, zoom, y, x);
+                URL url = null;
+
+                try {
+                    url = new URL(s);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+
+                return url;
+            }
+        };
+
+        if(mCurrOverlay != null)
+            mCurrOverlay.remove();
+        mCurrOverlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(provider));
+    }
+
     public void getLayerData() {
         //Start an intent to a service that downloads in the background
         //Pass in an PendingIntent which will be used to send back the data
         PendingIntent p = createPendingResult(DOWNLOAD_CODE, new Intent(), 0);
         Intent i = new Intent(this, DownloadService.class)
-            .putExtra(DownloadService.URL_EXTRA, METADATA)
+            .putExtra(DownloadService.URL_EXTRA, XML_METADATA)
             .putExtra(DownloadService.PENDING_RESULT_EXTRA, p);
         startService(i);
     }
