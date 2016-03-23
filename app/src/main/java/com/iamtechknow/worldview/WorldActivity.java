@@ -2,6 +2,7 @@ package com.iamtechknow.worldview;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.app.LoaderManager;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -16,6 +17,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.DatePicker;
 import android.widget.Toolbar;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -33,15 +35,14 @@ import com.roughike.bottombar.OnMenuTabSelectedListener;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
 public class WorldActivity extends Activity implements OnMapReadyCallback, LoaderManager.LoaderCallbacks<ArrayList<Layer>> {
     public static final String XML_METADATA = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml",
                                JSON_METADATA = "https://worldview.sit.earthdata.nasa.gov/config/wv.json";
-    public static final String TILE_URL = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/MODIS_Terra_Aerosol/default/2016-03-02/GoogleMapsCompatible_Level6/%d/%d/%d.png";
     public static final int TILE_SIZE = 256, DOWNLOAD_CODE = 0;
-    public static final long TWO_DAYS = 86400 * 2 * 1000;
 
     //UI fields
     private DrawerLayout mDrawerLayout;
@@ -49,6 +50,7 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
     private NavigationView mNavLayers, mNavDate;
     private RecyclerView mRecyclerView;
     private BottomBar mBottomBar;
+    private DatePickerDialog mDateDialog;
 
     //Map fields
     private GoogleMap mMap;
@@ -56,6 +58,8 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
 
     //Worldview Data
     private ArrayList<Layer> layers;
+    private int mCurrLayerIdx = 165; //show VIIRS satellite imagery as default
+    private Date currentDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +73,12 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
         mNavDate = (NavigationView) findViewById(R.id.nav_date);
         Toolbar mToolbar = (Toolbar) findViewById(R.id.tool_bar);
         setActionBar(mToolbar);
+
+        //Set default date to be today
+        currentDate = new Date(System.currentTimeMillis());
+        Calendar c = Calendar.getInstance();
+        c.setTime(currentDate);
+        mDateDialog = new DatePickerDialog(WorldActivity.this, mDateListener, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
 
         // Adding menu icon to Toolbar
         ActionBar actionBar = getActionBar();
@@ -84,10 +94,11 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
         LayerAdapter l = new LayerAdapter();
         l.setItemListener(new LayerAdapter.ItemOnClickListener() {
             @Override
-            public void onClick(Layer layer, boolean checked) {
-                if(checked)
-                    addTileOverlay(layer.generateURL(new Date(System.currentTimeMillis() - TWO_DAYS)));
-                else
+            public void onClick(int idx, boolean checked) {
+                if(checked) {
+                    mCurrLayerIdx = idx;
+                    addTileOverlay(layers.get(idx).generateURL(currentDate));
+                } else
                     removeTileOverlay();
                 mDrawerLayout.closeDrawers();
             }
@@ -106,7 +117,7 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
 
                         break;
                     case R.id.action_date:
-
+                        mDateDialog.show();
                         break;
                     case R.id.action_explore:
 
@@ -161,6 +172,8 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        showDefaultTiles();
+
         if(getSharedPreferences(DownloadService.PREFS_FILE, MODE_PRIVATE).getBoolean(DownloadService.PREFS_DB_KEY, false))
             getLoaderManager().initLoader(0, null, this);
         else
@@ -192,6 +205,16 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
 
     }
 
+    private DatePickerDialog.OnDateSetListener mDateListener = new DatePickerDialog.OnDateSetListener() {
+        @Override
+        public void onDateSet(DatePicker view, int year, int month, int day) {
+            Calendar c = Calendar.getInstance();
+            c.set(year, month, day);
+            currentDate = c.getTime();
+            addTileOverlay(layers.get(mCurrLayerIdx).generateURL(currentDate));
+        }
+    };
+
     public void addTileOverlay(final String url) {
         //Make a tile overlay
         UrlTileProvider provider = new UrlTileProvider(TILE_SIZE, TILE_SIZE) {
@@ -217,6 +240,14 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
     public void removeTileOverlay() {
         if(mCurrOverlay != null)
             mCurrOverlay.remove();
+    }
+
+    /**
+     * Show the VIIRS Corrected Reflectance (True Color) overlay of today
+     */
+    public void showDefaultTiles() {
+        Layer l = new Layer("VIIRS_SNPP_CorrectedReflectance_TrueColor", "GoogleMapsCompatible_Level9", "jpg");
+        addTileOverlay(l.generateURL(currentDate));
     }
 
     public void getLayerData() {

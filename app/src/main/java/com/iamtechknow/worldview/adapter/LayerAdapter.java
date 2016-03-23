@@ -20,7 +20,7 @@ public class LayerAdapter extends RecyclerView.Adapter<LayerAdapter.ViewHolder> 
      * Interface method to allow the MainActivity to access the item's coordinates to start routing
      */
     public interface ItemOnClickListener {
-        void onClick(Layer layer, boolean checked);
+        void onClick(int idx, boolean checked);
     }
 
     public void setItemListener(ItemOnClickListener mListener) {
@@ -75,7 +75,7 @@ public class LayerAdapter extends RecyclerView.Adapter<LayerAdapter.ViewHolder> 
             public void onClick(View v) {
                 if(v.getId() != R.id.layer_enable) //Check if text is clicked (instanceof didn't work)
                     holder.checkbox.setChecked(!(holder.checkbox.isChecked()));
-                mListener.onClick(l, holder.checkbox.isChecked());
+                mListener.onClick(holder.getAdapterPosition(), holder.checkbox.isChecked());
             }
         };
 
