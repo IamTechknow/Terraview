@@ -7,6 +7,8 @@ import android.app.LoaderManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.Loader;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
@@ -20,9 +22,11 @@ import android.view.MenuItem;
 import android.widget.DatePicker;
 import android.widget.Toolbar;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.UrlTileProvider;
@@ -33,11 +37,13 @@ import com.iamtechknow.worldview.util.Utils;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnMenuTabSelectedListener;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class WorldActivity extends Activity implements OnMapReadyCallback, LoaderManager.LoaderCallbacks<ArrayList<Layer>> {
@@ -93,17 +99,7 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         LayerAdapter l = new LayerAdapter();
-        l.setItemListener(new LayerAdapter.ItemOnClickListener() {
-            @Override
-            public void onClick(int idx, boolean checked) {
-                if(checked) {
-                    mCurrLayerIdx = idx;
-                    addTileOverlay(layers.get(idx).generateURL(currentDate));
-                } else
-                    removeTileOverlay();
-                mDrawerLayout.closeDrawers();
-            }
-        });
+        l.setItemListener(mLayerAdapter);
         mRecyclerView.setAdapter(l);
 
         //Setup bottombar
@@ -127,9 +123,17 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
 
                         break;
                     case R.id.action_search:
-
+                        Geocoder geocoder = new Geocoder(WorldActivity.this);
+                        try {
+                            List<Address> address = geocoder.getFromLocationName("SFO", 1);
+                            LatLng coords = new LatLng(address.get(0).getLatitude(), address.get(0).getLongitude());
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(coords, 8));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                         break;
                 }
+                mBottomBar.selectTabAtPosition(0, true); //allow item to be selected again
             }
         });
 
@@ -213,6 +217,18 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
             c.set(year, month, day);
             currentDate = c.getTime();
             addTileOverlay(layers.get(mCurrLayerIdx).generateURL(currentDate));
+        }
+    };
+
+    private LayerAdapter.ItemOnClickListener mLayerAdapter = new LayerAdapter.ItemOnClickListener() {
+        @Override
+        public void onClick(int idx, boolean checked) {
+            if(checked) {
+                mCurrLayerIdx = idx;
+                addTileOverlay(layers.get(idx).generateURL(currentDate));
+            } else
+                removeTileOverlay();
+            mDrawerLayout.closeDrawers();
         }
     };
 
