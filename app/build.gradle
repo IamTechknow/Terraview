@@ -43,5 +43,5 @@ dependencies {
     compile 'io.reactivex:rxjava:1.1.2'
     compile 'io.reactivex:rxandroid:1.1.0'
 
-    compile 'com.roughike:bottom-bar:1.1.7'
+    compile 'com.roughike:bottom-bar:1.2.1'
 }
