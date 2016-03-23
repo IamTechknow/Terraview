@@ -160,6 +160,7 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
         SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
         mSearchView = (SearchView) menu.findItem(R.id.search).getActionView();
         mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        mSearchView.setMaxWidth(Integer.MAX_VALUE); //ensures search would cover toolbar title
 
         return true;
     }
@@ -169,6 +170,7 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
         // Handle item selection
         switch (item.getItemId()) {
             case android.R.id.home:
+                mSearchView.onActionViewCollapsed();
                 mDrawerLayout.openDrawer(GravityCompat.START);
                 return true;
             case R.id.search:
