@@ -27,6 +27,8 @@ import com.google.android.gms.maps.model.UrlTileProvider;
 import com.iamtechknow.worldview.adapter.LayerAdapter;
 import com.iamtechknow.worldview.model.Layer;
 import com.iamtechknow.worldview.model.LayerLoader;
+import com.roughike.bottombar.BottomBar;
+import com.roughike.bottombar.OnMenuTabSelectedListener;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -46,6 +48,7 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
     private CoordinatorLayout mCoordinatorLayout;
     private NavigationView mNavLayers, mNavDate;
     private RecyclerView mRecyclerView;
+    private BottomBar mBottomBar;
 
     //Map fields
     private GoogleMap mMap;
@@ -91,6 +94,33 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
         });
         mRecyclerView.setAdapter(l);
 
+        //Setup bottombar
+        mBottomBar = BottomBar.attach(this, savedInstanceState);
+        mBottomBar.noTopOffset();
+        mBottomBar.noNavBarGoodness();
+        mBottomBar.setItemsFromMenu(R.menu.menu_bottombar, new OnMenuTabSelectedListener() {
+            @Override
+            public void onMenuItemSelected(int resId) {
+                switch(resId) {
+                    case R.id.action_about:
+
+                        break;
+                    case R.id.action_date:
+
+                        break;
+                    case R.id.action_explore:
+
+                        break;
+                    case R.id.action_layers:
+
+                        break;
+                    case R.id.action_search:
+
+                        break;
+                }
+            }
+        });
+
         //Request the map
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -114,6 +144,15 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
         }
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // Necessary to restore the BottomBar's state, otherwise we would
+        // lose the current tab on orientation change.
+        mBottomBar.onSaveInstanceState(outState);
+    }
+
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -121,8 +160,6 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        addTileOverlay(TILE_URL);
 
         if(getSharedPreferences(DownloadService.PREFS_FILE, MODE_PRIVATE).getBoolean(DownloadService.PREFS_DB_KEY, false))
             getLoaderManager().initLoader(0, null, this);

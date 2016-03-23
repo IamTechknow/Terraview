@@ -2,4 +2,8 @@
     <string name="app_name">Worldview</string>
     <string name="title_activity_world">@string/app_name</string>
     <string name="layers">Layers</string>
+    <string name="explore">Explore</string>
+    <string name="about">About</string>
+    <string name="search">Search</string>
+    <string name="date">Date</string>
 </resources>

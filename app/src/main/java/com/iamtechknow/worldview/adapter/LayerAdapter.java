@@ -73,7 +73,9 @@ public class LayerAdapter extends RecyclerView.Adapter<LayerAdapter.ViewHolder> 
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mListener.onClick(l, (holder.checkbox.isChecked()));
+                if(v.getId() != R.id.layer_enable) //Check if text is clicked (instanceof didn't work)
+                    holder.checkbox.setChecked(!(holder.checkbox.isChecked()));
+                mListener.onClick(l, holder.checkbox.isChecked());
             }
         };
 
