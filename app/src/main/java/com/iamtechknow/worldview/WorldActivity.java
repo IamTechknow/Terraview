@@ -29,6 +29,7 @@ import com.google.android.gms.maps.model.UrlTileProvider;
 import com.iamtechknow.worldview.adapter.LayerAdapter;
 import com.iamtechknow.worldview.model.Layer;
 import com.iamtechknow.worldview.model.LayerLoader;
+import com.iamtechknow.worldview.util.Utils;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnMenuTabSelectedListener;
 
@@ -114,7 +115,7 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Loade
             public void onMenuItemSelected(int resId) {
                 switch(resId) {
                     case R.id.action_about:
-
+                        Utils.showAbout(WorldActivity.this);
                         break;
                     case R.id.action_date:
                         mDateDialog.show();

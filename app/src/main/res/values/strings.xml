@@ -6,4 +6,44 @@
     <string name="about">About</string>
     <string name="search">Search</string>
     <string name="date">Date</string>
+    <string name="ok">OK</string>
+    <string name="about_html"><![CDATA[
+        <!DOCTYPE html>
+        <html lang=\'en\'>
+            <head>
+                <title></title>
+                <meta charset=\"UTF-8\">
+                <style> body { font-family: sans-serif; } pre { background-color: #eeeeee; padding: 1em; white-space: pre-wrap; } </style>
+            </head>
+            <body>
+                <h3>About</h3>
+                <pre>Worldview Mobile is a REST client for NASA\'s <a href=\"https://earthdata.nasa.gov/gibs\">Global Imagery Browse Services</a> (GIBS).
+                GIBS is a public API providing access to satellite data and imagery from the EOS and A-Train satellites.
+                While this application is not directly related to NASA\'s <a href=\"https://worldview.earthdata.nasa.gov/\">Worldview</a>,
+                I worked on improvements on the project in an internship in NASA\'s Goddard Space Flight Center and created this based on the idea a better interface could be made for mobile devices.
+                </pre>
+                <h3>Acknowledgements</h3>
+                <ul><li>NASA GIBS</li></ul>
+                <pre>We acknowledge the use of imagery provided by services from the Global Imagery Browse Services (GIBS), operated by the NASA/GSFC/Earth Science Data and Information System (ESDIS, <a href=\"https://earthdata.nasa.gov\">https://earthdata.nasa.gov</a>) with funding provided by NASA/HQ.</pre>
+                <h3>License</h3>
+                <pre>The MIT License (MIT) <br />Copyright
+                © 2016 Edmond Lee <br /><br />Permission
+                is hereby granted, free of charge, to any person obtaining a copy
+                of this software and associated documentation files (the \"Software\"), to deal
+                in the Software without restriction, including without limitation the rights
+                to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+                copies of the Software, and to permit persons to whom the Software is
+                furnished to do so, subject to the following conditions: <br /><br />The
+                above copyright notice and this permission notice shall be included in
+                all copies or substantial portions of the Software. <br /><br />THE
+                SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+                IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+                FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+                AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+                LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+                OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+                THE SOFTWARE.</pre>
+            </body>
+        </html>
+    ]]></string>
 </resources>
