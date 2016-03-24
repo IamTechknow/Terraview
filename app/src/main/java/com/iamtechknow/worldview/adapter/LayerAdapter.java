@@ -4,7 +4,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.iamtechknow.worldview.R;
@@ -48,13 +47,11 @@ public class LayerAdapter extends RecyclerView.Adapter<LayerAdapter.ViewHolder> 
      * View holder implementation for each list item
      */
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        CheckBox checkbox;
         TextView layer;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
-            checkbox = (CheckBox) itemView.findViewById(R.id.layer_enable);
             layer = (TextView) itemView.findViewById(R.id.layer_text);
         }
     }
@@ -73,16 +70,14 @@ public class LayerAdapter extends RecyclerView.Adapter<LayerAdapter.ViewHolder> 
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(v.getId() != R.id.layer_enable) //Check if text is clicked (instanceof didn't work)
-                    holder.checkbox.setChecked(!(holder.checkbox.isChecked()));
-                mListener.onClick(holder.getAdapterPosition(), holder.checkbox.isChecked());
+                l.setDisplaying(!l.isDisplaying());
+                mListener.onClick(holder.getAdapterPosition(), l.isDisplaying());
             }
         };
 
         holder.layer.setText(l.getTitle());
 
         holder.itemView.setOnClickListener(listener);
-        holder.checkbox.setOnClickListener(listener);
     }
 
     @Override

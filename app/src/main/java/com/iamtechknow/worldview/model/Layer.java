@@ -15,13 +15,16 @@ public class Layer implements Parcelable {
     //First string is title/identifier, second is time, third is tile matrix set
     public static final String URLtemplate = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/%s/default/%s/%s/";
 
-    //Fields for XML tags TODO add Dimension
+    //Fields for XML tags that are stored to database TODO add Dimension
     private String title;
     private String tileMatrixSet;
     private String format;
 
     //ISO 8601 date format
     private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+
+    //Is layer displayed:
+    private boolean isDisplaying;
 
     public Layer() {}
 
@@ -71,6 +74,14 @@ public class Layer implements Parcelable {
 
     public void setFormat(String format) {
         this.format = format;
+    }
+
+    public boolean isDisplaying() {
+        return isDisplaying;
+    }
+
+    public void setDisplaying(boolean displaying) {
+        isDisplaying = displaying;
     }
 
     /**
