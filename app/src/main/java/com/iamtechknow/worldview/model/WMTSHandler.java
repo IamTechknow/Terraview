@@ -21,8 +21,8 @@ public class WMTSHandler extends DefaultHandler {
     //The current element right now
     private String currentElement;
 
-    //Account for duplicate elements, indicate that we're in the layer element, not style or dimension
-    private boolean inLayerTag = true;
+    //Avoid unwanted elements, indicate that we're in the layer element, not style or dimension
+    private boolean inLayerTag = true, inTileMatrixSetLink;
 
     public WMTSHandler() throws ParserConfigurationException, SAXException {
         contents = new ArrayList<>();
@@ -31,14 +31,15 @@ public class WMTSHandler extends DefaultHandler {
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         //We're at the beginning of an element, check what it is
-        //Make a layer obect or save element string
-        //Don't do this if we're not in the layer top level element, wait until we exit the unwanted element (Style)
+        //Make a layer object or save element string
+        //Don't do this if we're not in the layer top level element, wait until we exit unwanted elements
+        if(localName.equals("Layer")) {
+            currLayer = new Layer();
+            inLayerTag = true;
+        }
+
         if(inLayerTag)
             switch(localName) {
-                case "Layer":
-                    currLayer = new Layer();
-                    inLayerTag = true;
-                    break;
                 case "Style": //ignore these three tags and everything within
                 case "Dimension":
                 case "TileMatrix":
@@ -47,18 +48,31 @@ public class WMTSHandler extends DefaultHandler {
                 case "Identifier":
                 case "Format":
                 case "TileMatrixSet":
-                    inLayerTag = true;
                     currentElement = localName;
+                    break;
+                case "TileMatrixSetLink":
+                    inTileMatrixSetLink = true;
             }
     }
 
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         //At the end of an element, we just need to know if we're finished with a Layer element
-        if(localName.equals("Layer"))
-            contents.add(currLayer);
-        else if(localName.equals("Style") || localName.equals("Dimension") || localName.equals("TileMatrixSet"))
-            inLayerTag = true;
+        switch (localName) {
+            case "Layer":
+                contents.add(currLayer);
+                inLayerTag = false;
+                break;
+            case "Style":
+            case "Dimension":
+                inLayerTag = true;
+                break;
+            case "TileMatrixSet":
+                inLayerTag = inTileMatrixSetLink; //TileMatrixSet may appear outside of a layer tag, we only want the ones that come after TileMatrixSetLink
+                break;
+            case "TileMatrixSetLink":
+                inTileMatrixSetLink = false;
+        }
     }
 
     @Override
@@ -75,7 +89,6 @@ public class WMTSHandler extends DefaultHandler {
                     break;
                 case "TileMatrixSet":
                     currLayer.setTileMatrixSet(new String(ch, start, length));
-                    break;
             }
             currentElement = null; //we are done, reset current element and wait for next one
         }

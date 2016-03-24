@@ -48,6 +48,7 @@ public class DownloadService extends IntentService {
             LayerDatabase db = new LayerDatabase(this);
             db.insertLayers(reader.getResult());
             getSharedPreferences(PREFS_FILE, MODE_PRIVATE).edit().putBoolean(PREFS_DB_KEY, true).apply();
+            db.close();
 
             PendingIntent p = intent.getParcelableExtra(PENDING_RESULT_EXTRA);
             Bundle b = new Bundle();
