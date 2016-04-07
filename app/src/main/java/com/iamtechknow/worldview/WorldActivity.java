@@ -40,7 +40,7 @@ import com.iamtechknow.worldview.model.Layer;
 import com.iamtechknow.worldview.model.LayerLoader;
 import com.iamtechknow.worldview.util.Utils;
 import com.roughike.bottombar.BottomBar;
-import com.roughike.bottombar.OnMenuTabSelectedListener;
+import com.roughike.bottombar.OnMenuTabClickListener;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -116,9 +116,9 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
         mBottomBar = BottomBar.attach(this, savedInstanceState);
         mBottomBar.noTopOffset();
         mBottomBar.noNavBarGoodness();
-        mBottomBar.setItemsFromMenu(R.menu.menu_bottombar, new OnMenuTabSelectedListener() {
+        mBottomBar.setItemsFromMenu(R.menu.menu_bottombar, new OnMenuTabClickListener() {
             @Override
-            public void onMenuItemSelected(int resId) {
+            public void onMenuTabSelected(int resId) {
                 switch(resId) {
                     case R.id.action_about:
                         Utils.showAbout(WorldActivity.this);
@@ -142,6 +142,11 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
                         mBottomBar.selectTabAtPosition(0, true); //allow item to be selected again
                     }
                 }, DELAY_MILLIS);
+            }
+
+            @Override
+            public void onMenuTabReSelected(int menuItemId) {
+
             }
         });
 
@@ -300,10 +305,10 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
     }
 
     /**
-     * Show the VIIRS Corrected Reflectance (True Color) overlay of today
+     * Show the VIIRS Corrected Reflectance (True Color) overlay for today
      */
     public void showDefaultTiles() {
-        Layer l = new Layer("VIIRS_SNPP_CorrectedReflectance_TrueColor", "GoogleMapsCompatible_Level9", "jpg");
+        Layer l = new Layer("VIIRS_SNPP_CorrectedReflectance_TrueColor", "GoogleMapsCompatible_Level9", "jpg", "Corrected Reflectance (True Color)", "Suomi NPP / VIIRS", null, "2015-11-24", true);
         addTileOverlay(l.generateURL(currentDate));
     }
 

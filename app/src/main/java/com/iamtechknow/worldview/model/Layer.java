@@ -2,8 +2,12 @@ package com.iamtechknow.worldview.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
+
+import com.iamtechknow.worldview.WorldActivity;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -139,7 +143,16 @@ public class Layer implements Parcelable {
      * @return A URL String that may be used for UrlTileProvider.getTileURL()
      */
     public String generateURL(Date d) {
-        String str = String.format(Locale.US, URLtemplate, title, dateFormat.format(d), tileMatrixSet);
+        //Check if date is between start and end dates
+        String date;
+        try {
+            date = d.before(dateFormat.parse(endDate)) && d.after(dateFormat.parse(startDate)) ? dateFormat.format(d) : dateFormat.format(new Date(System.currentTimeMillis()));
+        } catch(ParseException e) {
+            Log.w(WorldActivity.class.getSimpleName(), "Invalid date string");
+            date = dateFormat.format(new Date(System.currentTimeMillis()));
+        }
+
+        String str = String.format(Locale.US, URLtemplate, title, date, tileMatrixSet);
         return str + "%d/%d/%d." + format;
     }
 

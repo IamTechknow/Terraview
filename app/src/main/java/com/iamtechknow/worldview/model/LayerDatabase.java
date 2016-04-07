@@ -87,7 +87,7 @@ public class LayerDatabase extends SQLiteOpenHelper {
             String id = c.getString(c.getColumnIndex(COL_LAYER_ID)), matrix = c.getString(c.getColumnIndex(COL_LAYER_MATRIX)),
                     format = c.getString(c.getColumnIndex(COL_LAYER_FORMAT)), title = c.getString(c.getColumnIndex(COL_LAYER_TITLE)),
                     subtitle = c.getString(c.getColumnIndex(COL_LAYER_SUBTITLE)), end = c.getString(c.getColumnIndex(COL_LAYER_END)),
-                    start = c.getString(c.getColumnIndex(COL_LAYER_END));
+                    start = c.getString(c.getColumnIndex(COL_LAYER_START));
             boolean isBase = c.getLong(c.getColumnIndex(COL_LAYER_ISBASE)) != 0;
             Layer l = new Layer(id, matrix, format, title, subtitle, end, start, isBase);
             a.add(l);
