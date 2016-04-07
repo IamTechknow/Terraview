@@ -15,29 +15,38 @@ public class Layer implements Parcelable {
     //First string is title/identifier, second is time, third is tile matrix set
     public static final String URLtemplate = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/%s/default/%s/%s/";
 
-    //Fields for XML tags that are stored to database TODO add Dimension
-    private String title;
-    private String tileMatrixSet;
-    private String format;
+    //Fields for XML tags that are stored to database
+    private String identifier, tileMatrixSet, format, title, subtitle, endDate, startDate;
+    private boolean isBaseLayer;
 
     //ISO 8601 date format
     private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
-    //Is layer displayed:
+    //Is layer displayed? Not really needed when stack is used
     private boolean isDisplaying;
 
     public Layer() {}
 
-    public Layer(String _title, String matrixSet, String _format) {
-        title = _title;
+    public Layer(String _identifier, String matrixSet, String _format, String _title, String sub, String end, String start, boolean isBase) {
+        identifier = _identifier;
         tileMatrixSet = matrixSet;
         format = _format;
+        title = _title;
+        subtitle = sub;
+        endDate = end;
+        startDate = start;
+        isBaseLayer = isBase;
     }
 
     protected Layer(Parcel in) {
-        title = in.readString();
+        identifier = in.readString();
         tileMatrixSet = in.readString();
         format = in.readString();
+        title = in.readString();
+        subtitle = in.readString();
+        endDate = in.readString();
+        startDate = in.readString();
+        isBaseLayer = in.readByte() != 0;
     }
 
     public static final Creator<Layer> CREATOR = new Creator<Layer>() {
@@ -52,12 +61,12 @@ public class Layer implements Parcelable {
         }
     };
 
-    public String getTitle() {
-        return title;
+    public String getIdentifier() {
+        return identifier;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
     public String getTileMatrixSet() {
@@ -84,6 +93,46 @@ public class Layer implements Parcelable {
         isDisplaying = displaying;
     }
 
+    public boolean isBaseLayer() {
+        return isBaseLayer;
+    }
+
+    public void setBaseLayer(boolean baseLayer) {
+        isBaseLayer = baseLayer;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String _title) {
+        title = _title;
+    }
+
+    public String getSubtitle() {
+        return subtitle;
+    }
+
+    public void setSubtitle(String title) {
+        subtitle = title;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
+
     /**
      * Formats a string with layer data and specified date to be used for a tile provider
      * @param d A date string to be formatted in ISO 8601
@@ -94,6 +143,14 @@ public class Layer implements Parcelable {
         return str + "%d/%d/%d." + format;
     }
 
+    /**
+     * Determines whether or not the layer has both a start and end date. If it does the date must be restricted
+     * @return If the layer does not have an end date
+     */
+    public boolean isOngoing() {
+        return endDate != null && startDate != null;
+    }
+
     @Override
     public int describeContents() {
         return hashCode();
@@ -101,8 +158,13 @@ public class Layer implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(title);
+        dest.writeString(identifier);
         dest.writeString(tileMatrixSet);
         dest.writeString(format);
+        dest.writeString(title);
+        dest.writeString(subtitle);
+        dest.writeString(endDate);
+        dest.writeString(startDate);
+        dest.writeByte((byte) (isBaseLayer ? 1 : 0));
     }
 }
