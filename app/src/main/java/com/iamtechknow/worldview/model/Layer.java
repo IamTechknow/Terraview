@@ -122,7 +122,7 @@ public class Layer implements Parcelable {
     }
 
     public String getEndDate() {
-        return endDate;
+        return endDate != null ? endDate : dateFormat.format(new Date(System.currentTimeMillis()));
     }
 
     public void setEndDate(String endDate) {
@@ -130,7 +130,7 @@ public class Layer implements Parcelable {
     }
 
     public String getStartDate() {
-        return startDate;
+        return startDate != null ? startDate : "1979-01-01";
     }
 
     public void setStartDate(String startDate) {
