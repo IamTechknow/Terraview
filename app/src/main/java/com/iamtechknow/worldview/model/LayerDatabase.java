@@ -50,23 +50,27 @@ public class LayerDatabase extends SQLiteOpenHelper {
 
     /**
      * Insert a layer into the database efficiently
+     * All layers have a title, identifier, format, tile matrix set, but may or may not have the rest
      * @param title The layer's title
      * @param subtitle The layer's subtitle
      * @param identifier The layer's identifier (not always title)
      * @param start The layer's start date in ISO format
      * @param end The layer's end date in ISO format
      * @param format The layer's image format
-     * @param matrix The layer's tile matrix metadata
+     * @param matrix The layer's tile matrix set
      * @param st the statement to bind data with
      */
     private void insertLayer(String title, String subtitle, String identifier, String format, String matrix, String start, String end, boolean isBase, SQLiteStatement st) {
         st.bindString(1, title);
-        st.bindString(2, subtitle);
+        if(subtitle != null)
+            st.bindString(2, subtitle);
         st.bindString(3, identifier);
         st.bindString(4, format);
         st.bindString(5, matrix);
-        st.bindString(6, start);
-        st.bindString(7, end);
+        if(start != null)
+            st.bindString(6, start);
+        if(end != null)
+            st.bindString(7, end);
         st.bindLong(8, (isBase ? 1 : 0));
 
         st.executeInsert(); //returns the entry ID (unused)

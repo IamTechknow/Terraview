@@ -146,13 +146,13 @@ public class Layer implements Parcelable {
         //Check if date is between start and end dates
         String date;
         try {
-            date = d.before(dateFormat.parse(endDate)) && d.after(dateFormat.parse(startDate)) ? dateFormat.format(d) : dateFormat.format(new Date(System.currentTimeMillis()));
+            date = d.before(dateFormat.parse(getEndDate())) && d.after(dateFormat.parse(getStartDate())) ? dateFormat.format(d) : dateFormat.format(new Date(System.currentTimeMillis()));
         } catch(ParseException e) {
             Log.w(WorldActivity.class.getSimpleName(), "Invalid date string");
             date = dateFormat.format(new Date(System.currentTimeMillis()));
         }
 
-        String str = String.format(Locale.US, URLtemplate, title, date, tileMatrixSet);
+        String str = String.format(Locale.US, URLtemplate, identifier, date, tileMatrixSet);
         return str + "%d/%d/%d." + format;
     }
 

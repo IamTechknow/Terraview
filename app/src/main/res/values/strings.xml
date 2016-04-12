@@ -6,7 +6,6 @@
     <string name="about">About</string>
     <string name="search">Search</string>
     <string name="date">Date</string>
-    <string name="ok">OK</string>
     <string name="about_html"><![CDATA[
         <!DOCTYPE html>
         <html lang=\'en\'>

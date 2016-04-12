@@ -72,7 +72,7 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
 
     //Worldview Data
     private ArrayList<Layer> layers;
-    private int mCurrLayerIdx = 165; //show VIIRS satellite imagery as default
+    private int mCurrLayerIdx = 0; //show VIIRS satellite imagery as default
     private Date currentDate;
 
     //Allow tasks to be delayed
@@ -84,6 +84,7 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
         setContentView(R.layout.activity_main);
 
         //Setup UI
+        mHandler = new Handler();
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.thelayout);
         mNavLayers = (NavigationView) findViewById(R.id.nav_layers);
@@ -317,7 +318,8 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
         //Pass in an PendingIntent which will be used to send back the data
         PendingIntent p = createPendingResult(DOWNLOAD_CODE, new Intent(), 0);
         Intent i = new Intent(this, DownloadService.class)
-            .putExtra(DownloadService.URL_EXTRA, XML_METADATA)
+            .putExtra(DownloadService.URL_XML, XML_METADATA)
+            .putExtra(DownloadService.URL_JSON, JSON_METADATA)
             .putExtra(DownloadService.PENDING_RESULT_EXTRA, p);
         startService(i);
     }

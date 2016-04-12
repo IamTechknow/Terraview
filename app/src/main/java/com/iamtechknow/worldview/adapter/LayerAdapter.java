@@ -16,7 +16,7 @@ public class LayerAdapter extends RecyclerView.Adapter<LayerAdapter.ViewHolder> 
     private ItemOnClickListener mListener;
 
     /**
-     * Interface method to allow the MainActivity to access the item's coordinates to start routing
+     * Interface method to allow WorldActivity to access the position of the layer in the data set
      */
     public interface ItemOnClickListener {
         void onClick(int idx, boolean checked);

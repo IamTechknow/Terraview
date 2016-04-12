@@ -81,7 +81,7 @@ public class WMTSHandler extends DefaultHandler {
         if(currentElement != null && inLayerTag) {
             switch (currentElement) {
                 case "Identifier":
-                    currLayer.setTitle(new String(ch, start, length));
+                    currLayer.setIdentifier(new String(ch, start, length));
                     break;
                 case "Format":
                     String str = new String(ch, start, length);

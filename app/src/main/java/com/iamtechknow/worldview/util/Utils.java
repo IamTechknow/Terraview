@@ -39,7 +39,7 @@ public class Utils {
             return new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.about)
                 .setView(webView)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         dialog.dismiss();
                     }
