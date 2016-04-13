@@ -14,6 +14,7 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -54,7 +55,7 @@ public class DownloadService extends IntentService {
             ArrayList<Layer> list = reader.getResult();
             parser.parse(list);
 
-            saveToDB(list);
+            saveToDB(list, parser.getMeasurementMap(), parser.getCategoryMap());
 
             //Send data back to WorldActivity
             PendingIntent p = intent.getParcelableExtra(PENDING_RESULT_EXTRA);
@@ -71,9 +72,11 @@ public class DownloadService extends IntentService {
      * Helper function to save layer data to local database
      * @param data The parsed data
      */
-    private void saveToDB(ArrayList<Layer> data) {
+    private void saveToDB(ArrayList<Layer> data, Hashtable<String, ArrayList<String>> measures, Hashtable<String, ArrayList<String>> cats) {
         LayerDatabase db = new LayerDatabase(this);
         db.insertLayers(data);
+        db.insertCategories(cats);
+        db.insertMeasurements(measures);
         getSharedPreferences(PREFS_FILE, MODE_PRIVATE).edit().putBoolean(PREFS_DB_KEY, true).apply();
         db.close();
     }

@@ -16,12 +16,10 @@ public class WVJsonParser {
     private BufferedReader b;
 
     //Primary data structures, Measurements contain layer names, Categories contain measurements
-    private Map<String, ArrayList<String>> measurement_map, category_map;
-    private ArrayList<String> layerorder;
+    private Hashtable<String, ArrayList<String>> measurement_map, category_map;
 
     public WVJsonParser(InputStream is) {
         b = new BufferedReader(new InputStreamReader(is));
-        layerorder = new ArrayList<>();
         category_map = new Hashtable<>();
         measurement_map = new Hashtable<>();
     }
@@ -56,7 +54,7 @@ public class WVJsonParser {
         fillLayers(list, layers_json);
     }
 
-    public void fillMeasurements(Map<String, ArrayList<String>> measurements, JsonObject m_json) {
+    public void fillMeasurements(Hashtable<String, ArrayList<String>> measurements, JsonObject m_json) {
         //Parse measurement categories, first get the keys by getting the entry set
         ArrayList<String> measurement_keys = getKeys(m_json);
 
@@ -77,7 +75,7 @@ public class WVJsonParser {
         }
     }
 
-    public void fillCategories(Map<String, ArrayList<String>> categories, JsonObject cat_json) {
+    public void fillCategories(Hashtable<String, ArrayList<String>> categories, JsonObject cat_json) {
         //Get keys, fill category measurements list
         for(String s : getKeys(cat_json)) {
             ArrayList<String> cat_measurements = new ArrayList<>();
@@ -139,11 +137,11 @@ public class WVJsonParser {
         return cat_keys;
     }
 
-    public Map<String, ArrayList<String>> getMeasurementMap() {
+    public Hashtable<String, ArrayList<String>> getMeasurementMap() {
         return measurement_map;
     }
 
-    public Map<String, ArrayList<String>> getCategoryMap() {
+    public Hashtable<String, ArrayList<String>> getCategoryMap() {
         return category_map;
     }
 }

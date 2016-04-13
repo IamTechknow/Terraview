@@ -36,6 +36,7 @@ import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.UrlTileProvider;
 import com.iamtechknow.worldview.adapter.LayerAdapter;
+import com.iamtechknow.worldview.model.DataWrapper;
 import com.iamtechknow.worldview.model.Layer;
 import com.iamtechknow.worldview.model.LayerLoader;
 import com.iamtechknow.worldview.util.Utils;
@@ -48,10 +49,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 
-public class WorldActivity extends Activity implements OnMapReadyCallback, GoogleMap.OnMapClickListener, LoaderManager.LoaderCallbacks<ArrayList<Layer>> {
+public class WorldActivity extends Activity implements OnMapReadyCallback, GoogleMap.OnMapClickListener, LoaderManager.LoaderCallbacks<DataWrapper> {
     public static final String XML_METADATA = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml",
                                JSON_METADATA = "https://worldview.sit.earthdata.nasa.gov/config/wv.json";
     public static final int TILE_SIZE = 256, DOWNLOAD_CODE = 0;
@@ -72,6 +74,7 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
 
     //Worldview Data
     private ArrayList<Layer> layers;
+    private Hashtable<String, ArrayList<String>> categories, measurements;
     private int mCurrLayerIdx = 0; //show VIIRS satellite imagery as default
     private Date currentDate;
 
@@ -235,18 +238,21 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
     }
 
     @Override
-    public Loader<ArrayList<Layer>> onCreateLoader(int id, Bundle args) {
+    public Loader<DataWrapper> onCreateLoader(int id, Bundle args) {
         return new LayerLoader(WorldActivity.this);
     }
 
     @Override
-    public void onLoadFinished(Loader<ArrayList<Layer>> loader, ArrayList<Layer> lists) {
-        layers = lists;
+    public void onLoadFinished(Loader<DataWrapper> loader, DataWrapper data) {
+        layers = data.layers;
+        categories = data.cats;
+        measurements = data.measures;
+
         ((LayerAdapter) (mRecyclerView.getAdapter())).insertList(layers);
     }
 
     @Override
-    public void onLoaderReset(Loader<ArrayList<Layer>> loader) {}
+    public void onLoaderReset(Loader<DataWrapper> loader) {}
 
     @Override
     public void onBackPressed() { //hide search when on and back pressed
