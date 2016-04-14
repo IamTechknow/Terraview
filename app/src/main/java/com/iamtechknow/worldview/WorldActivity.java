@@ -231,7 +231,7 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         //Result comes from sending back the PendingIntent in the service
-        if(resultCode == RESULT_OK) {
+        if(requestCode == DOWNLOAD_CODE && resultCode == RESULT_OK) {
             layers = data.getParcelableArrayListExtra(DownloadService.RESULT_LIST);
             ((LayerAdapter) (mRecyclerView.getAdapter())).insertList(layers);
         }

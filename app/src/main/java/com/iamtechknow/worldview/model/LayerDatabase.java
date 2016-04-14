@@ -165,6 +165,7 @@ public class LayerDatabase extends SQLiteOpenHelper {
             ArrayList<String> list = new ArrayList<>();
             Collections.addAll(list, val.split(" "));
             map.put(key, list);
+            c.moveToNext();
         }
 
         c.close();
