@@ -57,7 +57,7 @@ public class DownloadService extends IntentService {
 
             saveToDB(list, parser.getMeasurementMap(), parser.getCategoryMap());
 
-            //Send data back to WorldActivity
+            //Send data back to WorldActivity - this may take some time!
             PendingIntent p = intent.getParcelableExtra(PENDING_RESULT_EXTRA);
             Bundle b = new Bundle();
             b.putParcelableArrayList(RESULT_LIST, list);

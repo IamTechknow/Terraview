@@ -1,6 +1,6 @@
 package com.iamtechknow.worldview.model;
 
-import android.content.AsyncTaskLoader;
+import android.support.v4.content.AsyncTaskLoader;
 import android.content.Context;
 
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ public class LayerLoader extends AsyncTaskLoader<DataWrapper> {
     //If the data is cached, use it!
     @Override
     protected void onStartLoading() {
-        if(layers != null)
+        if(measures != null)
             deliverResult(new DataWrapper(layers, cats, measures));
         else
             forceLoad();

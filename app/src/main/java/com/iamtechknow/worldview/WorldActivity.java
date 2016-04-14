@@ -1,37 +1,29 @@
 package com.iamtechknow.worldview;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.app.LoaderManager;
+import android.support.v4.app.LoaderManager;
 import android.app.PendingIntent;
-import android.app.SearchManager;
 import android.content.Intent;
-import android.content.Loader;
-import android.location.Address;
-import android.location.Geocoder;
+import android.support.v4.content.Loader;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.DatePicker;
-import android.widget.SearchView;
 import android.widget.Toolbar;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.UrlTileProvider;
@@ -43,17 +35,14 @@ import com.iamtechknow.worldview.util.Utils;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnMenuTabClickListener;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Hashtable;
-import java.util.List;
 import java.util.Locale;
 
-public class WorldActivity extends Activity implements OnMapReadyCallback, GoogleMap.OnMapClickListener, LoaderManager.LoaderCallbacks<DataWrapper> {
+public class WorldActivity extends AppCompatActivity implements OnMapReadyCallback, LoaderManager.LoaderCallbacks<DataWrapper> {
     public static final String XML_METADATA = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml",
                                JSON_METADATA = "https://worldview.sit.earthdata.nasa.gov/config/wv.json";
     public static final int TILE_SIZE = 256, DOWNLOAD_CODE = 0, LAYER_CODE = 1;
@@ -66,7 +55,6 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
     private RecyclerView mRecyclerView;
     private BottomBar mBottomBar;
     private DatePickerDialog mDateDialog;
-    private SearchView mSearchView;
 
     //Map fields
     private GoogleMap mMap;
@@ -74,7 +62,6 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
 
     //Worldview Data
     private ArrayList<Layer> layers;
-    private Hashtable<String, ArrayList<String>> categories, measurements;
     private int mCurrLayerIdx = 0; //show VIIRS satellite imagery as default
     private Date currentDate;
 
@@ -136,9 +123,6 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
                     case R.id.action_layers:
                         startActivityForResult(new Intent(WorldActivity.this, LayerActivity.class), LAYER_CODE);
                         break;
-                    case R.id.action_search:
-                        mSearchView.onActionViewExpanded();
-                        break;
                 }
                 mHandler.postDelayed(new Runnable() {
                     @Override
@@ -164,13 +148,6 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-
-        //Associate searchable configuration with the SearchView
-        SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
-        mSearchView = (SearchView) menu.findItem(R.id.search).getActionView();
-        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        mSearchView.setMaxWidth(Integer.MAX_VALUE); //ensures search would cover toolbar title
-
         return true;
     }
 
@@ -179,11 +156,7 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
         // Handle item selection
         switch (item.getItemId()) {
             case android.R.id.home:
-                mSearchView.onActionViewCollapsed();
                 mDrawerLayout.openDrawer(GravityCompat.START);
-                return true;
-            case R.id.search:
-                mSearchView.onActionViewExpanded();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -199,11 +172,9 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
         mBottomBar.onSaveInstanceState(outState);
     }
 
-    //Search query appears here
     @Override
     protected void onNewIntent(Intent intent) {
-        if(intent.getAction().equals(Intent.ACTION_SEARCH))
-            doGeoCoding(intent.getStringExtra(SearchManager.QUERY));
+
     }
 
     /**
@@ -213,19 +184,13 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setOnMapClickListener(this);
 
         showDefaultTiles();
 
         if(getSharedPreferences(DownloadService.PREFS_FILE, MODE_PRIVATE).getBoolean(DownloadService.PREFS_DB_KEY, false))
-            getLoaderManager().initLoader(0, null, this);
+            getSupportLoaderManager().initLoader(0, null, this);
         else
             getLayerData();
-    }
-
-    @Override
-    public void onMapClick(LatLng l) {
-        mSearchView.onActionViewCollapsed();
     }
 
     @Override
@@ -234,6 +199,8 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
         if(requestCode == DOWNLOAD_CODE && resultCode == RESULT_OK) {
             layers = data.getParcelableArrayListExtra(DownloadService.RESULT_LIST);
             ((LayerAdapter) (mRecyclerView.getAdapter())).insertList(layers);
+
+            //TODO: Send data to LayerActivity, also don't do this data transfer, just rely on Loader
         }
     }
 
@@ -245,22 +212,12 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
     @Override
     public void onLoadFinished(Loader<DataWrapper> loader, DataWrapper data) {
         layers = data.layers;
-        categories = data.cats;
-        measurements = data.measures;
 
         ((LayerAdapter) (mRecyclerView.getAdapter())).insertList(layers);
     }
 
     @Override
     public void onLoaderReset(Loader<DataWrapper> loader) {}
-
-    @Override
-    public void onBackPressed() { //hide search when on and back pressed
-        if(!mSearchView.isIconified())
-            mSearchView.onActionViewCollapsed();
-        else
-            super.onBackPressed();
-    }
 
     private DatePickerDialog.OnDateSetListener mDateListener = new DatePickerDialog.OnDateSetListener() {
         @Override
@@ -328,25 +285,5 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
             .putExtra(DownloadService.URL_JSON, JSON_METADATA)
             .putExtra(DownloadService.PENDING_RESULT_EXTRA, p);
         startService(i);
-    }
-
-    public void doGeoCoding(String query) {
-        mSearchView.onActionViewCollapsed(); //hide search
-        Geocoder geocoder = new Geocoder(WorldActivity.this);
-        try {
-            List<Address> address = geocoder.getFromLocationName(query, 1);
-            if(address.size() > 0) {
-                LatLng coords = new LatLng(address.get(0).getLatitude(), address.get(0).getLongitude());
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(coords, 8));
-            } else //No results, let user retry
-                Snackbar.make(mCoordinatorLayout, R.string.no_results, Snackbar.LENGTH_LONG).setAction(R.string.retry, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mSearchView.onActionViewExpanded();
-                    }
-                }).show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

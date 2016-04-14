@@ -5,10 +5,6 @@
         android:title="@string/explore"
         android:icon="@drawable/ic_explore_white_24px" />
     <item
-        android:id="@+id/action_search"
-        android:title="@string/search"
-        android:icon="@android:drawable/ic_menu_search" />
-    <item
         android:id="@+id/action_layers"
         android:title="@string/layers"
         android:icon="@drawable/ic_layers_white_24px" />

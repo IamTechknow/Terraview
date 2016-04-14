@@ -29,7 +29,7 @@ public class LayerActivity extends AppCompatActivity {
 
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
         Adapter adapter = new Adapter(getSupportFragmentManager());
-        adapter.addFragment(new LayerPageFragment(), "Categories");
+        adapter.addFragment(new LayerPageFragment(), "Categories"); //TODO: Set args for each frag
         adapter.addFragment(new LayerPageFragment(), "Measurements");
         adapter.addFragment(new LayerPageFragment(), "Layers");
         viewPager.setAdapter(adapter);
