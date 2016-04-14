@@ -56,7 +56,7 @@ import java.util.Locale;
 public class WorldActivity extends Activity implements OnMapReadyCallback, GoogleMap.OnMapClickListener, LoaderManager.LoaderCallbacks<DataWrapper> {
     public static final String XML_METADATA = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml",
                                JSON_METADATA = "https://worldview.sit.earthdata.nasa.gov/config/wv.json";
-    public static final int TILE_SIZE = 256, DOWNLOAD_CODE = 0;
+    public static final int TILE_SIZE = 256, DOWNLOAD_CODE = 0, LAYER_CODE = 1;
     public static final long DELAY_MILLIS = 1000;
 
     //UI fields
@@ -134,7 +134,7 @@ public class WorldActivity extends Activity implements OnMapReadyCallback, Googl
 
                         break;
                     case R.id.action_layers:
-
+                        startActivityForResult(new Intent(WorldActivity.this, LayerActivity.class), LAYER_CODE);
                         break;
                     case R.id.action_search:
                         mSearchView.onActionViewExpanded();
