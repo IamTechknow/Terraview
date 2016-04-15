@@ -1,5 +1,6 @@
 package com.iamtechknow.worldview.fragment;
 
+import android.content.Intent;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.os.Bundle;
@@ -11,18 +12,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.iamtechknow.worldview.LayerActivity;
 import com.iamtechknow.worldview.R;
-import com.iamtechknow.worldview.adapter.LayerAdapter;
+import com.iamtechknow.worldview.adapter.*;
 import com.iamtechknow.worldview.model.DataWrapper;
 import com.iamtechknow.worldview.model.Layer;
 import com.iamtechknow.worldview.model.LayerLoader;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Map;
 
 public class LayerPageFragment extends Fragment implements LoaderManager.LoaderCallbacks<DataWrapper> {
+    public static final int ARG_CAT = 0, ARG_MEASURE = 1, ARG_LAYER = 2;
+    public static final String EXTRA_ARG = "arg";
 
     private RecyclerView mRecyclerView;
+    private int mode;
 
     //Worldview Data
     private ArrayList<Layer> layers;
@@ -31,8 +37,9 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
         setHasOptionsMenu(false);
+
+        mode = getArguments().getInt(EXTRA_ARG, ARG_CAT);
     }
 
     @Override
@@ -51,7 +58,7 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        LayerAdapter l = new LayerAdapter();
+        DataAdapter l = new DataAdapter();
         l.setItemListener(mItemListener);
         mRecyclerView.setAdapter(l);
         return rootView;
@@ -69,6 +76,19 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
         measurements = data.measures;
 
         //TODO populate lists
+        switch (mode) {
+            case ARG_CAT: //Simple, get names of keys then display all categories
+                ArrayList<String> cat_list = new ArrayList<>();
+                for(Map.Entry<String, ArrayList<String>> e : categories.entrySet())
+                    cat_list.add(e.getKey());
+                ((DataAdapter) (mRecyclerView.getAdapter())).insertList(cat_list);
+                break;
+            case ARG_MEASURE:
+
+                break;
+            default:
+
+        }
     }
 
     @Override
@@ -77,7 +97,17 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
     LayerAdapter.ItemOnClickListener mItemListener = new LayerAdapter.ItemOnClickListener() {
         @Override
         public void onClick(int idx, boolean checked) {
-            //TODO
+            Intent i = new Intent(getActivity(), LayerActivity.class);
+            switch(mode) {
+                case ARG_CAT:
+                    i.setAction(LayerActivity.ACTION_SWITCH_MEASURE);
+                    break;
+                case ARG_MEASURE:
+                    i.setAction(LayerActivity.ACTION_SWITCH_CATEGORY);
+                    break;
+                default:
+            }
+            startActivity(i);
         }
     };
 }

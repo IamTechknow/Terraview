@@ -1,5 +1,6 @@
 package com.iamtechknow.worldview;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -16,6 +17,11 @@ import com.iamtechknow.worldview.fragment.LayerPageFragment;
 import java.util.ArrayList;
 
 public class LayerActivity extends AppCompatActivity {
+    public static final String ACTION_SWITCH_CATEGORY = "com.iamtechknow.worldview.CATEGORY",
+                               ACTION_SWITCH_MEASURE = "com.iamtechknow.worldview.MEASURE";
+
+    private TabLayout mTabLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,13 +35,22 @@ public class LayerActivity extends AppCompatActivity {
 
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
         Adapter adapter = new Adapter(getSupportFragmentManager());
-        adapter.addFragment(new LayerPageFragment(), "Categories"); //TODO: Set args for each frag
-        adapter.addFragment(new LayerPageFragment(), "Measurements");
-        adapter.addFragment(new LayerPageFragment(), "Layers");
+        LayerPageFragment frag1 = new LayerPageFragment(), frag2 = new LayerPageFragment(), frag3 = new LayerPageFragment();
+        Bundle extra1 = new Bundle(), extra2 = new Bundle(), extra3 = new Bundle();
+        extra1.putInt(LayerPageFragment.EXTRA_ARG, LayerPageFragment.ARG_CAT);
+        extra2.putInt(LayerPageFragment.EXTRA_ARG, LayerPageFragment.ARG_MEASURE);
+        extra3.putInt(LayerPageFragment.EXTRA_ARG, LayerPageFragment.ARG_LAYER);
+        frag1.setArguments(extra1);
+        frag2.setArguments(extra2);
+        frag3.setArguments(extra3);
+
+        adapter.addFragment(frag1, "Categories"); //TODO: Set args for each frag
+        adapter.addFragment(frag2, "Measurements");
+        adapter.addFragment(frag3, "Layers");
         viewPager.setAdapter(adapter);
 
-        TabLayout tabs = (TabLayout) findViewById(R.id.tabs);
-        tabs.setupWithViewPager(viewPager);
+        mTabLayout = (TabLayout) findViewById(R.id.tabs);
+        mTabLayout.setupWithViewPager(viewPager);
     }
 
     @Override
@@ -48,6 +63,21 @@ public class LayerActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    //TODO: Switch tabs
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if(intent.getAction() != null)
+            switch (intent.getAction()) {
+                case ACTION_SWITCH_CATEGORY:
+                    mTabLayout.getTabAt(LayerPageFragment.ARG_CAT).select();
+                    break;
+                case ACTION_SWITCH_MEASURE:
+                    mTabLayout.getTabAt(LayerPageFragment.ARG_MEASURE).select();
+                    break;
+            }
     }
 
     static class Adapter extends FragmentPagerAdapter {
