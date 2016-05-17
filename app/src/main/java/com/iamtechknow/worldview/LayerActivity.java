@@ -1,6 +1,5 @@
 package com.iamtechknow.worldview;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -16,11 +15,21 @@ import com.iamtechknow.worldview.fragment.LayerPageFragment;
 
 import java.util.ArrayList;
 
+import rx.functions.Action1;
+
 public class LayerActivity extends AppCompatActivity {
-    public static final String ACTION_SWITCH_CATEGORY = "com.iamtechknow.worldview.CATEGORY",
-                               ACTION_SWITCH_MEASURE = "com.iamtechknow.worldview.MEASURE";
+    public static final int CAT = 0, MEASURE = 1, LAYER = 2;
 
     private TabLayout mTabLayout;
+    private RxBus _rxBus;
+
+    // This is better done with a DI Library like Dagger
+    public RxBus getRxBusSingleton() {
+        if (_rxBus == null)
+            _rxBus = new RxBus();
+
+        return _rxBus;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +60,8 @@ public class LayerActivity extends AppCompatActivity {
 
         mTabLayout = (TabLayout) findViewById(R.id.tabs);
         mTabLayout.setupWithViewPager(viewPager);
+
+        _rxBus = getRxBusSingleton();
     }
 
     @Override
@@ -65,19 +76,31 @@ public class LayerActivity extends AppCompatActivity {
         }
     }
 
-    //TODO: Switch tabs
     @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        if(intent.getAction() != null)
-            switch (intent.getAction()) {
-                case ACTION_SWITCH_CATEGORY:
-                    mTabLayout.getTabAt(LayerPageFragment.ARG_CAT).select();
-                    break;
-                case ACTION_SWITCH_MEASURE:
-                    mTabLayout.getTabAt(LayerPageFragment.ARG_MEASURE).select();
-                    break;
-            }
+    public void onStart() {
+        super.onStart();
+        _rxBus.toObserverable()
+            .subscribe(new Action1<Object>() {
+                @Override
+                public void call(Object event) {
+                    if(event instanceof LayerPageFragment.TapEvent)
+                        //If we have an event due to a button press then go to the tab
+                        //And in the fragment that is also listening load the right data!
+                        switch(((LayerPageFragment.TapEvent) event).tab) {
+                            case CAT:
+                                mTabLayout.getTabAt(LayerPageFragment.ARG_CAT).select();
+                                break;
+
+                            case MEASURE:
+                                mTabLayout.getTabAt(LayerPageFragment.ARG_MEASURE).select();
+                                break;
+
+                            default: //layer
+                                mTabLayout.getTabAt(LayerPageFragment.ARG_LAYER).select();
+                                break;
+                        }
+                }
+            });
     }
 
     static class Adapter extends FragmentPagerAdapter {
@@ -108,5 +131,4 @@ public class LayerActivity extends AppCompatActivity {
             return mFragmentTitleList.get(position);
         }
     }
-
 }
