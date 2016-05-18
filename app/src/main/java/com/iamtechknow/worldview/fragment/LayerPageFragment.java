@@ -48,11 +48,16 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        //Load data, get event bus
+        //Load data
         super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(0, null, this);
     }
 
+	/**
+	 * Subscribes to the RxBus with a response to new events.
+	 * It is important to to subscribe to the same event bus used to post events, 
+	 * thus it is a singleton object.
+	 */
     @Override
     public void onStart() {
         super.onStart();
@@ -89,6 +94,7 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
             });
     }
 
+	//Inflate the fragment view and setup the RecyclerView
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_layer, container, false);

@@ -42,6 +42,7 @@ public class LayerActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+		//Create arguments for each fragments which will be used when they're created
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
         Adapter adapter = new Adapter(getSupportFragmentManager());
         LayerPageFragment frag1 = new LayerPageFragment(), frag2 = new LayerPageFragment(), frag3 = new LayerPageFragment();
@@ -53,7 +54,7 @@ public class LayerActivity extends AppCompatActivity {
         frag2.setArguments(extra2);
         frag3.setArguments(extra3);
 
-        adapter.addFragment(frag1, "Categories"); //TODO: Set args for each frag
+        adapter.addFragment(frag1, "Categories"); //Add the fragment and its tab title
         adapter.addFragment(frag2, "Measurements");
         adapter.addFragment(frag3, "Layers");
         viewPager.setAdapter(adapter);
@@ -76,6 +77,10 @@ public class LayerActivity extends AppCompatActivity {
         }
     }
 
+	/**
+	 * Subscribes to the RxBus with a response to new events.
+	 * The Activity can find out what layers are selected, and what tab should be shown when an item is tapped.
+	 */
     @Override
     public void onStart() {
         super.onStart();
@@ -103,6 +108,9 @@ public class LayerActivity extends AppCompatActivity {
             });
     }
 
+	/**
+	 * The Adapter provides the revelant information needed to setup the ViewPager's data source and views.
+	 */
     static class Adapter extends FragmentPagerAdapter {
         private final ArrayList<Fragment> mFragmentList = new ArrayList<>();
         private final ArrayList<String> mFragmentTitleList = new ArrayList<>();
