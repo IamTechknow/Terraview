@@ -3,5 +3,5 @@
     <color name="colorPrimary">#0288d1</color>
     <color name="colorPrimaryDark">#0277bd</color>
     <color name="colorAccent">@android:color/holo_blue_light</color>
-    <color name="myDividerColor">#d2d2d2</color>
+    <color name="selectedColor">#d2d2d2</color>
 </resources>

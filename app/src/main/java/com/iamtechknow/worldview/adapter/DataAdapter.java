@@ -42,6 +42,9 @@ public class DataAdapter extends RecyclerView.Adapter<LayerAdapter.ViewHolder> {
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                holder.isSelected = !holder.isSelected;
+                holder.itemView.setSelected(holder.isSelected);
+
                 //Send event to RxBus, we want the activity to switch to the next tab on the right
                 _rxBus.send(new LayerPageFragment.TapEvent(mode <= 1 ? mode + 1 : 0));
             }

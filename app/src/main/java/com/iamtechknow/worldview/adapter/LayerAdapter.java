@@ -48,10 +48,12 @@ public class LayerAdapter extends RecyclerView.Adapter<LayerAdapter.ViewHolder> 
      */
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView layer;
+        boolean isSelected;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
+            itemView.setClickable(true);
             layer = (TextView) itemView.findViewById(R.id.layer_text);
         }
     }
