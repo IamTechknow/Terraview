@@ -25,6 +25,9 @@ import java.util.Map;
 
 import rx.functions.Action1;
 
+/**
+ * Fragment with different modes to correspond to different behavior for each page.
+ */
 public class LayerPageFragment extends Fragment implements LoaderManager.LoaderCallbacks<DataWrapper> {
     public static final int ARG_CAT = 0, ARG_MEASURE = 1, ARG_LAYER = 2;
     public static final String EXTRA_ARG = "arg";
@@ -66,7 +69,12 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
                 @Override
                 public void call(Object event) {
                     if (event instanceof LayerPageFragment.TapEvent) {
-                        //In the fragment that is also listening load the right data!
+                        //For a event from the category tab, populate the appropriate measurements
+                        if(((LayerPageFragment.TapEvent) event).getTab() == ARG_MEASURE && mode == ARG_MEASURE) {
+                            String cat = ((LayerPageFragment.TapEvent) event).getCategory();
+                            ArrayList<String> _measurelist = categories.get(cat);
+                            ((DataAdapter) (mRecyclerView.getAdapter())).insertList(_measurelist);
+                        } //TODO: show layers based on measurement selected
                     }
                 }
             });
@@ -105,14 +113,17 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
     public static class TapEvent { //Container with event parameter
         private int tab;
         private Layer layer;
+        private String measurement, category;
 
         public TapEvent(int num) {
             tab = num;
         }
 
-        public TapEvent(int num, Layer l) {
+        public TapEvent(int num, Layer l, String s, String c) {
             tab = num;
             layer = l;
+            measurement = s;
+            category = c;
         }
 
         public int getTab() {
@@ -121,6 +132,14 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
 
         public Layer getLayer() {
             return layer;
+        }
+
+        public String getMeasurement() {
+            return measurement;
+        }
+
+        public String getCategory() {
+            return category;
         }
     }
 

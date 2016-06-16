@@ -7,8 +7,10 @@ import android.view.ViewGroup;
 
 import com.iamtechknow.worldview.R;
 import com.iamtechknow.worldview.RxBus;
-import com.iamtechknow.worldview.fragment.LayerPageFragment;
 import com.iamtechknow.worldview.model.Layer;
+
+import static com.iamtechknow.worldview.fragment.LayerPageFragment.*;
+import static com.iamtechknow.worldview.LayerActivity.*;
 
 import java.util.ArrayList;
 
@@ -47,12 +49,20 @@ public class DataAdapter extends RecyclerView.Adapter<LayerAdapter.ViewHolder> {
                 holder.isSelected = !holder.isSelected;
                 holder.itemView.setSelected(holder.isSelected);
 
-                //Send event to RxBus, we want the activity to switch to the next tab
-                //for categories and measurements, but not for layers
-                if(mode <= 1)
-                    _rxBus.send(new LayerPageFragment.TapEvent(mode + 1));
-                else
-                    _rxBus.send(new LayerPageFragment.TapEvent(0, mLayers.get(holder.getAdapterPosition())));
+                //Send event to RxBus, we want the activity to switch
+                // to the next tab for categories only
+                switch(mode) {
+                    case ARG_CAT:
+                        _rxBus.send(new TapEvent(MEASURE_TAB, null, null, mItems.get(holder.getAdapterPosition())));
+                        break;
+
+                    case ARG_LAYER:
+                        _rxBus.send(new TapEvent(LAYER_QUEUE, mLayers.get(holder.getAdapterPosition()), null, null));
+                        break;
+
+                    default:
+                        _rxBus.send(new TapEvent(mode + 1));
+                }
             }
         });
     }

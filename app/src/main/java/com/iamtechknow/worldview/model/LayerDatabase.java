@@ -99,7 +99,7 @@ public class LayerDatabase extends SQLiteOpenHelper {
 
     /**
      * Saves a map of measurements or categories. First obtains the keys for the map, then
-     * gets each ArrayList and concatenates them with a space in between to make them splitable
+     * gets each ArrayList and concatenates them with a semicolon in between to make them splitable
      * @param map The map to save
      * @param table The table to save the map to
      */
@@ -114,7 +114,7 @@ public class LayerDatabase extends SQLiteOpenHelper {
 
             ArrayList<String> val = map.get(key);
             for(String layer_id : val)
-                concat_val = concat_val.concat(layer_id + " ");
+                concat_val = concat_val.concat(layer_id + ";");
             st.bindString(1, key);
             st.bindString(2, concat_val);
             st.executeInsert(); //returns the entry ID (unused)
@@ -172,7 +172,7 @@ public class LayerDatabase extends SQLiteOpenHelper {
         while(!c.isAfterLast()) {
             String key = c.getString(c.getColumnIndex(COL_KEY)), val = c.getString(c.getColumnIndex(COL_VAL));
             ArrayList<String> list = new ArrayList<>();
-            Collections.addAll(list, val.split(" "));
+            Collections.addAll(list, val.split(";"));
             map.put(key, list);
             c.moveToNext();
         }
