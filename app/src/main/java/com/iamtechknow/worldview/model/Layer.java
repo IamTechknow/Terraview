@@ -17,7 +17,7 @@ import java.util.Locale;
  */
 public class Layer implements Parcelable {
     //First string is title/identifier, second is time, third is tile matrix set
-    public static final String URLtemplate = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/%s/default/%s/%s/";
+    public static final String URLtemplate = "http://gibs.earthdata.nasa.gov/wmts/epsg3857/best/%s/default/%s/%s/";
 
     //Fields for XML tags that are stored to database
     private String identifier, tileMatrixSet, format, title, subtitle, endDate, startDate;
@@ -139,6 +139,7 @@ public class Layer implements Parcelable {
 
     /**
      * Formats a string with layer data and specified date to be used for a tile provider
+     * A date is needed even when a layer does not have a time interval, in which it is unused
      * @param d A date string to be formatted in ISO 8601
      * @return A URL String that may be used for UrlTileProvider.getTileURL()
      */

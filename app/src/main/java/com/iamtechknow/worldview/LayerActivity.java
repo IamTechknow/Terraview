@@ -138,7 +138,7 @@ public class LayerActivity extends AppCompatActivity {
     }
 
 	/**
-	 * The Adapter provides the revelant information needed to setup the ViewPager's data source and views.
+	 * The Adapter provides the relevant information needed to setup the ViewPager's data source and views.
 	 */
     static class Adapter extends FragmentPagerAdapter {
         private final ArrayList<Fragment> mFragmentList = new ArrayList<>();

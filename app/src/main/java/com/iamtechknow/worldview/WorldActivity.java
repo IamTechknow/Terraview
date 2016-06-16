@@ -75,6 +75,7 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
 
         //Setup UI
         mCurrLayers = new ArrayList<>();
+        layer_stack = new ArrayList<>();
         mHandler = new Handler();
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.thelayout);
@@ -200,7 +201,7 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
             layer_stack = data.getParcelableArrayListExtra(LayerActivity.RESULT_STACK);
             removeAllTileOverlays();
             for(Layer l: layer_stack)
-                addTileOverlay(l.generateURL(currentDate), false);
+                addTileOverlay(l, false);
         }
     }
 
@@ -219,13 +220,16 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
     @Override
     public void onLoaderReset(Loader<DataWrapper> loader) {}
 
+    //Reload layers on date change
     private DatePickerDialog.OnDateSetListener mDateListener = new DatePickerDialog.OnDateSetListener() {
         @Override
         public void onDateSet(DatePicker view, int year, int month, int day) {
             Calendar c = Calendar.getInstance();
             c.set(year, month, day);
             currentDate = c.getTime();
-            addTileOverlay(layers.get(mCurrLayerIdx).generateURL(currentDate), true); //FIXME for layer stack
+            removeAllTileOverlays();
+            for(Layer l: layer_stack)
+                addTileOverlay(l, false);
         }
     };
 
@@ -234,19 +238,19 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
         public void onClick(int idx, boolean checked) {
             if(checked) {
                 mCurrLayerIdx = idx;
-                addTileOverlay(layers.get(idx).generateURL(currentDate), true);
+                addTileOverlay(layers.get(idx), true);
             } else
                 removeTileOverlay();
             mDrawerLayout.closeDrawers();
         }
     };
 
-    public void addTileOverlay(final String url, boolean removeLayer) {
+    public void addTileOverlay(final Layer layer, boolean removeLayer) {
         //Make a tile overlay
         UrlTileProvider provider = new UrlTileProvider(TILE_SIZE, TILE_SIZE) {
             @Override
             public URL getTileUrl(int x, int y, int zoom) {
-                String s = String.format(Locale.US, url, zoom, y, x);
+                String s = String.format(Locale.US, layer.generateURL(currentDate), zoom, y, x);
                 URL url = null;
 
                 try {
@@ -282,11 +286,16 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
     }
 
     /**
-     * Show the VIIRS Corrected Reflectance (True Color) overlay for today
+     * Show the VIIRS Corrected Reflectance (True Color) overlay for today and coastlines
      */
     public void showDefaultTiles() {
-        Layer l = new Layer("VIIRS_SNPP_CorrectedReflectance_TrueColor", "GoogleMapsCompatible_Level9", "jpg", "Corrected Reflectance (True Color)", "Suomi NPP / VIIRS", null, "2015-11-24", true);
-        addTileOverlay(l.generateURL(currentDate), false);
+        Layer l = new Layer("VIIRS_SNPP_CorrectedReflectance_TrueColor", "GoogleMapsCompatible_Level9", "jpg", "Corrected Reflectance (True Color)", "Suomi NPP / VIIRS", null, "2015-11-24", true),
+                coastline = new Layer("Coastlines", "GoogleMapsCompatible_Level9", "png", "Coastlines (OSM)", "OpenStreetMaps", null, null, false);
+        layer_stack.add(l);
+        layer_stack.add(coastline);
+
+        addTileOverlay(l, false);
+        addTileOverlay(coastline, false);
     }
 
     public void getLayerData() {

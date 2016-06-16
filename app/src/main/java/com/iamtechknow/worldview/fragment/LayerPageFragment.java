@@ -119,10 +119,6 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
         private Layer layer;
         private String measurement, category;
 
-        public TapEvent(int num) {
-            tab = num;
-        }
-
         public TapEvent(int num, Layer l, String s, String c) {
             tab = num;
             layer = l;

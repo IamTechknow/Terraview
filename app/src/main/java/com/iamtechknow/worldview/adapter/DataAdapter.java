@@ -15,7 +15,7 @@ import static com.iamtechknow.worldview.LayerActivity.*;
 import java.util.ArrayList;
 
 /**
- * Item adapter used for the layer picker fragments in LayerActivity's view pager
+ * Item adapter instance used for each layer picker fragment in LayerActivity's view pager
  * Uses an event bus implemented in RxJava to pass events to fragments when item is clicked
  */
 public class DataAdapter extends RecyclerView.Adapter<LayerAdapter.ViewHolder> {
@@ -49,18 +49,15 @@ public class DataAdapter extends RecyclerView.Adapter<LayerAdapter.ViewHolder> {
                 holder.isSelected = !holder.isSelected;
                 holder.itemView.setSelected(holder.isSelected);
 
-                //Send event to RxBus, we want the activity to switch
-                //to the next tab for categories only
+                //Send event to RxBus based on the current mode (tab) of the fragment the item resides in
                 switch(mode) {
                     case ARG_CAT:
                         _rxBus.send(new TapEvent(MEASURE_TAB, null, null, mItems.get(holder.getAdapterPosition())));
                         break;
 
                     case ARG_LAYER:
-                        _rxBus.send(new TapEvent(LAYER_QUEUE, mLayers.get(holder.getAdapterPosition()), null, null));
-                        break;
-
-                    case LAYER_DEQUE:
+                        int queue = holder.isSelected ? LAYER_QUEUE : LAYER_DEQUE;
+                        _rxBus.send(new TapEvent(queue, mLayers.get(holder.getAdapterPosition()), null, null));
                         break;
 
                     default: //Measurement
