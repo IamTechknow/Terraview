@@ -26,7 +26,7 @@ import java.util.Map;
 import rx.functions.Action1;
 
 /**
- * Fragment with different modes to correspond to different behavior for each page.
+ * Fragment with different modes to correspond to different behavior for each page for three different instances.
  */
 public class LayerPageFragment extends Fragment implements LoaderManager.LoaderCallbacks<DataWrapper> {
     public static final int ARG_CAT = 0, ARG_MEASURE = 1, ARG_LAYER = 2;
@@ -74,7 +74,11 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
                             String cat = ((LayerPageFragment.TapEvent) event).getCategory();
                             ArrayList<String> _measurelist = categories.get(cat);
                             ((DataAdapter) (mRecyclerView.getAdapter())).insertList(_measurelist);
-                        } //TODO: show layers based on measurement selected
+                        } else if(((LayerPageFragment.TapEvent) event).getTab() == ARG_LAYER && mode == ARG_LAYER) {
+                            String m = ((LayerPageFragment.TapEvent) event).getMeasurement();
+                            ArrayList<String> _layerlist = measurements.get(m);
+                            ((DataAdapter) (mRecyclerView.getAdapter())).insertList(_layerlist);
+                        }
                     }
                 }
             });
@@ -161,7 +165,7 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
                 ((DataAdapter) (mRecyclerView.getAdapter())).insertList(measure_list);
                 break;
 
-            default:
+            default: //Categories
                 ArrayList<String> cat_list = new ArrayList<>();
                 for (Map.Entry<String, ArrayList<String>> e : categories.entrySet())
                     cat_list.add(e.getKey());

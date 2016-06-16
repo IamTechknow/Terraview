@@ -50,7 +50,7 @@ public class DataAdapter extends RecyclerView.Adapter<LayerAdapter.ViewHolder> {
                 holder.itemView.setSelected(holder.isSelected);
 
                 //Send event to RxBus, we want the activity to switch
-                // to the next tab for categories only
+                //to the next tab for categories only
                 switch(mode) {
                     case ARG_CAT:
                         _rxBus.send(new TapEvent(MEASURE_TAB, null, null, mItems.get(holder.getAdapterPosition())));
@@ -60,8 +60,11 @@ public class DataAdapter extends RecyclerView.Adapter<LayerAdapter.ViewHolder> {
                         _rxBus.send(new TapEvent(LAYER_QUEUE, mLayers.get(holder.getAdapterPosition()), null, null));
                         break;
 
-                    default:
-                        _rxBus.send(new TapEvent(mode + 1));
+                    case LAYER_DEQUE:
+                        break;
+
+                    default: //Measurement
+                        _rxBus.send(new TapEvent(LAYER_TAB, null, mItems.get(holder.getAdapterPosition()), null));
                 }
             }
         });
