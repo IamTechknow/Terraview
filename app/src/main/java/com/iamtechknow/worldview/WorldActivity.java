@@ -12,6 +12,10 @@ import android.support.v4.content.Loader;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.DatePicker;
@@ -23,6 +27,9 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.UrlTileProvider;
+import com.iamtechknow.worldview.adapter.CurrLayerAdapter;
+import com.iamtechknow.worldview.adapter.ItemTouchHelperCallback;
+import com.iamtechknow.worldview.adapter.onStartDragListener;
 import com.iamtechknow.worldview.model.DataWrapper;
 import com.iamtechknow.worldview.model.Layer;
 import com.iamtechknow.worldview.model.LayerLoader;
@@ -36,7 +43,7 @@ import java.util.Date;
 import java.util.Locale;
 
 public class WorldActivity extends AppCompatActivity implements OnMapReadyCallback, LoaderManager.LoaderCallbacks<DataWrapper>,
-        NavigationView.OnNavigationItemSelectedListener {
+        NavigationView.OnNavigationItemSelectedListener, onStartDragListener {
     public static final String XML_METADATA = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml",
                                JSON_METADATA = "https://worldview.sit.earthdata.nasa.gov/config/wv.json";
     public static final int TILE_SIZE = 256, DOWNLOAD_CODE = 0, LAYER_CODE = 1;
@@ -44,8 +51,11 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
     //UI fields
     private DrawerLayout mDrawerLayout;
     private CoordinatorLayout mCoordinatorLayout;
-    private NavigationView mNavLeft, mNavDate;
+    private NavigationView mNavLeft, mNavLayers;
     private DatePickerDialog mDateDialog;
+    private RecyclerView mCurrList;
+    private CurrLayerAdapter mItemAdapter;
+    private ItemTouchHelper mDragHelper;
 
     //Map fields
     private GoogleMap mMap;
@@ -63,10 +73,12 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
         //Setup UI
         mCurrLayers = new ArrayList<>();
         layer_stack = new ArrayList<>();
+        mItemAdapter = new CurrLayerAdapter(this);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.thelayout);
-        mNavLeft = (NavigationView) findViewById(R.id.nav_layers);
-        mNavDate = (NavigationView) findViewById(R.id.nav_date);
+        mNavLeft = (NavigationView) findViewById(R.id.nav_menu);
+        mNavLayers = (NavigationView) findViewById(R.id.nav_layers);
+        mCurrList = (RecyclerView) findViewById(R.id.layer_list);
         Toolbar mToolbar = (Toolbar) findViewById(R.id.tool_bar);
         setActionBar(mToolbar);
         mNavLeft.setNavigationItemSelectedListener(this);
@@ -84,7 +96,15 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        //Request the map
+        //Setup the layer list - initally empty list
+        mCurrList.setItemAnimator(new DefaultItemAnimator());
+        mCurrList.setLayoutManager(new LinearLayoutManager(this));
+        mCurrList.setAdapter(mItemAdapter);
+        ItemTouchHelper.Callback callback = new ItemTouchHelperCallback(mItemAdapter); //Attach drag callbacks
+        mDragHelper = new ItemTouchHelper(callback);
+        mDragHelper.attachToRecyclerView(mCurrList);
+
+        //Request the map - control flow goes to onMapReady()
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
@@ -146,6 +166,7 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
             layers = data.getParcelableArrayListExtra(DownloadService.RESULT_LIST);
         else if(requestCode == LAYER_CODE) {
             layer_stack = data.getParcelableArrayListExtra(LayerActivity.RESULT_STACK);
+            mItemAdapter.insertList(layer_stack);
             removeAllTileOverlays();
             for(Layer l: layer_stack)
                 addTileOverlay(l, false);
@@ -177,6 +198,12 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
                 addTileOverlay(l, false);
         }
     };
+
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
+        //Called when drag handler is touched, start drag
+        mDragHelper.startDrag(viewHolder);
+    }
 
     public void addTileOverlay(final Layer layer, boolean removeLayer) {
         //Make a tile overlay
@@ -226,6 +253,7 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
                 coastline = new Layer("Coastlines", "GoogleMapsCompatible_Level9", "png", "Coastlines (OSM)", "OpenStreetMaps", null, null, false);
         layer_stack.add(l);
         layer_stack.add(coastline);
+        mItemAdapter.insertList(layer_stack);
 
         addTileOverlay(l, false);
         addTileOverlay(coastline, false);

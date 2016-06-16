@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Worldview</string>
     <string name="layers">Layers</string>
+    <string name="layers_nav">Layers - Swipe to left to delete</string>
     <string name="explore">Explore</string>
     <string name="about">About</string>
     <string name="date">Date</string>

@@ -25,12 +25,5 @@
     <include layout="@layout/nav_left" />
 
     <!-- Nav view for selecting date -->
-    <android.support.design.widget.NavigationView
-        android:id="@+id/nav_date"
-        android:background="#eeeeee"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="end"
-        android:fitsSystemWindows="true"
-        app:itemTextColor="@color/abc_primary_text_material_light" />
+    <include layout="@layout/nav_layers" />
 </android.support.v4.widget.DrawerLayout>
