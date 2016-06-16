@@ -115,7 +115,7 @@ public class LayerActivity extends AppCompatActivity {
                                 result.remove(((LayerPageFragment.TapEvent) event).getLayer());
                                 break;
 
-                            default: //layer queue
+                            default: //layer queue FIXME: only works when all layers displayed, search for key first?
                                 result.add(((LayerPageFragment.TapEvent) event).getLayer());
                                 break;
                         }

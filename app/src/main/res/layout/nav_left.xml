@@ -8,18 +8,7 @@
     android:layout_height="match_parent"
     android:layout_gravity="start"
     android:fitsSystemWindows="true"
-    app:itemTextColor="@color/abc_primary_text_material_light">
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="32dp"
-        android:text="@string/layers"
-        style="?android:listSeparatorTextViewStyle" />
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/layer_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="48dp"
-        android:paddingLeft="16dp" />
-
+    app:headerLayout="@layout/navheader"
+    app:itemTextColor="@color/abc_primary_text_material_light"
+    app:menu="@menu/main">
 </android.support.design.widget.NavigationView>
