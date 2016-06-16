@@ -18,11 +18,20 @@ public class LayerDatabase extends SQLiteOpenHelper {
             COL_LAYER_SUBTITLE = "subtitle", COL_LAYER_START = "start", COL_LAYER_END = "end",
             COL_LAYER_ISBASE = "isbase", COL_LAYER_ID = "identifier";
 
+    private static LayerDatabase mInstance = null; //Ensure only one instance in app lifecycle
+
     //Measurement and category table constants
     private static final String TABLE_CAT = "category", TABLE_MEASURE = "measurement", COL_KEY = "key", COL_VAL = "value";
     private static final int VERSION = 1;
 
-    public LayerDatabase(Context context) {
+    public static LayerDatabase getInstance(Context c) {
+        if (mInstance == null)
+            mInstance = new LayerDatabase(c);
+
+        return mInstance;
+    }
+
+    private LayerDatabase(Context context) {
         super(context, DB_NAME, null, VERSION);
     }
 

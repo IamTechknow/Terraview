@@ -73,7 +73,7 @@ public class DownloadService extends IntentService {
      * @param data The parsed data
      */
     private void saveToDB(ArrayList<Layer> data, Hashtable<String, ArrayList<String>> measures, Hashtable<String, ArrayList<String>> cats) {
-        LayerDatabase db = new LayerDatabase(this);
+        LayerDatabase db = LayerDatabase.getInstance(this);
         db.insertLayers(data);
         db.insertCategories(cats);
         db.insertMeasurements(measures);

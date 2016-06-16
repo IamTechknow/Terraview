@@ -13,7 +13,7 @@ public class LayerLoader extends AsyncTaskLoader<DataWrapper> {
 
     public LayerLoader(Context c) {
         super(c);
-        mHelper = new LayerDatabase(c);
+        mHelper = LayerDatabase.getInstance(c);
     }
 
     //If the data is cached, use it!
