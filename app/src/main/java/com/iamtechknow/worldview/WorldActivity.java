@@ -108,7 +108,8 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
         mBottomBar = BottomBar.attach(this, savedInstanceState);
         mBottomBar.noTopOffset();
         mBottomBar.noNavBarGoodness();
-        mBottomBar.setItemsFromMenu(R.menu.menu_bottombar, new OnMenuTabClickListener() {
+        mBottomBar.setItems(R.menu.menu_bottombar);
+        mBottomBar.setOnMenuTabClickListener(new OnMenuTabClickListener() {
             @Override
             public void onMenuTabSelected(int resId) {
                 switch(resId) {
