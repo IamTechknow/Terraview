@@ -58,10 +58,10 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
 
     //Map fields
     private GoogleMap mMap;
-    private TileOverlay mCurrOverlay;
 
     //Worldview Data
-    private ArrayList<Layer> layers;
+    private ArrayList<Layer> layers, layer_stack;
+    private ArrayList<TileOverlay> mCurrLayers;
     private int mCurrLayerIdx = 0; //show VIIRS satellite imagery as default
     private Date currentDate;
 
@@ -74,6 +74,7 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
         setContentView(R.layout.activity_main);
 
         //Setup UI
+        mCurrLayers = new ArrayList<>();
         mHandler = new Handler();
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.thelayout);
@@ -120,7 +121,7 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
                     case R.id.action_explore:
 
                         break;
-                    case R.id.action_layers:
+                    case R.id.action_layers: //TODO: If layer stack exists, send it to LayerActivity
                         startActivityForResult(new Intent(WorldActivity.this, LayerActivity.class), LAYER_CODE);
                         break;
                 }
@@ -172,11 +173,6 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
         mBottomBar.onSaveInstanceState(outState);
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-
-    }
-
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -199,8 +195,11 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
         if(requestCode == DOWNLOAD_CODE && resultCode == RESULT_OK) {
             layers = data.getParcelableArrayListExtra(DownloadService.RESULT_LIST);
             ((LayerAdapter) (mRecyclerView.getAdapter())).insertList(layers);
-
-            //TODO: Send data to LayerActivity, also don't do this data transfer, just rely on Loader
+        } else if(requestCode == LAYER_CODE) {
+            layer_stack = data.getParcelableArrayListExtra(LayerActivity.RESULT_STACK);
+            removeAllTileOverlays();
+            for(Layer l: layer_stack)
+                addTileOverlay(l.generateURL(currentDate), false);
         }
     }
 
@@ -225,7 +224,7 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
             Calendar c = Calendar.getInstance();
             c.set(year, month, day);
             currentDate = c.getTime();
-            addTileOverlay(layers.get(mCurrLayerIdx).generateURL(currentDate));
+            addTileOverlay(layers.get(mCurrLayerIdx).generateURL(currentDate), true); //FIXME for layer stack
         }
     };
 
@@ -234,14 +233,14 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
         public void onClick(int idx, boolean checked) {
             if(checked) {
                 mCurrLayerIdx = idx;
-                addTileOverlay(layers.get(idx).generateURL(currentDate));
+                addTileOverlay(layers.get(idx).generateURL(currentDate), true);
             } else
                 removeTileOverlay();
             mDrawerLayout.closeDrawers();
         }
     };
 
-    public void addTileOverlay(final String url) {
+    public void addTileOverlay(final String url, boolean removeLayer) {
         //Make a tile overlay
         UrlTileProvider provider = new UrlTileProvider(TILE_SIZE, TILE_SIZE) {
             @Override
@@ -259,13 +258,26 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
             }
         };
 
-        removeTileOverlay();
-        mCurrOverlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(provider));
+        if(removeLayer)
+            removeTileOverlay();
+
+        mCurrLayers.add(mMap.addTileOverlay(new TileOverlayOptions().tileProvider(provider)));
     }
 
+    //Remove the most recent map tile
     public void removeTileOverlay() {
-        if(mCurrOverlay != null)
-            mCurrOverlay.remove();
+        if(mCurrLayers.size() > 0) {
+            mCurrLayers.get(mCurrLayers.size() - 1).remove();
+            mCurrLayers.remove(mCurrLayers.size() - 1);
+        }
+    }
+
+    //Remove all tile overlays, used to replace with new set
+    //Remember that the default GMaps tile remains
+    public void removeAllTileOverlays() {
+        for(TileOverlay t : mCurrLayers)
+            t.remove();
+        mCurrLayers.clear();
     }
 
     /**
@@ -273,7 +285,7 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
      */
     public void showDefaultTiles() {
         Layer l = new Layer("VIIRS_SNPP_CorrectedReflectance_TrueColor", "GoogleMapsCompatible_Level9", "jpg", "Corrected Reflectance (True Color)", "Suomi NPP / VIIRS", null, "2015-11-24", true);
-        addTileOverlay(l.generateURL(currentDate));
+        addTileOverlay(l.generateURL(currentDate), false);
     }
 
     public void getLayerData() {

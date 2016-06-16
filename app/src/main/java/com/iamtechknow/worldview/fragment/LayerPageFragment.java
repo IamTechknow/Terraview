@@ -65,31 +65,9 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
             .subscribe(new Action1<Object>() {
                 @Override
                 public void call(Object event) {
-                    if (event instanceof LayerPageFragment.TapEvent)
+                    if (event instanceof LayerPageFragment.TapEvent) {
                         //In the fragment that is also listening load the right data!
-                        switch (((LayerPageFragment.TapEvent) event).tab) {
-                            case ARG_LAYER:
-                                if(mode == ARG_LAYER) {
-                                    ArrayList<String> layer_list = new ArrayList<>();
-                                    for (Layer l: layers)
-                                        layer_list.add(l.getTitle());
-                                    ((DataAdapter) (mRecyclerView.getAdapter())).insertList(layer_list);
-                                }
-                                break;
-
-                            case ARG_MEASURE:
-                                if(mode == ARG_MEASURE) {
-                                    ArrayList<String> measure_list = new ArrayList<>();
-                                    for (Map.Entry<String, ArrayList<String>> e : measurements.entrySet())
-                                        measure_list.add(e.getKey());
-                                    ((DataAdapter) (mRecyclerView.getAdapter())).insertList(measure_list);
-                                }
-                                break;
-
-                            default: //category, do nothing?
-
-                                break;
-                        }
+                    }
                 }
             });
     }
@@ -118,23 +96,58 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
         categories = data.cats;
         measurements = data.measures;
 
-        //Populate just categories list, populate others when tapped on
-        if(mode == ARG_CAT) {
-            ArrayList<String> cat_list = new ArrayList<>();
-            for (Map.Entry<String, ArrayList<String>> e : categories.entrySet())
-                cat_list.add(e.getKey());
-            ((DataAdapter) (mRecyclerView.getAdapter())).insertList(cat_list);
-        }
+        populateLists();
     }
 
     @Override
     public void onLoaderReset(Loader<DataWrapper> loader) {}
 
     public static class TapEvent { //Container with event parameter
-        public int tab;
+        private int tab;
+        private Layer layer;
 
-        public TapEvent(int tab_number) {
-            tab = tab_number;
+        public TapEvent(int num) {
+            tab = num;
+        }
+
+        public TapEvent(int num, Layer l) {
+            tab = num;
+            layer = l;
+        }
+
+        public int getTab() {
+            return tab;
+        }
+
+        public Layer getLayer() {
+            return layer;
+        }
+    }
+
+    //Populate lists from Loader data
+    private void populateLists() {
+        switch (mode) {
+            case ARG_LAYER:
+                ArrayList<String> layer_list = new ArrayList<>();
+                for (Layer l: layers)
+                    layer_list.add(l.getTitle());
+                ((DataAdapter) (mRecyclerView.getAdapter())).insertList(layer_list);
+                ((DataAdapter) (mRecyclerView.getAdapter())).insertLayers(layers);
+                break;
+
+            case ARG_MEASURE:
+                ArrayList<String> measure_list = new ArrayList<>();
+                for (Map.Entry<String, ArrayList<String>> e : measurements.entrySet())
+                    measure_list.add(e.getKey());
+                ((DataAdapter) (mRecyclerView.getAdapter())).insertList(measure_list);
+                break;
+
+            default:
+                ArrayList<String> cat_list = new ArrayList<>();
+                for (Map.Entry<String, ArrayList<String>> e : categories.entrySet())
+                    cat_list.add(e.getKey());
+                ((DataAdapter) (mRecyclerView.getAdapter())).insertList(cat_list);
+                break;
         }
     }
 }

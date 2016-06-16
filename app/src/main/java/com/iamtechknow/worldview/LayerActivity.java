@@ -1,5 +1,6 @@
 package com.iamtechknow.worldview;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -12,16 +13,23 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.iamtechknow.worldview.fragment.LayerPageFragment;
+import com.iamtechknow.worldview.model.Layer;
 
 import java.util.ArrayList;
 
 import rx.functions.Action1;
 
 public class LayerActivity extends AppCompatActivity {
-    public static final int CAT = 0, MEASURE = 1, LAYER = 2;
+    //Constants for RxBus events and Intent
+    public static final int LAYER_QUEUE = 0, MEASURE_TAB = 1, LAYER_TAB = 2, LAYER_DEQUE = 3;
+    public static final String RESULT_STACK = "result";
 
+    //UI handling
     private TabLayout mTabLayout;
     private RxBus _rxBus;
+
+    //List for layers to be displayed handled as a stack
+    private ArrayList<Layer> result;
 
     // This is better done with a DI Library like Dagger
     public RxBus getRxBusSingleton() {
@@ -47,6 +55,7 @@ public class LayerActivity extends AppCompatActivity {
         Adapter adapter = new Adapter(getSupportFragmentManager());
         LayerPageFragment frag1 = new LayerPageFragment(), frag2 = new LayerPageFragment(), frag3 = new LayerPageFragment();
         Bundle extra1 = new Bundle(), extra2 = new Bundle(), extra3 = new Bundle();
+        result = new ArrayList<>();
         extra1.putInt(LayerPageFragment.EXTRA_ARG, LayerPageFragment.ARG_CAT);
         extra2.putInt(LayerPageFragment.EXTRA_ARG, LayerPageFragment.ARG_MEASURE);
         extra3.putInt(LayerPageFragment.EXTRA_ARG, LayerPageFragment.ARG_LAYER);
@@ -68,9 +77,11 @@ public class LayerActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case android.R.id.home:
-                if (NavUtils.getParentActivityName(this) != null)
+            case android.R.id.home: //back button pressed
+                if (NavUtils.getParentActivityName(this) != null) {
+                    setResult();
                     NavUtils.navigateUpFromSameTask(this);
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -91,21 +102,39 @@ public class LayerActivity extends AppCompatActivity {
                     if(event instanceof LayerPageFragment.TapEvent)
                         //If we have an event due to a button press then go to the tab
                         //And in the fragment that is also listening load the right data!
-                        switch(((LayerPageFragment.TapEvent) event).tab) {
-                            case CAT:
-                                mTabLayout.getTabAt(LayerPageFragment.ARG_CAT).select();
+                        switch(((LayerPageFragment.TapEvent) event).getTab()) {
+                            case LAYER_TAB:
+                                mTabLayout.getTabAt(LayerPageFragment.ARG_LAYER).select();
                                 break;
 
-                            case MEASURE:
+                            case MEASURE_TAB:
                                 mTabLayout.getTabAt(LayerPageFragment.ARG_MEASURE).select();
                                 break;
 
-                            default: //layer
-                                mTabLayout.getTabAt(LayerPageFragment.ARG_LAYER).select();
+                            case LAYER_DEQUE:
+                                result.remove(((LayerPageFragment.TapEvent) event).getLayer());
+                                break;
+
+                            default: //layer queue
+                                result.add(((LayerPageFragment.TapEvent) event).getLayer());
                                 break;
                         }
                 }
             });
+    }
+
+    @Override
+    public void onBackPressed() {
+        setResult();
+        super.onBackPressed();
+    }
+
+    private void setResult() {
+        Bundle b = new Bundle();
+        b.putParcelableArrayList(RESULT_STACK, result);
+        Intent i = new Intent().putExtras(b);
+
+        setResult(RESULT_OK, i);
     }
 
 	/**

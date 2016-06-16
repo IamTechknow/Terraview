@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import com.iamtechknow.worldview.R;
 import com.iamtechknow.worldview.RxBus;
 import com.iamtechknow.worldview.fragment.LayerPageFragment;
+import com.iamtechknow.worldview.model.Layer;
 
 import java.util.ArrayList;
 
@@ -17,11 +18,12 @@ import java.util.ArrayList;
  */
 public class DataAdapter extends RecyclerView.Adapter<LayerAdapter.ViewHolder> {
     private ArrayList<String> mItems;
+    private ArrayList<Layer> mLayers;
     private RxBus _rxBus;
     private final int mode;
 
     /**
-     * Setup an empty adapter
+     * Set up an empty adapter
      */
     public DataAdapter(RxBus bus, int _mode) {
         super();
@@ -45,8 +47,12 @@ public class DataAdapter extends RecyclerView.Adapter<LayerAdapter.ViewHolder> {
                 holder.isSelected = !holder.isSelected;
                 holder.itemView.setSelected(holder.isSelected);
 
-                //Send event to RxBus, we want the activity to switch to the next tab on the right
-                _rxBus.send(new LayerPageFragment.TapEvent(mode <= 1 ? mode + 1 : 0));
+                //Send event to RxBus, we want the activity to switch to the next tab
+                //for categories and measurements, but not for layers
+                if(mode <= 1)
+                    _rxBus.send(new LayerPageFragment.TapEvent(mode + 1));
+                else
+                    _rxBus.send(new LayerPageFragment.TapEvent(0, mLayers.get(holder.getAdapterPosition())));
             }
         });
     }
@@ -59,5 +65,9 @@ public class DataAdapter extends RecyclerView.Adapter<LayerAdapter.ViewHolder> {
     public void insertList(ArrayList<String> strings) {
         mItems = strings;
         notifyDataSetChanged();
+    }
+
+    public void insertLayers(ArrayList<Layer> layers) {
+        mLayers = layers;
     }
 }
