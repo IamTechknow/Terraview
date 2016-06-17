@@ -48,6 +48,7 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
     public static final String XML_METADATA = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml",
                                JSON_METADATA = "https://worldview.sit.earthdata.nasa.gov/config/wv.json";
     public static final int TILE_SIZE = 256, DOWNLOAD_CODE = 0, LAYER_CODE = 1;
+    public static final float Z_OFFSET = 5.0f;
 
     //UI fields
     private DrawerLayout mDrawerLayout;
@@ -171,6 +172,7 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
             removeAllTileOverlays();
             for(Layer l: layer_stack)
                 addTileOverlay(l, false);
+            initZOffsets();
         }
     }
 
@@ -197,6 +199,7 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
             removeAllTileOverlays();
             for(Layer l: layer_stack)
                 addTileOverlay(l, false);
+            initZOffsets();
         }
     };
 
@@ -214,6 +217,21 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
 
     @Override
     public void onSwapNeeded(int i, int i_new) {
+        //Swap the objects in the underlying data and change the Z-order
+        //Base layers should not be able to be shown over overlays
+        TileOverlay above, below;
+        if(i > i_new) { //swapping above
+            above = mCurrLayers.get(i);
+            below = mCurrLayers.get(i_new);
+            above.setZIndex(above.getZIndex() + Z_OFFSET);
+            below.setZIndex(below.getZIndex() - Z_OFFSET);
+        } else { //swapping below
+            above = mCurrLayers.get(i_new);
+            below = mCurrLayers.get(i);
+            above.setZIndex(above.getZIndex() + Z_OFFSET);
+            below.setZIndex(below.getZIndex() - Z_OFFSET);
+        }
+
         Collections.swap(mCurrLayers, i, i_new);
     }
 
@@ -221,6 +239,12 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
     public void onLayerSwiped(int position) {
         TileOverlay temp = mCurrLayers.remove(position);
         temp.remove();
+
+        //Fix Z-Order of other overlays
+        for(int i = 0; i < mCurrLayers.size(); i++) {
+            TileOverlay t = mCurrLayers.get(0);
+            t.setZIndex(t.getZIndex() - Z_OFFSET);
+        }
     }
 
     public void addTileOverlay(final Layer layer, boolean removeLayer) {
@@ -275,9 +299,17 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
 
         addTileOverlay(l, false);
         addTileOverlay(coastline, false);
+        initZOffsets();
     }
 
-    public void getLayerData() {
+    private void initZOffsets() {
+        //After tile overlays added, set the Z-Order from the default of 0.0
+        //Layers at the top of the list have the highest Z-order
+        for(int i = 0; i < mCurrLayers.size(); i++)
+            mCurrLayers.get(i).setZIndex(Z_OFFSET * (mCurrLayers.size() - 1 - i));
+    }
+
+    private void getLayerData() {
         //Start an intent to a service that downloads in the background
         //Pass in an PendingIntent which will be used to send back the data
         PendingIntent p = createPendingResult(DOWNLOAD_CODE, new Intent(), 0);
