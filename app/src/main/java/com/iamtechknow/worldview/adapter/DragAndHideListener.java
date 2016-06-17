@@ -24,4 +24,9 @@ public interface DragAndHideListener {
      * Called when the tile overlays need to be swapped, and maybe the layer stack too
      */
     void onSwapNeeded(int i, int i_new);
+
+    /**
+     * Called when an item is swiped to remove the corresponding tile overlay
+     */
+    void onLayerSwiped(int position);
 }

@@ -217,6 +217,12 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
         Collections.swap(mCurrLayers, i, i_new);
     }
 
+    @Override
+    public void onLayerSwiped(int position) {
+        TileOverlay temp = mCurrLayers.remove(position);
+        temp.remove();
+    }
+
     public void addTileOverlay(final Layer layer, boolean removeLayer) {
         //Make a tile overlay
         UrlTileProvider provider = new UrlTileProvider(TILE_SIZE, TILE_SIZE) {

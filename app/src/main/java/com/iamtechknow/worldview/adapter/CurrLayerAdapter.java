@@ -17,7 +17,11 @@ import java.util.Collections;
 
 public class CurrLayerAdapter extends RecyclerView.Adapter<CurrLayerAdapter.CurrViewHolder>
         implements ItemTouchHelperAdapter {
+
+    //Data set containing the current layers to be shown
     private ArrayList<Layer> mLayers;
+
+    //Callbacks for ItemTouchHelper actions
     private final DragAndHideListener mDragListener;
 
     public CurrLayerAdapter(DragAndHideListener listener) {
@@ -99,6 +103,7 @@ public class CurrLayerAdapter extends RecyclerView.Adapter<CurrLayerAdapter.Curr
     public void onItemDismiss(int position) {
         mLayers.remove(position);
         notifyItemRemoved(position);
+        mDragListener.onLayerSwiped(position);
     }
 
     public void insertList(ArrayList<Layer> list) {
