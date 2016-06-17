@@ -18,34 +18,46 @@ import java.util.Collections;
 public class CurrLayerAdapter extends RecyclerView.Adapter<CurrLayerAdapter.CurrViewHolder>
         implements ItemTouchHelperAdapter {
     private ArrayList<Layer> mLayers;
-    private final onStartDragListener mDragListener;
+    private final DragAndHideListener mDragListener;
 
-    public CurrLayerAdapter(onStartDragListener listener) {
+    public CurrLayerAdapter(DragAndHideListener listener) {
         super();
         mLayers = new ArrayList<>();
         mDragListener = listener;
     }
 
-    public class CurrViewHolder extends RecyclerView.ViewHolder implements View.OnTouchListener {
+    public class CurrViewHolder extends RecyclerView.ViewHolder implements View.OnTouchListener, View.OnClickListener {
         TextView tv;
-        ImageView drag_handle;
+        ImageView drag_handle, vis;
+        boolean visible;
 
         public CurrViewHolder(View itemView) {
             super(itemView);
 
             tv = (TextView) itemView.findViewById(R.id.curr_layer_text);
             drag_handle = (ImageView) itemView.findViewById(R.id.curr_layer_drag_handle);
+            vis = (ImageView) itemView.findViewById(R.id.curr_layer_visibility);
+            visible = true;
 
             itemView.setClickable(true);
             drag_handle.setOnTouchListener(this);
+            vis.setOnClickListener(this);
         }
 
+        //For drag handle, Call drag listener to start a drag when image is pressed down
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            //Call listener to start a drag when image is pressed down
             if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN)
                 mDragListener.onStartDrag(this);
             return false;
+        }
+
+        //For visibility button, notify map to hide layer
+        @Override
+        public void onClick(View v) {
+            visible = !visible;
+            vis.setImageAlpha(visible ? 255 : 96);
+            mDragListener.onToggleLayer(mLayers.get(getAdapterPosition()), visible);
         }
     }
 
@@ -68,11 +80,15 @@ public class CurrLayerAdapter extends RecyclerView.Adapter<CurrLayerAdapter.Curr
     @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
         if (fromPosition < toPosition)
-            for (int i = fromPosition; i < toPosition; i++)
+            for (int i = fromPosition; i < toPosition; i++) {
                 Collections.swap(mLayers, i, i + 1);
+                mDragListener.onSwapNeeded(i, i + 1);
+            }
         else
-            for (int i = fromPosition; i > toPosition; i--)
+            for (int i = fromPosition; i > toPosition; i--) {
                 Collections.swap(mLayers, i, i - 1);
+                mDragListener.onSwapNeeded(i, i - 1);
+            }
 
         notifyItemMoved(fromPosition, toPosition);
         return true;

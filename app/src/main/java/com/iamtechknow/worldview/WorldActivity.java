@@ -29,7 +29,7 @@ import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.UrlTileProvider;
 import com.iamtechknow.worldview.adapter.CurrLayerAdapter;
 import com.iamtechknow.worldview.adapter.ItemTouchHelperCallback;
-import com.iamtechknow.worldview.adapter.onStartDragListener;
+import com.iamtechknow.worldview.adapter.DragAndHideListener;
 import com.iamtechknow.worldview.model.DataWrapper;
 import com.iamtechknow.worldview.model.Layer;
 import com.iamtechknow.worldview.model.LayerLoader;
@@ -39,11 +39,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 
 public class WorldActivity extends AppCompatActivity implements OnMapReadyCallback, LoaderManager.LoaderCallbacks<DataWrapper>,
-        NavigationView.OnNavigationItemSelectedListener, onStartDragListener {
+        NavigationView.OnNavigationItemSelectedListener, DragAndHideListener {
     public static final String XML_METADATA = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml",
                                JSON_METADATA = "https://worldview.sit.earthdata.nasa.gov/config/wv.json";
     public static final int TILE_SIZE = 256, DOWNLOAD_CODE = 0, LAYER_CODE = 1;
@@ -203,6 +204,17 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
     public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
         //Called when drag handler is touched, start drag
         mDragHelper.startDrag(viewHolder);
+    }
+
+    @Override
+    public void onToggleLayer(Layer l, boolean hide) {
+        int pos = layer_stack.indexOf(l);
+        mCurrLayers.get(pos).setVisible(hide);
+    }
+
+    @Override
+    public void onSwapNeeded(int i, int i_new) {
+        Collections.swap(mCurrLayers, i, i_new);
     }
 
     public void addTileOverlay(final Layer layer, boolean removeLayer) {

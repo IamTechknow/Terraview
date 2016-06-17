@@ -4,13 +4,20 @@
     android:layout_height="@dimen/item_height"
     android:foreground="?android:attr/selectableItemBackground"
     android:background="@drawable/layerstate">
-    <!-- Drag handle icon, text, then delete icon at end -->
+    <ImageView
+        android:id="@+id/curr_layer_visibility"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:paddingStart="8dp"
+        android:src="@drawable/ic_visibility_white_24px" />
     <TextView
         android:id="@+id/curr_layer_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_alignParentStart="true"
+        android:layout_toEndOf="@id/curr_layer_visibility"
         android:layout_toStartOf="@+id/curr_layer_drag_handle"
         android:paddingStart="8dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Small" />
