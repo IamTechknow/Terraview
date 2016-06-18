@@ -39,7 +39,7 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
      * View holder implementation for each list item
      */
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView layer;
+        TextView text;
         boolean isSelected;
 
         public ViewHolder(View itemView) {
@@ -47,7 +47,7 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
 
             itemView.setClickable(true);
             itemView.setOnClickListener(this);
-            layer = (TextView) itemView.findViewById(R.id.layer_text);
+            text = (TextView) itemView.findViewById(R.id.layer_text);
         }
 
         @Override
@@ -63,7 +63,10 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
 
                 case ARG_LAYER:
                     int queue = isSelected ? LAYER_QUEUE : LAYER_DEQUE;
-                    _rxBus.send(new TapEvent(queue, mLayers.get(getAdapterPosition()), null, null));
+                    Layer temp = searchLayer(text.getText().toString());
+
+                    if(temp != null)
+                        _rxBus.send(new TapEvent(queue, temp, null, null));
                     break;
 
                 default: //Measurement
@@ -80,7 +83,7 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.layer.setText(mItems.get(position));
+        holder.text.setText(mItems.get(position));
     }
 
     @Override
@@ -95,5 +98,15 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
 
     public void insertLayers(ArrayList<Layer> layers) {
         mLayers = layers;
+    }
+
+    //Given a title, find the layer it belongs to
+    //Will never return null if a title exists
+    private Layer searchLayer(String title) {
+        for(Layer l : mLayers)
+            if(l.getTitle().equals(title))
+                return l;
+
+        return null;
     }
 }

@@ -63,6 +63,7 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
     private GoogleMap mMap;
 
     //Worldview Data
+    //layer_stack is used as the data source for the right hand drawer
     private ArrayList<Layer> layers, layer_stack;
     private ArrayList<TileOverlay> mCurrLayers;
     private Date currentDate;
@@ -293,12 +294,12 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
     public void showDefaultTiles() {
         Layer l = new Layer("VIIRS_SNPP_CorrectedReflectance_TrueColor", "GoogleMapsCompatible_Level9", "jpg", "Corrected Reflectance (True Color)", "Suomi NPP / VIIRS", null, "2015-11-24", true),
                 coastline = new Layer("Coastlines", "GoogleMapsCompatible_Level9", "png", "Coastlines (OSM)", "OpenStreetMaps", null, null, false);
-        layer_stack.add(l);
         layer_stack.add(coastline);
+        layer_stack.add(l);
         mItemAdapter.insertList(layer_stack);
 
-        addTileOverlay(l, false);
         addTileOverlay(coastline, false);
+        addTileOverlay(l, false);
         initZOffsets();
     }
 

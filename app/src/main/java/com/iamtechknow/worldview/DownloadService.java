@@ -49,6 +49,7 @@ public class DownloadService extends IntentService {
 
             //Get GIBS data from XML, then metadata from JSON, both of which have exclusive data
             //run() calls WMTSHandler.parse() which is also synchronous so we may get result when we're done
+            //TODO: Still need to get layers found in JSON but not XML
             WMTSReader reader = new WMTSReader();
             reader.run(xmlResponse.body().byteStream());
             WVJsonParser parser = new WVJsonParser(jsonResponse.body().byteStream());

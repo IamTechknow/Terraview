@@ -69,14 +69,22 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
                 @Override
                 public void call(Object event) {
                     if (event instanceof LayerPageFragment.TapEvent) {
-                        //For a event from the category tab, populate the appropriate measurements
+                        //For a event from the category/measurement tab, populate the appropriate measurements/layers
                         if(((LayerPageFragment.TapEvent) event).getTab() == ARG_MEASURE && mode == ARG_MEASURE) {
                             String cat = ((LayerPageFragment.TapEvent) event).getCategory();
                             ArrayList<String> _measurelist = categories.get(cat);
                             ((DataAdapter) (mRecyclerView.getAdapter())).insertList(_measurelist);
                         } else if(((LayerPageFragment.TapEvent) event).getTab() == ARG_LAYER && mode == ARG_LAYER) {
                             String m = ((LayerPageFragment.TapEvent) event).getMeasurement();
-                            ArrayList<String> _layerlist = measurements.get(m);
+
+                            //Because multiple measurements may be mapped to one layer we can't use
+                            //a hash table to store the layers, search for each layer by comparing identifiers
+                            ArrayList<String> id_list = measurements.get(m), _layerlist = new ArrayList<>();
+                            for(String id: id_list) {
+                                Layer temp = searchLayer(id);
+                                _layerlist.add(temp != null ? temp.getTitle() : id);
+                            }
+
                             ((DataAdapter) (mRecyclerView.getAdapter())).insertList(_layerlist);
                         }
                     }
@@ -168,5 +176,14 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
                 ((DataAdapter) (mRecyclerView.getAdapter())).insertList(cat_list);
                 break;
         }
+    }
+
+    //Given an identifier, find the layer it belongs to
+    private Layer searchLayer(String id) {
+        for(Layer l : layers)
+            if(l.getIdentifier().equals(id))
+                return l;
+
+        return null;
     }
 }
