@@ -3,7 +3,12 @@ package com.iamtechknow.worldview;
 import android.app.ActionBar;
 import android.app.DatePickerDialog;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
@@ -158,8 +163,15 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
 
         if(getSharedPreferences(DownloadService.PREFS_FILE, MODE_PRIVATE).getBoolean(DownloadService.PREFS_DB_KEY, false))
             getSupportLoaderManager().initLoader(0, null, this);
-        else
-            getLayerData();
+        else { //Check internet access to get layer data or set up receiver
+            if(Utils.isOnline(this))
+                getLayerData();
+            else {
+                IntentFilter filter = new IntentFilter();
+                filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+                registerReceiver(connectReceiver, filter);
+            }
+        }
     }
 
     @Override
@@ -313,7 +325,6 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
                 mCurrLayers.get(i).setZIndex(BASE_Z_OFFSET);
             else
                 mCurrLayers.get(i).setZIndex(Z_OFFSET * (mCurrLayers.size() - 1 - i));
-
     }
 
     private void getLayerData() {
@@ -326,4 +337,20 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
             .putExtra(DownloadService.PENDING_RESULT_EXTRA, p);
         startService(i);
     }
+
+    /**
+     * Used to indicate internet connectivity is available to load Worldview and GIBS data.
+     * Not used when internet is already available or data already obtained
+     */
+    BroadcastReceiver connectReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+                if(Utils.isOnline(context)) {
+                    getLayerData();
+                    unregisterReceiver(connectReceiver);
+                }
+            }
+        }
+    };
 }

@@ -23,7 +23,7 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
     private ArrayList<String> mItems;
     private ArrayList<Layer> mLayers;
     private RxBus _rxBus;
-    private final int mode;
+    private final int mode; //Corresponds to its residing fragment
 
     /**
      * Set up an empty adapter

@@ -7,13 +7,22 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.webkit.WebView;
 
 import com.iamtechknow.worldview.R;
 
 public class Utils {
+    public static boolean isOnline(Context c) {
+        ConnectivityManager manager = (ConnectivityManager) c.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = manager.getActiveNetworkInfo();
+        return info != null && info.isConnected();
+    }
+
     public static void showAbout(Activity activity) {
         FragmentManager fm = activity.getFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
