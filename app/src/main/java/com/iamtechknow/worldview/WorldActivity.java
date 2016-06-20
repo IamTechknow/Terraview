@@ -52,7 +52,7 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
     public static final String XML_METADATA = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml",
                                JSON_METADATA = "https://worldview.sit.earthdata.nasa.gov/config/wv.json",
                                RESULT_LIST = "list";
-    public static final int TILE_SIZE = 256, DOWNLOAD_CODE = 0, LAYER_CODE = 1;
+    public static final int TILE_SIZE = 256, DOWNLOAD_CODE = 0, LAYER_CODE = 1, SECONDS_PER_DAY = 24*60*60;
     public static final float Z_OFFSET = 5.0f, BASE_Z_OFFSET = -50.0f; //base layers cannot cover overlays
 
     //UI fields
@@ -92,10 +92,11 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
         mNavLeft.setNavigationItemSelectedListener(this);
 
         //Set default date to be today
-        currentDate = new Date(System.currentTimeMillis());
+        currentDate = new Date();
         Calendar c = Calendar.getInstance();
         c.setTime(currentDate);
-        mDateDialog = new DatePickerDialog(WorldActivity.this, mDateListener, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+        mDateDialog = new DatePickerDialog(this, mDateListener, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+        mDateDialog.getDatePicker().setMaxDate(currentDate.getTime() + SECONDS_PER_DAY); //HACK: can't set date to today without increasing max date time
 
         // Adding menu icon to Toolbar
         ActionBar actionBar = getActionBar();
