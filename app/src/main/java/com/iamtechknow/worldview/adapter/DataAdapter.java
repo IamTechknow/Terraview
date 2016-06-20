@@ -1,6 +1,7 @@
 package com.iamtechknow.worldview.adapter;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
     private ArrayList<String> mItems;
     private ArrayList<Layer> mLayers;
+    private SparseBooleanArray mSelectedPositions;
     private RxBus _rxBus;
     private final int mode; //Corresponds to its residing fragment
 
@@ -30,9 +32,12 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
      */
     public DataAdapter(RxBus bus, int _mode) {
         super();
-        mItems = new ArrayList<>();
-        _rxBus = bus;
         mode = _mode;
+        _rxBus = bus;
+        mItems = new ArrayList<>();
+
+        if(mode == ARG_LAYER)
+            mSelectedPositions = new SparseBooleanArray();
     }
 
     /**
@@ -40,7 +45,6 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
      */
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView text;
-        boolean isSelected;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -50,28 +54,35 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
             text = (TextView) itemView.findViewById(R.id.layer_text);
         }
 
+        /**
+         * When an item is tapped, its selection state will be toggled.
+         * The selection state determines whether to insert or remove from the queue the layer from the position in the data set.
+         * The underlying data is modified but not the UI, which will happen when notifyDataSetChanged is called.
+         */
         @Override
         public void onClick(View v) {
-            isSelected = !isSelected;
-            itemView.setSelected(isSelected);
-
             //Send event to RxBus based on the current mode (tab) of the fragment the item resides in
             switch(mode) {
                 case ARG_CAT:
                     _rxBus.send(new TapEvent(MEASURE_TAB, null, null, mItems.get(getAdapterPosition())));
                     break;
 
+                //Selection states only apply to the Layer tab
                 case ARG_LAYER:
-                    int queue = isSelected ? LAYER_QUEUE : LAYER_DEQUE;
+                    boolean prevState = isItemChecked(getAdapterPosition()); //selected when tapped?
+                    setItemChecked(getLayoutPosition(), !prevState);
+                    int queue = !prevState ? LAYER_QUEUE : LAYER_DEQUE;
                     Layer temp = searchLayer(text.getText().toString());
 
                     if(temp != null)
                         _rxBus.send(new TapEvent(queue, temp, null, null));
+                    notifyDataSetChanged();
                     break;
 
                 default: //Measurement
                     _rxBus.send(new TapEvent(LAYER_TAB, null, mItems.get(getAdapterPosition()), null));
             }
+
         }
     }
 
@@ -81,9 +92,18 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
         return new ViewHolder(v);
     }
 
+    /**
+     * Called to update each visible ViewHolder when notifyDataSetChanged() is invoked.
+     * The text is updated when the view holder is first binded, and the selection state is always updated. <br />
+     * To avoid undefined behavior (items being selected when tapped), the UI is only updated here,
+     * because it is possible for view holders to be selected when not done so, thus
+     * its selection state is always refreshed with the underlying data.
+     */
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.text.setText(mItems.get(position));
+        if(mode == ARG_LAYER)
+            holder.itemView.setActivated(isItemChecked(position));
     }
 
     @Override
@@ -100,6 +120,19 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
         mLayers = layers;
     }
 
+    /**
+     * Given the current stack of layers, shown them as being selected in the list
+     * @param stack The layer objects of the tile overlays that would be shown on the map
+     */
+    public void updateSelected(ArrayList<Layer> stack) {
+        if(mode == ARG_LAYER)
+            for(Layer l : stack) {
+                int pos = searchLayer(l);
+                if(pos != -1)
+                    setItemChecked(pos, true);
+            }
+    }
+
     //Given a title, find the layer it belongs to
     //Will never return null if a title exists
     private Layer searchLayer(String title) {
@@ -108,5 +141,30 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
                 return l;
 
         return null;
+    }
+
+    //Given a title, find a layer that has the same title
+    //If there is such a layer return its index
+    //TODO: Sort the list, use binary search
+    private int searchLayer(Layer arg) {
+        for(int i = 0; i < mLayers.size(); i++)
+            if(mLayers.get(i).getTitle().equals(arg.getTitle()))
+                return i;
+        return -1;
+    }
+
+    /**
+     * Update the underlying data set for items selected.
+     * Also may be used by the fragment to indicate what layers are already selected when
+     * received from the LayerActivity.
+     * @param position The position of a given ViewHolder
+     * @param isSelected Whether or not the item is selected
+     */
+    private void setItemChecked(int position, boolean isSelected) {
+        mSelectedPositions.put(position, isSelected);
+    }
+
+    private boolean isItemChecked(int position) {
+        return mSelectedPositions.get(position);
     }
 }

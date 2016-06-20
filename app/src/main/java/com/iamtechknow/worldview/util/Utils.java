@@ -17,12 +17,22 @@ import android.webkit.WebView;
 import com.iamtechknow.worldview.R;
 
 public class Utils {
+
+    /**
+     * Helper method to determine whether or not there is internet access
+     * @param c Context required to get the connectivity manager
+     * @return Whether or not there is internet access
+     */
     public static boolean isOnline(Context c) {
         ConnectivityManager manager = (ConnectivityManager) c.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = manager.getActiveNetworkInfo();
         return info != null && info.isConnected();
     }
 
+    /**
+     * Create and show the about dialog, essentially a formatted web page
+     * @param activity The activity in which to display the fragment in
+     */
     public static void showAbout(Activity activity) {
         FragmentManager fm = activity.getFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();

@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
@@ -51,7 +50,8 @@ import java.util.Locale;
 public class WorldActivity extends AppCompatActivity implements OnMapReadyCallback, LoaderManager.LoaderCallbacks<DataWrapper>,
         NavigationView.OnNavigationItemSelectedListener, DragAndHideListener {
     public static final String XML_METADATA = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml",
-                               JSON_METADATA = "https://worldview.sit.earthdata.nasa.gov/config/wv.json";
+                               JSON_METADATA = "https://worldview.sit.earthdata.nasa.gov/config/wv.json",
+                               RESULT_LIST = "list";
     public static final int TILE_SIZE = 256, DOWNLOAD_CODE = 0, LAYER_CODE = 1;
     public static final float Z_OFFSET = 5.0f, BASE_Z_OFFSET = -50.0f; //base layers cannot cover overlays
 
@@ -143,8 +143,9 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
             case R.id.action_date:
                 mDateDialog.show();
                 break;
-            case R.id.action_layers: //TODO: If layer stack exists, send it to LayerActivity
-                startActivityForResult(new Intent(WorldActivity.this, LayerActivity.class), LAYER_CODE);
+            case R.id.action_layers:
+                Intent i = new Intent(WorldActivity.this, LayerActivity.class).putParcelableArrayListExtra(RESULT_LIST, layer_stack);
+                startActivityForResult(i, LAYER_CODE);
                 break;
         }
         mDrawerLayout.closeDrawers();
@@ -306,7 +307,7 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
      */
     public void showDefaultTiles() {
         Layer l = new Layer("VIIRS_SNPP_CorrectedReflectance_TrueColor", "GoogleMapsCompatible_Level9", "jpg", "Corrected Reflectance (True Color)", "Suomi NPP / VIIRS", null, "2015-11-24", true),
-                coastline = new Layer("Coastlines", "GoogleMapsCompatible_Level9", "png", "Coastlines (OSM)", "OpenStreetMaps", null, null, false);
+                coastline = new Layer("Coastlines", "GoogleMapsCompatible_Level9", "png", "Coastlines", "OpenStreetMaps", null, null, false);
         layer_stack.add(coastline);
         layer_stack.add(l);
         mItemAdapter.insertList(layer_stack);

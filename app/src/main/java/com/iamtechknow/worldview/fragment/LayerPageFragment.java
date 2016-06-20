@@ -37,7 +37,7 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
     private RxBus _rxBus;
 
     //Worldview Data
-    private ArrayList<Layer> layers;
+    private ArrayList<Layer> layers, stack;
     private Hashtable<String, ArrayList<String>> categories, measurements;
 
     @Override
@@ -47,6 +47,10 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
 
         mode = getArguments().getInt(EXTRA_ARG, ARG_CAT);
         _rxBus = ((LayerActivity) getActivity()).getRxBusSingleton();
+
+        //For the layer tab fragment, check what layers were sent from LayerActivity
+        if(mode == ARG_LAYER)
+            stack = getArguments().getParcelableArrayList(LayerActivity.RESULT_STACK);
     }
 
     @Override
@@ -153,27 +157,29 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
 
     //Populate lists from Loader data
     private void populateLists() {
+        DataAdapter adapter = (DataAdapter) (mRecyclerView.getAdapter());
         switch (mode) {
             case ARG_LAYER:
                 ArrayList<String> layer_list = new ArrayList<>();
                 for (Layer l: layers)
                     layer_list.add(l.getTitle());
-                ((DataAdapter) (mRecyclerView.getAdapter())).insertList(layer_list);
-                ((DataAdapter) (mRecyclerView.getAdapter())).insertLayers(layers);
+                adapter.insertList(layer_list);
+                adapter.insertLayers(layers);
+                adapter.updateSelected(stack);
                 break;
 
             case ARG_MEASURE:
                 ArrayList<String> measure_list = new ArrayList<>();
                 for (Map.Entry<String, ArrayList<String>> e : measurements.entrySet())
                     measure_list.add(e.getKey());
-                ((DataAdapter) (mRecyclerView.getAdapter())).insertList(measure_list);
+                adapter.insertList(measure_list);
                 break;
 
             default: //Categories
                 ArrayList<String> cat_list = new ArrayList<>();
                 for (Map.Entry<String, ArrayList<String>> e : categories.entrySet())
                     cat_list.add(e.getKey());
-                ((DataAdapter) (mRecyclerView.getAdapter())).insertList(cat_list);
+                adapter.insertList(cat_list);
                 break;
         }
     }

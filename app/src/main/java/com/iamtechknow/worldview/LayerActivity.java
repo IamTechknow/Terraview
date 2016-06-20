@@ -61,6 +61,11 @@ public class LayerActivity extends AppCompatActivity {
         extra3.putInt(LayerPageFragment.EXTRA_ARG, LayerPageFragment.ARG_LAYER);
         frag1.setArguments(extra1);
         frag2.setArguments(extra2);
+
+        //Check if intent extras are received, which would be the layer data from WorldActivity
+        result = getIntent().getParcelableArrayListExtra(WorldActivity.RESULT_LIST);
+        if(result != null) //if it exists, send to data adapter in layer tab
+            extra3.putParcelableArrayList(RESULT_STACK, result);
         frag3.setArguments(extra3);
 
         adapter.addFragment(frag1, "Categories"); //Add the fragment and its tab title
