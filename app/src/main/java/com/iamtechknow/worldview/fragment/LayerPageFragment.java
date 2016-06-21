@@ -20,7 +20,7 @@ import com.iamtechknow.worldview.model.Layer;
 import com.iamtechknow.worldview.model.LayerLoader;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.TreeMap;
 import java.util.Map;
 
 import rx.functions.Action1;
@@ -38,7 +38,7 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
 
     //Worldview Data
     private ArrayList<Layer> layers, stack;
-    private Hashtable<String, ArrayList<String>> categories, measurements;
+    private TreeMap<String, ArrayList<String>> categories, measurements;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

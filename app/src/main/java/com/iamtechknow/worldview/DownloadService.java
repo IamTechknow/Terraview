@@ -15,6 +15,7 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.TreeMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -73,7 +74,7 @@ public class DownloadService extends IntentService {
      * Helper function to save layer data to local database
      * @param data The parsed data
      */
-    private void saveToDB(ArrayList<Layer> data, Hashtable<String, ArrayList<String>> measures, Hashtable<String, ArrayList<String>> cats) {
+    private void saveToDB(ArrayList<Layer> data, TreeMap<String, ArrayList<String>> measures, TreeMap<String, ArrayList<String>> cats) {
         LayerDatabase db = LayerDatabase.getInstance(this);
         db.insertLayers(data);
         db.insertCategories(cats);

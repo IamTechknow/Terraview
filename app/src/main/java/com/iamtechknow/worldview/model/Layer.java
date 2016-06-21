@@ -2,6 +2,7 @@ package com.iamtechknow.worldview.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.iamtechknow.worldview.WorldActivity;
@@ -15,7 +16,7 @@ import java.util.Locale;
 /**
  * POGO (Plain old Java object) that represents the XML structure for a layer in WMTSCapabilities.xml
  */
-public class Layer implements Parcelable {
+public class Layer implements Parcelable, Comparable<Layer> {
     //First string is title/identifier, second is time, third is tile matrix set
     public static final String URLtemplate = "http://gibs.earthdata.nasa.gov/wmts/epsg3857/best/%s/default/%s/%s/";
 
@@ -25,9 +26,6 @@ public class Layer implements Parcelable {
 
     //ISO 8601 date format
     private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-
-    //Is layer displayed? Not really needed when stack is used
-    private boolean isDisplaying;
 
     public Layer() {}
 
@@ -87,14 +85,6 @@ public class Layer implements Parcelable {
 
     public void setFormat(String format) {
         this.format = format;
-    }
-
-    public boolean isDisplaying() {
-        return isDisplaying;
-    }
-
-    public void setDisplaying(boolean displaying) {
-        isDisplaying = displaying;
     }
 
     public boolean isBaseLayer() {
@@ -157,14 +147,6 @@ public class Layer implements Parcelable {
         return str + "%d/%d/%d." + format;
     }
 
-    /**
-     * Determines whether or not the layer has both a start and end date. If it does the date must be restricted
-     * @return If the layer does not have an end date
-     */
-    public boolean isOngoing() {
-        return endDate != null && startDate != null;
-    }
-
     @Override
     public int describeContents() {
         return hashCode();
@@ -180,5 +162,11 @@ public class Layer implements Parcelable {
         dest.writeString(endDate);
         dest.writeString(startDate);
         dest.writeByte((byte) (isBaseLayer ? 1 : 0));
+    }
+
+    //Layers are compared the same way as strings, the relative order depends on that of their titles
+    @Override
+    public int compareTo(@NonNull Layer another) {
+        return getTitle().compareTo(another.getTitle());
     }
 }

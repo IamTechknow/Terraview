@@ -9,19 +9,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.Collections;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class WVJsonParser {
     private BufferedReader b;
 
     //Primary data structures, Measurements contain layer names, Categories contain measurements
-    private Hashtable<String, ArrayList<String>> measurement_map, category_map;
+    private TreeMap<String, ArrayList<String>> measurement_map, category_map;
 
     public WVJsonParser(InputStream is) {
         b = new BufferedReader(new InputStreamReader(is));
-        category_map = new Hashtable<>();
-        measurement_map = new Hashtable<>();
+        category_map = new TreeMap<>();
+        measurement_map = new TreeMap<>();
     }
 
     /**
@@ -54,7 +55,7 @@ public class WVJsonParser {
         fillLayers(list, layers_json);
     }
 
-    public void fillMeasurements(Hashtable<String, ArrayList<String>> measurements, JsonObject m_json) {
+    public void fillMeasurements(TreeMap<String, ArrayList<String>> measurements, JsonObject m_json) {
         //Parse measurement categories, first get the keys by getting the entry set
         ArrayList<String> measurement_keys = getKeys(m_json);
 
@@ -71,11 +72,12 @@ public class WVJsonParser {
                 for(JsonElement e : settings) //Now we can access the layer names to put in the list and map
                     measurement_layers.add(e.getAsString());
             }
+            Collections.sort(measurement_layers); //To display measurements in order
             measurements.put(measure, measurement_layers); //List is complete here
         }
     }
 
-    public void fillCategories(Hashtable<String, ArrayList<String>> categories, JsonObject cat_json) {
+    public void fillCategories(TreeMap<String, ArrayList<String>> categories, JsonObject cat_json) {
         //Get keys, fill category measurements list
         for(String s : getKeys(cat_json)) {
             ArrayList<String> cat_measurements = new ArrayList<>();
@@ -85,6 +87,7 @@ public class WVJsonParser {
             for(JsonElement e : catArray)
                 cat_measurements.add(e.getAsString());
 
+            Collections.sort(cat_measurements);
             categories.put(s, cat_measurements);
         }
     }
@@ -122,6 +125,7 @@ public class WVJsonParser {
                 layer.setBaseLayer(false);
             }
         }
+        Collections.sort(list);
     }
 
     /**
@@ -137,11 +141,11 @@ public class WVJsonParser {
         return cat_keys;
     }
 
-    public Hashtable<String, ArrayList<String>> getMeasurementMap() {
+    public TreeMap<String, ArrayList<String>> getMeasurementMap() {
         return measurement_map;
     }
 
-    public Hashtable<String, ArrayList<String>> getCategoryMap() {
+    public TreeMap<String, ArrayList<String>> getCategoryMap() {
         return category_map;
     }
 }

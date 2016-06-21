@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteStatement;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Hashtable;
+import java.util.TreeMap;
 import java.util.Set;
 
 public class LayerDatabase extends SQLiteOpenHelper {
@@ -103,7 +103,7 @@ public class LayerDatabase extends SQLiteOpenHelper {
      * @param map The map to save
      * @param table The table to save the map to
      */
-    private void insertMap(Hashtable<String, ArrayList<String>> map, String table) {
+    private void insertMap(TreeMap<String, ArrayList<String>> map, String table) {
         SQLiteDatabase DB = getWritableDatabase();
         DB.beginTransaction();
         SQLiteStatement st = DB.compileStatement("insert into " + table + " (key, value) values(?, ?);" );
@@ -125,11 +125,11 @@ public class LayerDatabase extends SQLiteOpenHelper {
         DB.endTransaction();
     }
 
-    public void insertMeasurements(Hashtable<String, ArrayList<String>> map) {
+    public void insertMeasurements(TreeMap<String, ArrayList<String>> map) {
         insertMap(map, TABLE_MEASURE);
     }
 
-    public void insertCategories(Hashtable<String, ArrayList<String>> map) {
+    public void insertCategories(TreeMap<String, ArrayList<String>> map) {
         insertMap(map, TABLE_CAT);
     }
 
@@ -164,8 +164,8 @@ public class LayerDatabase extends SQLiteOpenHelper {
      * @param table The specified table, can be measurements or categories
      * @return the SQLite table in hash table form
      */
-    private Hashtable<String, ArrayList<String>> queryMap(String table) {
-        Hashtable<String, ArrayList<String>> map = new Hashtable<>();
+    private TreeMap<String, ArrayList<String>> queryMap(String table) {
+        TreeMap<String, ArrayList<String>> map = new TreeMap<>();
         Cursor c = getReadableDatabase().query(table, null, null, null, null, null, null);
         c.moveToFirst();
 
@@ -181,11 +181,11 @@ public class LayerDatabase extends SQLiteOpenHelper {
         return map;
     }
 
-    public Hashtable<String, ArrayList<String>> queryMeasurements() {
+    public TreeMap<String, ArrayList<String>> queryMeasurements() {
         return queryMap(TABLE_MEASURE);
     }
 
-    public Hashtable<String, ArrayList<String>> queryCategories() {
+    public TreeMap<String, ArrayList<String>> queryCategories() {
         return queryMap(TABLE_CAT);
     }
 }
