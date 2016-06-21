@@ -119,7 +119,7 @@ public class WVJsonParser {
                 layer.setSubtitle(subtitle);
                 layer.setStartDate(startDate);
                 layer.setEndDate(endDate);
-            } catch(NullPointerException e) { //FIXME:Deal with bad input data later
+            } catch(NullPointerException e) { //Gracefully deal with bad input
                 Log.w(getClass().getSimpleName(), "Unable to access layer metadata, skipping: " + layer.getIdentifier());
                 layer.setTitle(layer.getIdentifier());
                 layer.setBaseLayer(false);

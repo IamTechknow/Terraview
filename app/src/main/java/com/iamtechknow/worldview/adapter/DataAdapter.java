@@ -147,7 +147,8 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
     //If there is such a layer return its index
     //TODO: Sort the list, use binary search
     private int searchLayer(Layer arg) {
-        for(int i = 0; i < mLayers.size(); i++)
+        int size = mLayers.size();
+        for(int i = 0; i < size; i++)
             if(mLayers.get(i).getTitle().equals(arg.getTitle()))
                 return i;
         return -1;

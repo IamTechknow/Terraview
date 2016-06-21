@@ -95,6 +95,18 @@ public class WMTSHandler extends DefaultHandler {
     }
 
     public ArrayList<Layer> getResult() {
+        cleanUpList();
         return contents;
+    }
+
+    //Get rid of invalid layer identifiers - AIRS_Dust_Score, SMAP_L4_Soil_Temperature_L
+    private void cleanUpList() {
+        int size = contents.size();
+        for(int i = 0; i < size; i++)
+            if(contents.get(i).getIdentifier().equals("AIRS_Dust_Score")) { //duplicate
+                contents.remove(i);
+                size--;
+            } else if(contents.get(i).getIdentifier().equals("SMAP_L4_Soil_Temperature_L")) //wrong name
+                contents.get(i).setIdentifier("SMAP_L4_Soil_Temperature_Layer_1");
     }
 }
