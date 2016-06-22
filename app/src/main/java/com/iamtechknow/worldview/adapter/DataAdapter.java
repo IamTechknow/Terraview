@@ -44,7 +44,7 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
      * View holder implementation for each list item
      */
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView text;
+        TextView text, subtitle;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -52,6 +52,7 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
             itemView.setClickable(true);
             itemView.setOnClickListener(this);
             text = (TextView) itemView.findViewById(R.id.layer_text);
+            subtitle = (TextView) itemView.findViewById(R.id.layer_sub); //can be null for other tabs
         }
 
         /**
@@ -88,7 +89,8 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.layer_item, parent, false);
+        int layout = mode == ARG_LAYER ? R.layout.layer_item_with_sub : R.layout.layer_item ;
+        View v = LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
         return new ViewHolder(v);
     }
 
@@ -102,6 +104,12 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.text.setText(mItems.get(position));
+        if(holder.subtitle != null) { //if item in layer tab, show subtitle
+            Layer l = searchLayer(mItems.get(position));
+            if(l != null)
+                holder.subtitle.setText(l.getSubtitle());
+        }
+
         if(mode == ARG_LAYER)
             holder.itemView.setActivated(isItemChecked(position));
     }

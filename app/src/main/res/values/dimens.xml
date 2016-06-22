@@ -4,4 +4,5 @@
     <dimen name="navheader_height">222dp</dimen>
     <dimen name="text_padding_left">16dp</dimen>
     <dimen name="item_height">48dp</dimen>
+    <dimen name="item_sub_height">72dp</dimen>
 </resources>
