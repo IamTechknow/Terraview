@@ -99,11 +99,10 @@ public class WVJsonParser {
         for(Layer layer : list) {
             try {
                 JsonObject jsonLayer = layer_json.get(layer.getIdentifier()).getAsJsonObject();
-                String title, subtitle = null, endDate = null, startDate = null;
+                String subtitle = null, endDate = null, startDate = null;
                 boolean isBaseLayer;
 
                 isBaseLayer = jsonLayer.getAsJsonPrimitive("group").getAsString().equals("baselayers");
-                title = jsonLayer.getAsJsonPrimitive("title").getAsString();
 
                 try { //These elements don't always exist in the layer object
                     subtitle = jsonLayer.getAsJsonPrimitive("subtitle").getAsString();
@@ -114,7 +113,6 @@ public class WVJsonParser {
                 }
 
                 //Finishing getting data, add it in now
-                layer.setTitle(title);
                 layer.setBaseLayer(isBaseLayer);
                 layer.setSubtitle(subtitle);
                 layer.setStartDate(startDate);

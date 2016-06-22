@@ -22,7 +22,7 @@ public class WMTSHandler extends DefaultHandler {
     private String currentElement;
 
     //Avoid unwanted elements, indicate that we're in the layer element, not style or dimension
-    private boolean inLayerTag = true, inTileMatrixSetLink;
+    private boolean inLayerTag, inTileMatrixSetLink;
 
     public WMTSHandler() throws ParserConfigurationException, SAXException {
         contents = new ArrayList<>();
@@ -48,6 +48,7 @@ public class WMTSHandler extends DefaultHandler {
                 case "Identifier":
                 case "Format":
                 case "TileMatrixSet":
+                case "Title":
                     currentElement = localName;
                     break;
                 case "TileMatrixSetLink":
@@ -77,7 +78,7 @@ public class WMTSHandler extends DefaultHandler {
 
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException {
-        //We have access to the characters, check the element first then save it
+        //We have access to the element text, check element then save it
         if(currentElement != null && inLayerTag) {
             switch (currentElement) {
                 case "Identifier":
@@ -89,6 +90,9 @@ public class WMTSHandler extends DefaultHandler {
                     break;
                 case "TileMatrixSet":
                     currLayer.setTileMatrixSet(new String(ch, start, length));
+                    break;
+                case "Title":
+                    currLayer.setTitle(new String(ch, start, length));
             }
             currentElement = null; //we are done, reset current element and wait for next one
         }
