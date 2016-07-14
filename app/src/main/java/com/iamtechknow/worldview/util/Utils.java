@@ -17,6 +17,7 @@ import android.webkit.WebView;
 import com.iamtechknow.worldview.R;
 
 public class Utils {
+    private static final String HTML_EXTRA = "html";
 
     /**
      * Helper method to determine whether or not there is internet access
@@ -30,30 +31,38 @@ public class Utils {
     }
 
     /**
-     * Create and show the about dialog, essentially a formatted web page
+     * Create and show the given HTML, essentially a formatted web page
      * @param activity The activity in which to display the fragment in
      */
     public static void showAbout(Activity activity) {
+        showWebPage(activity, activity.getString(R.string.about_html));
+    }
+
+    public static void showWebPage(Activity activity, String html) {
         FragmentManager fm = activity.getFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
         Fragment prev = fm.findFragmentByTag("dialog_about");
+        Bundle extra1 = new Bundle();
+        extra1.putString(HTML_EXTRA, html);
         if (prev != null)
             ft.remove(prev);
 
         ft.addToBackStack(null);
 
-        new aboutDialog().show(ft, "dialog_about");
+        AboutDialog about = new AboutDialog();
+        about.setArguments(extra1);
+        about.show(ft, "dialog_about");
     }
 
-    public static class aboutDialog extends DialogFragment {
+    public static class AboutDialog extends DialogFragment {
         public static final String MIME_TYPE = "text/html";
 
-        public aboutDialog() {}
+        public AboutDialog() {}
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             WebView webView = new WebView(getActivity());
-            webView.loadData(getString(R.string.about_html), MIME_TYPE, null);
+            webView.loadData(getArguments().getString(HTML_EXTRA), MIME_TYPE, null);
 
             return new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.about)
