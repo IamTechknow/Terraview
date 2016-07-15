@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.iamtechknow.worldview.R;
 import com.iamtechknow.worldview.RxBus;
+import com.iamtechknow.worldview.TapEvent;
 import com.iamtechknow.worldview.model.Layer;
 
 import static com.iamtechknow.worldview.fragment.LayerPageFragment.*;

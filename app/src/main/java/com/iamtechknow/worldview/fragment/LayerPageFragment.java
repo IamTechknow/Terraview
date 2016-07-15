@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import com.iamtechknow.worldview.LayerActivity;
 import com.iamtechknow.worldview.R;
 import com.iamtechknow.worldview.RxBus;
+import com.iamtechknow.worldview.TapEvent;
 import com.iamtechknow.worldview.adapter.*;
 import com.iamtechknow.worldview.model.DataWrapper;
 import com.iamtechknow.worldview.model.Layer;
@@ -72,14 +73,14 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
             .subscribe(new Action1<Object>() {
                 @Override
                 public void call(Object event) {
-                    if (event instanceof LayerPageFragment.TapEvent) {
+                    if (event instanceof TapEvent) {
                         //For a event from the category/measurement tab, populate the appropriate measurements/layers
-                        if(((LayerPageFragment.TapEvent) event).getTab() == ARG_MEASURE && mode == ARG_MEASURE) {
-                            String cat = ((LayerPageFragment.TapEvent) event).getCategory();
+                        if(((TapEvent) event).getTab() == ARG_MEASURE && mode == ARG_MEASURE) {
+                            String cat = ((TapEvent) event).getCategory();
                             ArrayList<String> _measurelist = categories.get(cat);
                             ((DataAdapter) (mRecyclerView.getAdapter())).insertList(_measurelist);
-                        } else if(((LayerPageFragment.TapEvent) event).getTab() == ARG_LAYER && mode == ARG_LAYER) {
-                            String m = ((LayerPageFragment.TapEvent) event).getMeasurement();
+                        } else if(((TapEvent) event).getTab() == ARG_LAYER && mode == ARG_LAYER) {
+                            String m = ((TapEvent) event).getMeasurement();
 
                             //Because multiple measurements may be mapped to one layer we can't use
                             //a hash table to store the layers, search for each layer by comparing identifiers
@@ -125,35 +126,6 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public void onLoaderReset(Loader<DataWrapper> loader) {}
-
-    public static class TapEvent { //Container with event parameter
-        private int tab;
-        private Layer layer;
-        private String measurement, category;
-
-        public TapEvent(int num, Layer l, String s, String c) {
-            tab = num;
-            layer = l;
-            measurement = s;
-            category = c;
-        }
-
-        public int getTab() {
-            return tab;
-        }
-
-        public Layer getLayer() {
-            return layer;
-        }
-
-        public String getMeasurement() {
-            return measurement;
-        }
-
-        public String getCategory() {
-            return category;
-        }
-    }
 
     //Populate lists from Loader data
     private void populateLists() {

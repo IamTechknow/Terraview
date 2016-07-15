@@ -119,10 +119,10 @@ public class LayerActivity extends AppCompatActivity {
             .subscribe(new Action1<Object>() {
                 @Override
                 public void call(Object event) {
-                    if(event instanceof LayerPageFragment.TapEvent)
+                    if(event instanceof TapEvent)
                         //If we have an event due to a button press then go to the tab
                         //And in the fragment that is also listening load the right data!
-                        switch(((LayerPageFragment.TapEvent) event).getTab()) {
+                        switch(((TapEvent) event).getTab()) {
                             case LAYER_TAB:
                                 mTabLayout.getTabAt(LayerPageFragment.ARG_LAYER).select();
                                 break;
@@ -132,15 +132,15 @@ public class LayerActivity extends AppCompatActivity {
                                 break;
 
                             case LAYER_DEQUE:
-                                result.remove(((LayerPageFragment.TapEvent) event).getLayer());
+                                result.remove(((TapEvent) event).getLayer());
                                 break;
 
                             case LOAD_HTML:
-                                LayerPageFragment.TapEvent e = (LayerPageFragment.TapEvent) event;
+                                TapEvent e = (TapEvent) event;
                                 useRetrofit(e.getCategory(), e.getMeasurement());
 
                             default: //layer queue
-                                result.add(((LayerPageFragment.TapEvent) event).getLayer());
+                                result.add(((TapEvent) event).getLayer());
                                 break;
                         }
                 }
