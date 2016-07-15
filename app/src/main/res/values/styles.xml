@@ -11,11 +11,12 @@
     <style name="AppTheme" parent="AppTheme.Base" />
 
     <!-- Theme for layer activity for TabLayout, no toolbar! -->
-    <style name="AppTheme.Tabs" parent="Theme.AppCompat.NoActionBar">
+    <style name="AppTheme.Tabs" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@android:color/white</item>
         <item name="android:textColor">@android:color/black</item>
+        <item name="android:textColorSecondary">@android:color/white</item>
     </style>
 
 </resources>
