@@ -12,21 +12,35 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
+import com.iamtechknow.worldview.api.MetadataAPI;
 import com.iamtechknow.worldview.fragment.LayerPageFragment;
 import com.iamtechknow.worldview.model.Layer;
+import com.iamtechknow.worldview.util.Utils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import rx.Observable;
+import rx.Observer;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 public class LayerActivity extends AppCompatActivity {
     //Constants for RxBus events and Intent
-    public static final int LAYER_QUEUE = 0, MEASURE_TAB = 1, LAYER_TAB = 2, LAYER_DEQUE = 3;
-    public static final String RESULT_STACK = "result";
+    public static final int LAYER_QUEUE = 0, MEASURE_TAB = 1, LAYER_TAB = 2, LAYER_DEQUE = 3, LOAD_HTML = 4;
+    public static final String RESULT_STACK = "result", BASE_URL = "https://worldview.earthdata.nasa.gov/";
 
     //UI handling
     private TabLayout mTabLayout;
     private RxBus _rxBus;
+    private Retrofit retrofit;
 
     //List for layers to be displayed handled as a stack
     private ArrayList<Layer> result;
@@ -77,6 +91,7 @@ public class LayerActivity extends AppCompatActivity {
         mTabLayout.setupWithViewPager(viewPager);
 
         _rxBus = getRxBusSingleton();
+        retrofit = new Retrofit.Builder().baseUrl(BASE_URL).build();
     }
 
     @Override
@@ -119,6 +134,10 @@ public class LayerActivity extends AppCompatActivity {
                             case LAYER_DEQUE:
                                 result.remove(((LayerPageFragment.TapEvent) event).getLayer());
                                 break;
+
+                            case LOAD_HTML:
+                                LayerPageFragment.TapEvent e = (LayerPageFragment.TapEvent) event;
+                                useRetrofit(e.getCategory(), e.getMeasurement());
 
                             default: //layer queue
                                 result.add(((LayerPageFragment.TapEvent) event).getLayer());
@@ -172,5 +191,43 @@ public class LayerActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             return mFragmentTitleList.get(position);
         }
+    }
+
+    private void useRetrofit(String cat, String layer) {
+        MetadataAPI api = retrofit.create(MetadataAPI.class);
+        final Call<ResponseBody> result = api.fetchData(cat, layer);
+        Subscription sub = Observable.just(true).map(new Func1<Boolean, Response<ResponseBody> >() {
+            @Override
+            public Response<ResponseBody> call(Boolean aBoolean) {
+                Response<ResponseBody> r = null;
+                try {
+                    r = result.execute();
+                } catch(IOException e) {
+                    e.printStackTrace();
+                }
+                return r;
+            }
+        }).subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(new Observer<Response<ResponseBody>>() {
+              @Override
+              public void onCompleted() {
+                  //TODO: need to cancel sub?
+              }
+
+              @Override
+              public void onError(Throwable e) {
+
+              }
+
+              @Override
+              public void onNext(Response<ResponseBody> r) {
+                  try {
+                      Utils.showWebPage(LayerActivity.this, r.body().string());
+                  } catch (IOException e) {
+                      e.printStackTrace();
+                  }
+              }
+          });
     }
 }

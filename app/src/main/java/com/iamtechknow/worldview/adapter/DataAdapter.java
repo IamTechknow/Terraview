@@ -10,32 +10,23 @@ import android.widget.TextView;
 
 import com.iamtechknow.worldview.R;
 import com.iamtechknow.worldview.RxBus;
-import com.iamtechknow.worldview.api.MetadataAPI;
 import com.iamtechknow.worldview.model.Layer;
 
 import static com.iamtechknow.worldview.fragment.LayerPageFragment.*;
 import static com.iamtechknow.worldview.LayerActivity.*;
 
-import java.io.IOException;
 import java.util.ArrayList;
-
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Retrofit;
 
 /**
  * Item adapter instance used for each layer picker fragment in LayerActivity's view pager
  * Uses an event bus implemented in RxJava to pass events to fragments when item is clicked
  */
 public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
-    private static final String BASE_URL = "https://worldview.earthdata.nasa.gov/";
-
     private ArrayList<String> mItems;
     private ArrayList<Layer> mLayers;
     private SparseBooleanArray mSelectedPositions;
     private RxBus _rxBus;
     private final int mode; //Corresponds to its residing fragment
-    private Retrofit retrofit;
 
     /**
      * Set up an empty adapter
@@ -45,7 +36,6 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
         mode = _mode;
         _rxBus = bus;
         mItems = new ArrayList<>();
-        retrofit = new Retrofit.Builder().baseUrl(BASE_URL).build();
 
         if(mode == ARG_LAYER)
             mSelectedPositions = new SparseBooleanArray();
@@ -70,7 +60,7 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
                 icon.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        useRetrofit();
+                        _rxBus.send(new TapEvent(LOAD_HTML, null, "CorrectedReflectance", "modis"));
                     }
                 });
         }
@@ -195,16 +185,5 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
 
     private boolean isItemChecked(int position) {
         return mSelectedPositions.get(position);
-    }
-
-    //WIP: When the icon for layer items is pressed, use retrofit to get the raw html of the metadata then display it
-    private void useRetrofit() {
-        MetadataAPI api = retrofit.create(MetadataAPI.class);
-        Call<ResponseBody> result = api.fetchData("modis", "CorrectedReflected");
-        try {
-            result.execute().body().string(); //FIXME: Use RXJava to do async result
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }
