@@ -8,14 +8,14 @@ I worked on improvements on the project in an internship in NASA's Goddard Space
 - Google Maps API for Android is used to load and display tiles
     Worldview uses OpenLayers 3, which is a Javascript library. I could have done the same if I used a WebView, but I want this to be a native Android application.
 
-- RxJava is used to create an event bus
+- RxJava is used to create an event bus and to perform networking tasks
 	Currently the ViewPager which accepts fragments to "page" through them in tabs does not allow communication through each of these fragments. I am using a tabbed interface to allow the user to select Worldview layers and their categories displayed in a RecyclerView to display a stack of layers on the map. 
 	The app needs a way to determine what category is selected to display the corresponding measurements in the next tab, and finally the revelant layers in the final tab. This is handled by creating an event bus in RxJava and allowing the activity and its fragments to subscribe 
-	to events that appear in the bus as they are posted when a RecyclerView item is tapped. 
-	
-- BottomBar is used to help implement the UI
-    To make the user interface more intuitive, I decided to implement common actions with bottom navigation instead of displaying them in a navigation drawer.
-    Bottom navigation is actually used for quick navigation between top-level views, thus I am using this library to suit my needs as opposed to following Google's Material Design guidelines.
+	to events that appear in the bus as they are posted when a RecyclerView item is tapped.
+
+- Retrofit is used to obtain HTML of layer information
+    When selecting layers in the Worldview application, information and sources are displayed.
+    This is found in a web page. I simplified the process of generating the URLs by creating my own API interface to use with Retrofit. No converter is used, the raw ResponseBody object is returned.
 
 - Metadata is obtained and parsed from Worldview
     Worldview's metadata may be found in the wv.json file, and contains more metadata on the layers and categories compared to
