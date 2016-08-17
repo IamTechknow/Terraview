@@ -147,8 +147,8 @@ public class Layer implements Parcelable, Comparable<Layer> {
         try {
             Date end = dateFormat.parse(getEndDate()), begin = dateFormat.parse(getStartDate());
 
-            if(isOngoing) //only compare start date
-                date = d.after(begin) ? dateFormat.format(d) : dateFormat.format(new Date());
+            if(isOngoing) //compare start date and today
+                date = d.before(new Date()) && d.after(begin) ? dateFormat.format(d) : dateFormat.format(new Date());
             else
                 date = d.before(end) && d.after(begin) ? dateFormat.format(d) : dateFormat.format(new Date());
         } catch(ParseException e) {
