@@ -63,7 +63,7 @@ public class LayerDatabase extends SQLiteOpenHelper {
         DB.beginTransaction();
         SQLiteStatement st = DB.compileStatement("insert into " + TABLE_LAYER + " (title, subtitle, identifier, format, matrix, start, end, isbase) values (?, ?, ?, ?, ?, ?, ?, ?);");
         for(Layer l: layers)
-            insertLayer(l.getTitle(), l.getSubtitle(), l.getIdentifier(), l.getFormat(), l.getTileMatrixSet(), l.getStartDate(), l.getEndDate(), l.isBaseLayer(), st);
+            insertLayer(l.getTitle(), l.getSubtitle(), l.getIdentifier(), l.getFormat(), l.getTileMatrixSet(), l.getStartDateRaw(), l.getEndDateRaw(), l.isBaseLayer(), st);
         DB.setTransactionSuccessful();
         DB.endTransaction();
     }
@@ -146,8 +146,9 @@ public class LayerDatabase extends SQLiteOpenHelper {
         while(!c.isAfterLast()) {
             String id = c.getString(c.getColumnIndex(COL_LAYER_ID)), matrix = c.getString(c.getColumnIndex(COL_LAYER_MATRIX)),
                     format = c.getString(c.getColumnIndex(COL_LAYER_FORMAT)), title = c.getString(c.getColumnIndex(COL_LAYER_TITLE)),
-                    subtitle = c.getString(c.getColumnIndex(COL_LAYER_SUBTITLE)), end = c.getString(c.getColumnIndex(COL_LAYER_END)),
-                    start = c.getString(c.getColumnIndex(COL_LAYER_START));
+                    subtitle = c.getString(c.getColumnIndex(COL_LAYER_SUBTITLE)),
+                    end = c.isNull(c.getColumnIndex(COL_LAYER_END)) ? null : c.getString(c.getColumnIndex(COL_LAYER_END)),
+                    start = c.isNull(c.getColumnIndex(COL_LAYER_START)) ? null : c.getString(c.getColumnIndex(COL_LAYER_START));
             boolean isBase = c.getLong(c.getColumnIndex(COL_LAYER_ISBASE)) != 0;
             Layer l = new Layer(id, matrix, format, title, subtitle, end, start, isBase);
             a.add(l);

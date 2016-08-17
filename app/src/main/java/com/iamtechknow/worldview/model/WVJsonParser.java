@@ -55,7 +55,7 @@ public class WVJsonParser {
         fillLayers(list, layers_json);
     }
 
-    public void fillMeasurements(TreeMap<String, ArrayList<String>> measurements, JsonObject m_json) {
+    private void fillMeasurements(TreeMap<String, ArrayList<String>> measurements, JsonObject m_json) {
         //Parse measurement categories, first get the keys by getting the entry set
         ArrayList<String> measurement_keys = getKeys(m_json);
 
@@ -77,7 +77,7 @@ public class WVJsonParser {
         }
     }
 
-    public void fillCategories(TreeMap<String, ArrayList<String>> categories, JsonObject cat_json) {
+    private void fillCategories(TreeMap<String, ArrayList<String>> categories, JsonObject cat_json) {
         //Get keys, fill category measurements list
         for(String s : getKeys(cat_json)) {
             ArrayList<String> cat_measurements = new ArrayList<>();
@@ -92,27 +92,31 @@ public class WVJsonParser {
         }
     }
 
-    public void fillLayers(ArrayList<Layer> list, JsonObject layer_json) {
+    private void fillLayers(ArrayList<Layer> list, JsonObject layer_json) {
         //By now we have the identifiers for all the Layers we could use to display on Google Maps
         //Not all layers supported on Worldview have support for GMaps. Now we go through each identifier
 
         for(Layer layer : list) {
             try {
                 JsonObject jsonLayer = layer_json.get(layer.getIdentifier()).getAsJsonObject();
+                JsonPrimitive subPrimitive, startPrimitive, endPrimitive;
                 String subtitle = null, endDate = null, startDate = null;
                 boolean isBaseLayer;
 
                 isBaseLayer = jsonLayer.getAsJsonPrimitive("group").getAsString().equals("baselayers");
 
-                try { //These elements don't always exist in the layer object
-                    subtitle = jsonLayer.getAsJsonPrimitive("subtitle").getAsString();
-                    startDate = jsonLayer.getAsJsonPrimitive("startDate").getAsString();
-                    endDate = jsonLayer.getAsJsonPrimitive("endDate").getAsString();
-                } catch (Exception e) { //Don't print stack trace
+                //These may not exist in the metadata
+                subPrimitive = jsonLayer.getAsJsonPrimitive("subtitle");
+                startPrimitive = jsonLayer.getAsJsonPrimitive("startDate");
+                endPrimitive = jsonLayer.getAsJsonPrimitive("endDate");
 
-                }
+                if(subPrimitive != null)
+                    subtitle = subPrimitive.getAsString();
+                if(startPrimitive != null)
+                    startDate = startPrimitive.getAsString();
+                if(endPrimitive != null)
+                    endDate = endPrimitive.getAsString();
 
-                //Finishing getting data, add it in now
                 layer.setBaseLayer(isBaseLayer);
                 layer.setSubtitle(subtitle);
                 layer.setStartDate(startDate);

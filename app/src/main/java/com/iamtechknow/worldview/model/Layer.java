@@ -115,6 +115,10 @@ public class Layer implements Parcelable, Comparable<Layer> {
         return endDate != null ? endDate : dateFormat.format(new Date(System.currentTimeMillis()));
     }
 
+    public String getEndDateRaw() {
+        return endDate;
+    }
+
     public void setEndDate(String endDate) {
         this.endDate = endDate;
     }
@@ -127,6 +131,10 @@ public class Layer implements Parcelable, Comparable<Layer> {
         this.startDate = startDate;
     }
 
+    public String getStartDateRaw() {
+        return startDate;
+    }
+
     /**
      * Formats a string with layer data and specified date to be used for a tile provider
      * A date is needed even when a layer does not have a time interval, in which it is unused
@@ -134,12 +142,17 @@ public class Layer implements Parcelable, Comparable<Layer> {
      * @return A URL String that may be used for UrlTileProvider.getTileURL()
      */
     public String generateURL(Date d) {
-        //Check if date is between start and end dates
         String date;
+        boolean isOngoing = endDate == null;
         try {
-            date = d.before(dateFormat.parse(getEndDate())) && d.after(dateFormat.parse(getStartDate())) ? dateFormat.format(d) : dateFormat.format(new Date(System.currentTimeMillis()));
+            Date end = dateFormat.parse(getEndDate()), begin = dateFormat.parse(getStartDate());
+
+            if(isOngoing) //only compare start date
+                date = d.after(begin) ? dateFormat.format(d) : dateFormat.format(new Date());
+            else
+                date = d.before(end) && d.after(begin) ? dateFormat.format(d) : dateFormat.format(new Date());
         } catch(ParseException e) {
-            Log.w(WorldActivity.class.getSimpleName(), "Invalid date string");
+            Log.w(WorldActivity.class.getSimpleName(), e.getMessage());
             date = dateFormat.format(new Date(System.currentTimeMillis()));
         }
 

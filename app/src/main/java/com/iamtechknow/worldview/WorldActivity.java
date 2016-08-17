@@ -91,10 +91,14 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
         setActionBar(mToolbar);
         mNavLeft.setNavigationItemSelectedListener(this);
 
-        //Set default date to be today
+        //Set default date to be today, midnight time for consistency
         currentDate = new Date();
         Calendar c = Calendar.getInstance();
         c.setTime(currentDate);
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
         mDateDialog = new DatePickerDialog(this, mDateListener, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
         mDateDialog.getDatePicker().setMaxDate(currentDate.getTime() + SECONDS_PER_DAY); //HACK: can't set date to today without increasing max date time
 
@@ -204,12 +208,16 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
     @Override
     public void onLoaderReset(Loader<DataWrapper> loader) {}
 
-    //Reload layers on date change
+    //Reload layers on date change. Cut off time, dates should always be midnight
     private DatePickerDialog.OnDateSetListener mDateListener = new DatePickerDialog.OnDateSetListener() {
         @Override
         public void onDateSet(DatePicker view, int year, int month, int day) {
             Calendar c = Calendar.getInstance();
             c.set(year, month, day);
+            c.set(Calendar.HOUR_OF_DAY, 0);
+            c.set(Calendar.MINUTE, 0);
+            c.set(Calendar.SECOND, 0);
+            c.set(Calendar.MILLISECOND, 0);
             currentDate = c.getTime();
             removeAllTileOverlays();
             for(Layer l: layer_stack)
