@@ -17,6 +17,7 @@ import static com.iamtechknow.worldview.fragment.LayerPageFragment.*;
 import static com.iamtechknow.worldview.LayerActivity.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Item adapter instance used for each layer picker fragment in LayerActivity's view pager
@@ -139,16 +140,18 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
     }
 
     /**
-     * Given the current stack of layers, shown them as being selected in the list
-     * @param stack The layer objects of the tile overlays that would be shown on the map
+     * Given the current set of layers, shown them as being selected in the list
+     * The list has changed so the boolean array must be invalidated
+     * Check if a title exists in the set then call setItemChecked
+     * @param set The layer objects of the tile overlays that would be shown on the map
      */
-    public void updateSelected(ArrayList<Layer> stack) {
-        if(mode == ARG_LAYER)
-            for(Layer l : stack) {
-                int pos = searchLayer(l);
-                if(pos != -1)
-                    setItemChecked(pos, true);
-            }
+    public void updateSelected(HashSet<String> set) {
+        if(mode == ARG_LAYER) {
+            mSelectedPositions.clear();
+            for (int i = 0; i < mItems.size(); i++)
+                if(set.contains(mItems.get(i)))
+                    setItemChecked(i, true);
+        }
     }
 
     //Given a title, find the layer it belongs to
@@ -159,17 +162,6 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
                 return l;
 
         return null;
-    }
-
-    //Given a title, find a layer that has the same title
-    //If there is such a layer return its index
-    //TODO: Sort the list, use binary search
-    private int searchLayer(Layer arg) {
-        int size = mLayers.size();
-        for(int i = 0; i < size; i++)
-            if(mLayers.get(i).getTitle().equals(arg.getTitle()))
-                return i;
-        return -1;
     }
 
     /**

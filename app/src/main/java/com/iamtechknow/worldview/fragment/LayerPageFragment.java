@@ -21,6 +21,7 @@ import com.iamtechknow.worldview.model.Layer;
 import com.iamtechknow.worldview.model.LayerLoader;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.TreeMap;
 import java.util.Map;
 
@@ -41,6 +42,9 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
     private ArrayList<Layer> layers, stack;
     private TreeMap<String, ArrayList<String>> categories, measurements;
 
+    //HashSet to keep track of selected elements from stack
+    private HashSet<String> layerSet;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,8 +54,10 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
         _rxBus = ((LayerActivity) getActivity()).getRxBusSingleton();
 
         //For the layer tab fragment, check what layers were sent from LayerActivity
-        if(mode == ARG_LAYER)
+        if(mode == ARG_LAYER) {
             stack = getArguments().getParcelableArrayList(LayerActivity.RESULT_STACK);
+            layerSet = new HashSet<>();
+        }
     }
 
     @Override
@@ -90,7 +96,11 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
                                 _layerlist.add(temp != null ? temp.getTitle() : id);
                             }
 
-                            ((DataAdapter) (mRecyclerView.getAdapter())).insertList(_layerlist);
+                            //Update list entries and selection status
+                            updateSet();
+                            DataAdapter adapter = (DataAdapter) mRecyclerView.getAdapter();
+                            adapter.insertList(_layerlist);
+                            adapter.updateSelected(layerSet);
                         }
                     }
                 }
@@ -137,7 +147,8 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
                     layer_list.add(l.getTitle());
                 adapter.insertList(layer_list);
                 adapter.insertLayers(layers);
-                adapter.updateSelected(stack);
+                updateSet();
+                adapter.updateSelected(layerSet);
                 break;
 
             case ARG_MEASURE:
@@ -163,5 +174,11 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
                 return l;
 
         return null;
+    }
+
+    private void updateSet() {
+        layerSet.clear();
+        for(Layer l : stack)
+            layerSet.add(l.getTitle());
     }
 }
