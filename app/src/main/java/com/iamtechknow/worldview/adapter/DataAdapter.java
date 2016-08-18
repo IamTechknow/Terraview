@@ -57,13 +57,6 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
             text = (TextView) itemView.findViewById(R.id.layer_text);
             subtitle = (TextView) itemView.findViewById(R.id.layer_sub); //these two non-null for layer tab items
             icon = (ImageView) itemView.findViewById(R.id.layer_info);
-            if(icon != null)
-                icon.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        _rxBus.send(new TapEvent(LOAD_HTML, null, "CorrectedReflectance", "modis"));
-                    }
-                });
         }
 
         /**
@@ -94,7 +87,6 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
                 default: //Measurement
                     _rxBus.send(new TapEvent(LAYER_TAB, null, mItems.get(getAdapterPosition()), null));
             }
-
         }
     }
 
@@ -117,8 +109,15 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
         holder.text.setText(mItems.get(position));
         if(holder.subtitle != null) { //if item in layer tab, show subtitle
             Layer l = searchLayer(mItems.get(position));
-            if(l != null)
+            if(l != null) {
                 holder.subtitle.setText(l.getSubtitle());
+                holder.icon.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        _rxBus.send(new TapEvent(LOAD_HTML, null, l.getDescription(), null));
+                    }
+                });
+            }
         }
 
         if(mode == ARG_LAYER)

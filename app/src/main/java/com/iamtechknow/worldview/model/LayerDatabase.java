@@ -16,7 +16,7 @@ public class LayerDatabase extends SQLiteOpenHelper {
     private static final String DB_NAME = "layers.sqlite", TABLE_LAYER = "layer",
             COL_LAYER_TITLE = "title", COL_LAYER_FORMAT = "format", COL_LAYER_MATRIX = "matrix",
             COL_LAYER_SUBTITLE = "subtitle", COL_LAYER_START = "start", COL_LAYER_END = "end",
-            COL_LAYER_ISBASE = "isbase", COL_LAYER_ID = "identifier";
+            COL_LAYER_ISBASE = "isbase", COL_LAYER_ID = "identifier", COL_LAYER_DESC = "desc";
 
     private static LayerDatabase mInstance = null; //Ensure only one instance in app lifecycle
 
@@ -42,7 +42,7 @@ public class LayerDatabase extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         //create the "layer" table, each entry corresponds to POJO field
-        db.execSQL("create table " + TABLE_LAYER + " ( title text, subtitle text, identifier text, format text, matrix text, start text, end text, isbase integer)");
+        db.execSQL("create table " + TABLE_LAYER + " ( title text, subtitle text, identifier text, format text, matrix text, start text, end text, desc text, isbase integer)");
 
         //Tables with the same format, contains a key string and value concatenated string
         db.execSQL("create table " + TABLE_CAT + " ( key text, value text)");
@@ -61,9 +61,9 @@ public class LayerDatabase extends SQLiteOpenHelper {
     public void insertLayers(ArrayList<Layer> layers) {
         SQLiteDatabase DB = getWritableDatabase();
         DB.beginTransaction();
-        SQLiteStatement st = DB.compileStatement("insert into " + TABLE_LAYER + " (title, subtitle, identifier, format, matrix, start, end, isbase) values (?, ?, ?, ?, ?, ?, ?, ?);");
+        SQLiteStatement st = DB.compileStatement("insert into " + TABLE_LAYER + " (title, subtitle, identifier, format, matrix, start, end, desc, isbase) values (?, ?, ?, ?, ?, ?, ?, ?, ?);");
         for(Layer l: layers)
-            insertLayer(l.getTitle(), l.getSubtitle(), l.getIdentifier(), l.getFormat(), l.getTileMatrixSet(), l.getStartDateRaw(), l.getEndDateRaw(), l.isBaseLayer(), st);
+            insertLayer(l.getTitle(), l.getSubtitle(), l.getIdentifier(), l.getFormat(), l.getTileMatrixSet(), l.getStartDateRaw(), l.getEndDateRaw(), l.getDescription(), l.isBaseLayer(), st);
         DB.setTransactionSuccessful();
         DB.endTransaction();
     }
@@ -76,11 +76,12 @@ public class LayerDatabase extends SQLiteOpenHelper {
      * @param identifier The layer's identifier (not always title)
      * @param start The layer's start date in ISO format
      * @param end The layer's end date in ISO format
+     * @param desc The layer's metadata web page
      * @param format The layer's image format
      * @param matrix The layer's tile matrix set
      * @param st the statement to bind data with
      */
-    private void insertLayer(String title, String subtitle, String identifier, String format, String matrix, String start, String end, boolean isBase, SQLiteStatement st) {
+    private void insertLayer(String title, String subtitle, String identifier, String format, String matrix, String start, String end, String desc, boolean isBase, SQLiteStatement st) {
         st.bindString(1, title);
         if(subtitle != null)
             st.bindString(2, subtitle);
@@ -91,7 +92,9 @@ public class LayerDatabase extends SQLiteOpenHelper {
             st.bindString(6, start);
         if(end != null)
             st.bindString(7, end);
-        st.bindLong(8, (isBase ? 1 : 0));
+        if(desc != null)
+            st.bindString(8, desc);
+        st.bindLong(9, (isBase ? 1 : 0));
 
         st.executeInsert(); //returns the entry ID (unused)
         st.clearBindings();
@@ -148,9 +151,10 @@ public class LayerDatabase extends SQLiteOpenHelper {
                     format = c.getString(c.getColumnIndex(COL_LAYER_FORMAT)), title = c.getString(c.getColumnIndex(COL_LAYER_TITLE)),
                     subtitle = c.getString(c.getColumnIndex(COL_LAYER_SUBTITLE)),
                     end = c.isNull(c.getColumnIndex(COL_LAYER_END)) ? null : c.getString(c.getColumnIndex(COL_LAYER_END)),
-                    start = c.isNull(c.getColumnIndex(COL_LAYER_START)) ? null : c.getString(c.getColumnIndex(COL_LAYER_START));
+                    start = c.isNull(c.getColumnIndex(COL_LAYER_START)) ? null : c.getString(c.getColumnIndex(COL_LAYER_START)),
+                    desc = c.isNull(c.getColumnIndex(COL_LAYER_DESC)) ? null : c.getString(c.getColumnIndex(COL_LAYER_DESC));
             boolean isBase = c.getLong(c.getColumnIndex(COL_LAYER_ISBASE)) != 0;
-            Layer l = new Layer(id, matrix, format, title, subtitle, end, start, isBase);
+            Layer l = new Layer(id, matrix, format, title, subtitle, end, start, desc, isBase);
             a.add(l);
             c.moveToNext();
         }

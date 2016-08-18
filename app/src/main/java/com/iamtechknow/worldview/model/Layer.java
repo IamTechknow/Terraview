@@ -21,7 +21,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
     public static final String URLtemplate = "http://gibs.earthdata.nasa.gov/wmts/epsg3857/best/%s/default/%s/%s/";
 
     //Fields for XML tags that are stored to database
-    private String identifier, tileMatrixSet, format, title, subtitle, endDate, startDate;
+    private String identifier, tileMatrixSet, format, title, subtitle, endDate, startDate, description;
     private boolean isBaseLayer;
 
     //ISO 8601 date format
@@ -29,7 +29,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
 
     public Layer() {}
 
-    public Layer(String _identifier, String matrixSet, String _format, String _title, String sub, String end, String start, boolean isBase) {
+    public Layer(String _identifier, String matrixSet, String _format, String _title, String sub, String end, String start, String _description, boolean isBase) {
         identifier = _identifier;
         tileMatrixSet = matrixSet;
         format = _format;
@@ -37,6 +37,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
         subtitle = sub;
         endDate = end;
         startDate = start;
+        description = _description;
         isBaseLayer = isBase;
     }
 
@@ -48,6 +49,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
         subtitle = in.readString();
         endDate = in.readString();
         startDate = in.readString();
+        description = in.readString();
         isBaseLayer = in.readByte() != 0;
     }
 
@@ -135,6 +137,14 @@ public class Layer implements Parcelable, Comparable<Layer> {
         return startDate;
     }
 
+    public void setDescription(String _description) {
+        description = _description;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
     /**
      * Formats a string with layer data and specified date to be used for a tile provider
      * A date is needed even when a layer does not have a time interval, in which it is unused
@@ -174,6 +184,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
         dest.writeString(subtitle);
         dest.writeString(endDate);
         dest.writeString(startDate);
+        dest.writeString(description);
         dest.writeByte((byte) (isBaseLayer ? 1 : 0));
     }
 

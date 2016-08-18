@@ -137,7 +137,7 @@ public class LayerActivity extends AppCompatActivity {
 
                             case LOAD_HTML:
                                 TapEvent e = (TapEvent) event;
-                                useRetrofit(e.getCategory(), e.getMeasurement());
+                                useRetrofit(e.getMeasurement());
 
                             default: //layer queue
                                 result.add(((TapEvent) event).getLayer());
@@ -193,9 +193,13 @@ public class LayerActivity extends AppCompatActivity {
         }
     }
 
-    private void useRetrofit(String cat, String layer) {
+    private void useRetrofit(String description) {
+        if(description == null)
+            return;
+
         MetadataAPI api = retrofit.create(MetadataAPI.class);
-        final Call<ResponseBody> result = api.fetchData(cat, layer);
+        String[] temp = description.split("/"); //must split data for URL to work
+        final Call<ResponseBody> result = api.fetchData(temp[0], temp[1]);
         Subscription sub = Observable.just(true).map(new Func1<Boolean, Response<ResponseBody> >() {
             @Override
             public Response<ResponseBody> call(Boolean aBoolean) {

@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -17,12 +18,15 @@ public class WVJsonParser {
     private BufferedReader b;
 
     //Primary data structures, Measurements contain layer names, Categories contain measurements
+    //The hash table is to map layers with their metadata URL descriptions
     private TreeMap<String, ArrayList<String>> measurement_map, category_map;
+    private Hashtable<String, String> desc_map;
 
     public WVJsonParser(InputStream is) {
         b = new BufferedReader(new InputStreamReader(is));
         category_map = new TreeMap<>();
         measurement_map = new TreeMap<>();
+        desc_map = new Hashtable<>();
     }
 
     /**
@@ -67,10 +71,12 @@ public class WVJsonParser {
             //Get each key for the sources
             ArrayList<String> sources = getKeys(measureSources), measurement_layers = new ArrayList<>();
 
-            for(String source : sources) { //iterate thru each source (GPM/GPI, MODIS, etc)
-                JsonArray settings = measureSources.getAsJsonObject(source).getAsJsonArray("settings");
-                for(JsonElement e : settings) //Now we can access the layer names to put in the list and map
+            for(String source_name : sources) { //iterate thru each source (GPM/GPI, MODIS, etc)
+                JsonObject source = measureSources.getAsJsonObject(source_name);
+                for(JsonElement e : source.getAsJsonArray("settings")) { //Now we can access the layer names to put in the list and map
                     measurement_layers.add(e.getAsString());
+                    desc_map.put(e.getAsString(), source.get("description").getAsString());
+                }
             }
             Collections.sort(measurement_layers); //To display measurements in order
             measurements.put(measure, measurement_layers); //List is complete here
@@ -121,6 +127,9 @@ public class WVJsonParser {
                 layer.setSubtitle(subtitle);
                 layer.setStartDate(startDate);
                 layer.setEndDate(endDate);
+
+                if(desc_map.containsKey(layer.getIdentifier()))
+                    layer.setDescription(desc_map.get(layer.getIdentifier()));
             } catch(NullPointerException e) { //Gracefully deal with bad input
                 Log.w(getClass().getSimpleName(), "Unable to access layer metadata, skipping: " + layer.getIdentifier());
                 layer.setTitle(layer.getIdentifier());
