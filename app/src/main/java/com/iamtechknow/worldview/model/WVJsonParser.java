@@ -100,11 +100,14 @@ public class WVJsonParser {
 
     private void fillLayers(ArrayList<Layer> list, JsonObject layer_json) {
         //By now we have the identifiers for all the Layers we could use to display on Google Maps
-        //Not all layers supported on Worldview have support for GMaps. Now we go through each identifier
+        //Layers not found in both XML and JSON metadata are deleted for now
+        ArrayList<Layer> toDelete = new ArrayList<>();
 
         for(Layer layer : list) {
-            try {
-                JsonObject jsonLayer = layer_json.get(layer.getIdentifier()).getAsJsonObject();
+            JsonElement element = layer_json.get(layer.getIdentifier());
+
+            if(element != null) {
+                JsonObject jsonLayer = element.getAsJsonObject();
                 JsonPrimitive subPrimitive, startPrimitive, endPrimitive;
                 String subtitle = null, endDate = null, startDate = null;
                 boolean isBaseLayer;
@@ -130,12 +133,12 @@ public class WVJsonParser {
 
                 if(desc_map.containsKey(layer.getIdentifier()))
                     layer.setDescription(desc_map.get(layer.getIdentifier()));
-            } catch(NullPointerException e) { //Gracefully deal with bad input
-                Log.w(getClass().getSimpleName(), "Unable to access layer metadata, skipping: " + layer.getIdentifier());
-                layer.setTitle(layer.getIdentifier());
-                layer.setBaseLayer(false);
+            } else {
+                Log.i(getClass().getSimpleName(), layer.getIdentifier() + " not found, deleting");
+                toDelete.add(layer);
             }
         }
+        list.removeAll(toDelete);
         Collections.sort(list);
     }
 

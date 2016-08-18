@@ -50,7 +50,7 @@ import java.util.Locale;
 public class WorldActivity extends AppCompatActivity implements OnMapReadyCallback, LoaderManager.LoaderCallbacks<DataWrapper>,
         NavigationView.OnNavigationItemSelectedListener, DragAndHideListener {
     public static final String XML_METADATA = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml",
-                               JSON_METADATA = "https://worldview.sit.earthdata.nasa.gov/config/wv.json",
+                               JSON_METADATA = "https://worldview.earthdata.nasa.gov/config/wv.json",
                                RESULT_LIST = "list";
     public static final int TILE_SIZE = 256, DOWNLOAD_CODE = 0, LAYER_CODE = 1, SECONDS_PER_DAY = 24*60*60*1000;
     public static final float Z_OFFSET = 5.0f, BASE_Z_OFFSET = -50.0f; //base layers cannot cover overlays
