@@ -315,8 +315,8 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
      * Show the VIIRS Corrected Reflectance (True Color) overlay for today and coastlines
      */
     public void showDefaultTiles() {
-        Layer l = new Layer("VIIRS_SNPP_CorrectedReflectance_TrueColor", "GoogleMapsCompatible_Level9", "jpg", "Corrected Reflectance (True Color)", "Suomi NPP / VIIRS", null, "2015-11-24", null, true),
-                coastline = new Layer("Coastlines", "GoogleMapsCompatible_Level9", "png", "Coastlines", "OpenStreetMaps", null, null, null, false);
+        Layer l = new Layer("VIIRS_SNPP_CorrectedReflectance_TrueColor", "GoogleMapsCompatible_Level9", "jpg", "Corrected Reflectance (True Color, VIIRS, SNPP)", "Suomi NPP / VIIRS", null, "2015-11-24", null, true),
+                coastline = new Layer("Coastlines", "GoogleMapsCompatible_Level9", "png", "Coastlines (OSM)", "OpenStreetMaps", null, null, null, false);
         layer_stack.add(coastline);
         layer_stack.add(l);
         mItemAdapter.insertList(layer_stack);
