@@ -17,7 +17,7 @@ import android.webkit.WebView;
 import com.iamtechknow.worldview.R;
 
 public class Utils {
-    private static final String HTML_EXTRA = "html";
+    private static final String HTML_EXTRA = "html", ABOUT_TAG = "dialog_about";
 
     /**
      * Helper method to determine whether or not there is internet access
@@ -41,7 +41,7 @@ public class Utils {
     public static void showWebPage(Activity activity, String html) {
         FragmentManager fm = activity.getFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
-        Fragment prev = fm.findFragmentByTag("dialog_about");
+        Fragment prev = fm.findFragmentByTag(ABOUT_TAG);
         Bundle extra1 = new Bundle();
         extra1.putString(HTML_EXTRA, html);
         if (prev != null)
@@ -51,7 +51,7 @@ public class Utils {
 
         AboutDialog about = new AboutDialog();
         about.setArguments(extra1);
-        about.show(ft, "dialog_about");
+        about.show(ft, ABOUT_TAG);
     }
 
     public static class AboutDialog extends DialogFragment {
