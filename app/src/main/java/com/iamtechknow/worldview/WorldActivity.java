@@ -164,6 +164,7 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setMaxZoomPreference(9.0f);
 
         showDefaultTiles();
 
