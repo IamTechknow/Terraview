@@ -193,7 +193,7 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
             mItemAdapter.insertList(layer_stack);
             removeAllTileOverlays();
             for(Layer l: layer_stack)
-                addTileOverlay(l, false);
+                addTileOverlay(l);
             initZOffsets();
         }
     }
@@ -224,7 +224,7 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
             currentDate = c.getTime();
             removeAllTileOverlays();
             for(Layer l: layer_stack)
-                addTileOverlay(l, false);
+                addTileOverlay(l);
             initZOffsets();
         }
     };
@@ -274,7 +274,7 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
         }
     }
 
-    public void addTileOverlay(final Layer layer, boolean removeLayer) {
+    public void addTileOverlay(final Layer layer) {
         //Make a tile overlay
         UrlTileProvider provider = new UrlTileProvider(TILE_SIZE, TILE_SIZE) {
             @Override
@@ -292,18 +292,7 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
             }
         };
 
-        if(removeLayer)
-            removeTileOverlay();
-
         mCurrLayers.add(mMap.addTileOverlay(new TileOverlayOptions().tileProvider(provider)));
-    }
-
-    //Remove the most recent map tile
-    public void removeTileOverlay() {
-        if(mCurrLayers.size() > 0) {
-            mCurrLayers.get(mCurrLayers.size() - 1).remove();
-            mCurrLayers.remove(mCurrLayers.size() - 1);
-        }
     }
 
     //Remove all tile overlays, used to replace with new set
@@ -324,8 +313,8 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
         layer_stack.add(l);
         mItemAdapter.insertList(layer_stack);
 
-        addTileOverlay(coastline, false);
-        addTileOverlay(l, false);
+        addTileOverlay(coastline);
+        addTileOverlay(l);
         initZOffsets();
     }
 
