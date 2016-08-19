@@ -47,14 +47,14 @@ dependencies {
         exclude group: 'com.android.support', module: 'design'
         exclude module: 'recyclerview-v7'
     }
-    androidTestCompile 'com.android.support:support-annotations:24.1.1'
+    androidTestCompile 'com.android.support:support-annotations:24.2.0'
     androidTestCompile "com.android.support.test:runner:0.5"
     androidTestCompile "com.android.support.test:rules:0.5"
 
-    compile 'com.android.support:appcompat-v7:24.1.1'
-    compile 'com.android.support:support-v4:24.1.1'
-    compile 'com.android.support:design:24.1.1'
-    compile 'com.android.support:recyclerview-v7:24.1.1'
+    compile 'com.android.support:appcompat-v7:24.2.0'
+    compile 'com.android.support:support-v4:24.2.0'
+    compile 'com.android.support:design:24.2.0'
+    compile 'com.android.support:recyclerview-v7:24.2.0'
     compile 'com.google.android.gms:play-services-maps:9.4.0'
     compile 'com.google.code.gson:gson:2.7'
 
