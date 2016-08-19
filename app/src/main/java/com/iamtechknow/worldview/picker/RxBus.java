@@ -1,4 +1,4 @@
-package com.iamtechknow.worldview;
+package com.iamtechknow.worldview.picker;
 
 import rx.Observable;
 import rx.subjects.PublishSubject;

@@ -18,7 +18,7 @@
             android:name="com.google.android.gms.maps.MapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:context="com.iamtechknow.worldview.WorldActivity" />
+            tools:context="com.iamtechknow.worldview.map.WorldActivity" />
     </android.support.design.widget.CoordinatorLayout>
     <!-- Nav view for selecting layers -->
     <include layout="@layout/nav_left" />

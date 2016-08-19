@@ -1,4 +1,4 @@
-package com.iamtechknow.worldview;
+package com.iamtechknow.worldview.picker;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,8 +12,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
+import com.iamtechknow.worldview.R;
+import com.iamtechknow.worldview.model.TapEvent;
 import com.iamtechknow.worldview.api.MetadataAPI;
-import com.iamtechknow.worldview.fragment.LayerPageFragment;
+import com.iamtechknow.worldview.map.WorldActivity;
 import com.iamtechknow.worldview.model.Layer;
 import com.iamtechknow.worldview.util.Utils;
 

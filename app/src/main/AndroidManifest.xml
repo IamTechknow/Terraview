@@ -24,7 +24,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".WorldActivity"
+            android:name=".map.WorldActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop">
             <intent-filter>
@@ -34,12 +34,12 @@
         </activity>
 
         <activity
-            android:name=".LayerActivity"
+            android:name=".picker.LayerActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.Tabs"
             android:launchMode="singleTop">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
-                android:value=".WorldActivity" />
+                android:value=".map.WorldActivity" />
         </activity>
         <service android:name=".DownloadService" />
     </application>

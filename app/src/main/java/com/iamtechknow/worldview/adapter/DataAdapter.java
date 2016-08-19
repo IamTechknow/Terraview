@@ -9,12 +9,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.iamtechknow.worldview.R;
-import com.iamtechknow.worldview.RxBus;
-import com.iamtechknow.worldview.TapEvent;
+import com.iamtechknow.worldview.picker.RxBus;
+import com.iamtechknow.worldview.model.TapEvent;
 import com.iamtechknow.worldview.model.Layer;
 
-import static com.iamtechknow.worldview.fragment.LayerPageFragment.*;
-import static com.iamtechknow.worldview.LayerActivity.*;
+import static com.iamtechknow.worldview.picker.LayerPageFragment.*;
+import static com.iamtechknow.worldview.picker.LayerActivity.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;

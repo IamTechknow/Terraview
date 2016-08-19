@@ -1,6 +1,5 @@
 package com.iamtechknow.worldview.picker;
 
-import com.iamtechknow.worldview.RxBus;
 import com.iamtechknow.worldview.model.Layer;
 
 import java.util.ArrayList;

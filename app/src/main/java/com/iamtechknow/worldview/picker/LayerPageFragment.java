@@ -1,4 +1,4 @@
-package com.iamtechknow.worldview.fragment;
+package com.iamtechknow.worldview.picker;
 
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -11,10 +11,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.iamtechknow.worldview.LayerActivity;
+import com.iamtechknow.worldview.picker.LayerActivity;
 import com.iamtechknow.worldview.R;
-import com.iamtechknow.worldview.RxBus;
-import com.iamtechknow.worldview.TapEvent;
+import com.iamtechknow.worldview.picker.RxBus;
+import com.iamtechknow.worldview.model.TapEvent;
 import com.iamtechknow.worldview.adapter.*;
 import com.iamtechknow.worldview.model.DataWrapper;
 import com.iamtechknow.worldview.model.Layer;

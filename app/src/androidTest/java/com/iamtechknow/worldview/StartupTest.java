@@ -11,6 +11,7 @@ import android.support.test.runner.AndroidJUnit4;
 import android.support.v4.view.GravityCompat;
 
 import com.dannyroa.espresso_samples.recyclerview.RecyclerViewMatcher;
+import com.iamtechknow.worldview.map.WorldActivity;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;

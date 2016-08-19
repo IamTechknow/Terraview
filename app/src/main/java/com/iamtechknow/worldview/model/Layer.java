@@ -5,7 +5,7 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.iamtechknow.worldview.WorldActivity;
+import com.iamtechknow.worldview.map.WorldActivity;
 
 import java.text.DateFormat;
 import java.text.ParseException;

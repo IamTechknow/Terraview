@@ -1,4 +1,4 @@
-package com.iamtechknow.worldview;
+package com.iamtechknow.worldview.model;
 
 import com.iamtechknow.worldview.model.Layer;
 

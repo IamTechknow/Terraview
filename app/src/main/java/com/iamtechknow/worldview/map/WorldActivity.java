@@ -1,4 +1,4 @@
-package com.iamtechknow.worldview;
+package com.iamtechknow.worldview.map;
 
 import android.app.ActionBar;
 import android.app.DatePickerDialog;
@@ -32,6 +32,9 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.UrlTileProvider;
+import com.iamtechknow.worldview.DownloadService;
+import com.iamtechknow.worldview.picker.LayerActivity;
+import com.iamtechknow.worldview.R;
 import com.iamtechknow.worldview.adapter.CurrLayerAdapter;
 import com.iamtechknow.worldview.adapter.ItemTouchHelperCallback;
 import com.iamtechknow.worldview.adapter.DragAndHideListener;
