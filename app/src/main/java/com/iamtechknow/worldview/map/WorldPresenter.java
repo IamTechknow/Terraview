@@ -1,5 +1,8 @@
 package com.iamtechknow.worldview.map;
 
+import android.content.Context;
+import android.support.v4.app.LoaderManager;
+
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
@@ -63,8 +66,14 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     }
 
     @Override
-    public void getData(boolean needInternet) {
-        dataSource = needInternet ? new RemoteDataSource() : new LocalDataSource();
+    public void getLocalData(LoaderManager manager, Context c) {
+        dataSource = new LocalDataSource(manager, c);
+        dataSource.loadData(this);
+    }
+
+    @Override
+    public void getRemoteData(Context c) {
+        dataSource = new RemoteDataSource(c);
         dataSource.loadData(this);
     }
 

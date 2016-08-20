@@ -1,5 +1,8 @@
 package com.iamtechknow.worldview.map;
 
+import android.content.Context;
+import android.support.v4.app.LoaderManager;
+
 import com.google.android.gms.maps.GoogleMap;
 import com.iamtechknow.worldview.model.Layer;
 
@@ -12,7 +15,9 @@ public interface MapPresenter {
 
     void onDateChanged(Date date);
 
-    void getData(boolean needInternet);
+    void getRemoteData(Context c);
+
+    void getLocalData(LoaderManager manager, Context c);
 
     void setLayersAndUpdateMap(ArrayList<Layer> stack);
 

@@ -27,7 +27,6 @@ import android.widget.Toolbar;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.iamtechknow.worldview.DownloadService;
 import com.iamtechknow.worldview.picker.LayerActivity;
 import com.iamtechknow.worldview.R;
 import com.iamtechknow.worldview.adapter.CurrLayerAdapter;
@@ -41,10 +40,8 @@ import java.util.Calendar;
 
 public class WorldActivity extends AppCompatActivity implements MapView, OnMapReadyCallback,
         NavigationView.OnNavigationItemSelectedListener, DragAndHideListener {
-    public static final String XML_METADATA = "http://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml",
-                               JSON_METADATA = "https://worldview.earthdata.nasa.gov/config/wv.json",
-                               RESULT_LIST = "list";
-    public static final int DOWNLOAD_CODE = 0, LAYER_CODE = 1, SECONDS_PER_DAY = 24*60*60*1000;
+    public static final String RESULT_LIST = "list", PREFS_FILE = "settings", PREFS_DB_KEY = "have_db";
+    public static final int LAYER_CODE = 1, SECONDS_PER_DAY = 24*60*60*1000;
 
     //UI fields
     private DrawerLayout mDrawerLayout;
@@ -137,11 +134,11 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        if(getSharedPreferences(DownloadService.PREFS_FILE, MODE_PRIVATE).getBoolean(DownloadService.PREFS_DB_KEY, false))
-            mapPresenter.getData(false);
+        if(getSharedPreferences(PREFS_FILE, MODE_PRIVATE).getBoolean(PREFS_DB_KEY, false))
+            mapPresenter.getLocalData(getSupportLoaderManager(), this);
         else { //Check internet access to get layer data or set up receiver
             if(Utils.isOnline(this))
-                mapPresenter.getData(true);
+                mapPresenter.getRemoteData(this);
             else {
                 Snackbar.make(mCoordinatorLayout, R.string.internet, Snackbar.LENGTH_LONG).show();
                 IntentFilter filter = new IntentFilter();
@@ -201,11 +198,9 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     BroadcastReceiver connectReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-                if(Utils.isOnline(context)) {
-                    mapPresenter.getData(true);
-                    unregisterReceiver(connectReceiver);
-                }
+            if(intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION) && Utils.isOnline(context)) {
+                mapPresenter.getRemoteData(context);
+                unregisterReceiver(connectReceiver);
             }
         }
     };

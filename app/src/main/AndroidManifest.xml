@@ -41,7 +41,6 @@
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value=".map.WorldActivity" />
         </activity>
-        <service android:name=".DownloadService" />
     </application>
 
 </manifest>
