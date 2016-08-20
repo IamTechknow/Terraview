@@ -7,21 +7,20 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public interface MapPresenter {
-    void onResume();
 
-    void onDestroy();
-
-    void onMapLoaded(GoogleMap gmaps); //TODO: Fetch data here then insert tile overlays
+    void onMapReady(GoogleMap gmaps); //TODO: Fetch data here then insert tile overlays
 
     void onDateChanged(Date date);
 
-    void onConnectionAvailable();
+    void getData(boolean needInternet);
 
-    void setLayersAndUpdateMap(ArrayList<Layer> stack); //TODO: Replace stack, replace tiles (private), init z-offsets (private method)
+    void setLayersAndUpdateMap(ArrayList<Layer> stack);
 
-    void swapLayerPositions(int i, int i_new); //TODO: Next three are responses to recyclerview gestures
+    void onSwapNeeded(int i, int i_new);
 
-    void toggleLayer(Layer l, boolean hide);
+    void onToggleLayer(Layer l, boolean hide);
 
-    void deleteLayer(int position);
+    void onLayerSwiped(int position);
+
+    ArrayList<Layer> getCurrLayerStack();
 }
