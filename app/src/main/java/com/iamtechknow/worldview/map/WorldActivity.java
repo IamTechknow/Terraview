@@ -213,4 +213,9 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         mDateDialog = new DatePickerDialog(this, mDateListener, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
         mDateDialog.getDatePicker().setMaxDate(maxDate + SECONDS_PER_DAY); //HACK: Increase max date to select current day
     }
+
+    @Override
+    public void setLayerList(ArrayList<Layer> stack) {
+        mItemAdapter.insertList(stack);
+    }
 }

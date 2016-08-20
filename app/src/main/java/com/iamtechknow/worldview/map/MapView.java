@@ -9,4 +9,6 @@ import java.util.ArrayList;
  */
 public interface MapView {
     void setDateDialog(long maxDate);
+
+    void setLayerList(ArrayList<Layer> stack);
 }

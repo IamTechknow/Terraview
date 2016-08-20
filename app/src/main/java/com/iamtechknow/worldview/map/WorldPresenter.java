@@ -90,6 +90,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     @Override
     public void setLayersAndUpdateMap(ArrayList<Layer> stack) {
         layer_stack = stack;
+        mapView.setLayerList(layer_stack);
         removeAllTileOverlays();
         for(Layer l: layer_stack)
             addTileOverlay(l);
@@ -152,6 +153,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         addTileOverlay(coastline);
         addTileOverlay(l);
         initZOffsets();
+        mapView.setLayerList(layer_stack);
     }
 
     private void addTileOverlay(final Layer layer) {
