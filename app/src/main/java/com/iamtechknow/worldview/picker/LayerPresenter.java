@@ -1,9 +1,11 @@
 package com.iamtechknow.worldview.picker;
 
+import android.content.Context;
+import android.support.v4.app.LoaderManager;
+
 import com.iamtechknow.worldview.model.Layer;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
 /**
  * Presenter for the layer tab of the picker activity.
@@ -15,11 +17,17 @@ public interface LayerPresenter {
 
     void useRetrofit(String description);
 
-    void updateSelectedItems(HashSet<String> set);
+    void updateSelectedItems(ArrayList<String> items);
 
-    void setItemChecked(int position, boolean isSelected); //TODO: these two may be called by data adapter
+    void setItemChecked(int position, boolean isSelected);
 
     boolean isItemChecked(int position);
 
-    Layer searchLayer(int pos);
+    Layer searchLayerById(String id);
+
+    Layer searchLayerByTitle(String title);
+
+    void getData(LoaderManager manager, Context c);
+
+    void changeStack(Layer l, boolean queue);
 }

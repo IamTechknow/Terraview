@@ -1,5 +1,8 @@
 package com.iamtechknow.worldview.picker;
 
+import android.content.Context;
+import android.support.v4.app.LoaderManager;
+
 import java.util.ArrayList;
 import java.util.TreeMap;
 
@@ -12,5 +15,7 @@ import java.util.TreeMap;
 public interface NonLayerPresenter {
     void onStart();
 
-    TreeMap<String, ArrayList<String>> getData(int type);
+    TreeMap<String, ArrayList<String>> getMap(int type);
+
+    void getData(LoaderManager manager, Context c);
 }

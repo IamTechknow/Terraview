@@ -47,11 +47,11 @@ public class LayerActivity extends AppCompatActivity {
 		//Create arguments for each fragments which will be used when they're created
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
         Adapter adapter = new Adapter(getSupportFragmentManager());
-        LayerPageFragment frag1 = new LayerPageFragment(), frag2 = new LayerPageFragment(), frag3 = new LayerPageFragment();
+        LayerPageFragment frag1 = new LayerPageFragment(), frag2 = new LayerPageFragment();
+        LayerFragment frag3 = new LayerFragment();
         Bundle extra1 = new Bundle(), extra2 = new Bundle(), extra3 = new Bundle();
         extra1.putInt(LayerPageFragment.EXTRA_ARG, LayerPageFragment.ARG_CAT);
         extra2.putInt(LayerPageFragment.EXTRA_ARG, LayerPageFragment.ARG_MEASURE);
-        extra3.putInt(LayerPageFragment.EXTRA_ARG, LayerPageFragment.ARG_LAYER);
         frag1.setArguments(extra1);
         frag2.setArguments(extra2);
 
@@ -107,17 +107,6 @@ public class LayerActivity extends AppCompatActivity {
 
                             case MEASURE_TAB:
                                 mTabLayout.getTabAt(LayerPageFragment.ARG_MEASURE).select();
-                                break;
-
-                            case LAYER_DEQUE:
-                                result.remove(((TapEvent) event).getLayer());
-                                break;
-
-                            case LOAD_HTML: //TODO call retrofit method at DataAdapter
-                                TapEvent e = (TapEvent) event;
-
-                            default: //layer queue
-                                result.add(((TapEvent) event).getLayer());
                                 break;
                         }
                 }

@@ -1,7 +1,12 @@
 package com.iamtechknow.worldview.picker;
 
+import android.content.Context;
+import android.support.v4.app.LoaderManager;
+import android.util.SparseBooleanArray;
+
 import com.iamtechknow.worldview.api.MetadataAPI;
 import com.iamtechknow.worldview.data.DataSource;
+import com.iamtechknow.worldview.data.LocalDataSource;
 import com.iamtechknow.worldview.model.Layer;
 
 import java.io.IOException;
@@ -18,21 +23,34 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
-public class LayerPresenterImpl implements LayerPresenter {
+public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallback {
     private static final String BASE_URL = "https://worldview.earthdata.nasa.gov/";
 
     private LayerView view;
-    private DataSource data;
     private Retrofit retrofit;
 
-    public LayerPresenterImpl(LayerView _view) {
+    private DataSource dataSource;
+
+    //Manage the item positions that should be highlighted
+    private SparseBooleanArray mSelectedPositions;
+
+    //List for layers to be displayed handled as a stack
+    private ArrayList<Layer> stack;
+
+    //HashSet to keep track of selected elements from stack
+    private HashSet<String> titleSet;
+
+    public LayerPresenterImpl(LayerView _view, ArrayList<Layer> list) {
         view = _view;
+        stack = list;
         retrofit = new Retrofit.Builder().baseUrl(BASE_URL).build();
+        mSelectedPositions = new SparseBooleanArray();
+        titleSet = new HashSet<>();
     }
 
     @Override
     public ArrayList<Layer> getCurrStack() {
-        return null;
+        return stack;
     }
 
     @Override
@@ -75,22 +93,72 @@ public class LayerPresenterImpl implements LayerPresenter {
     }
 
     @Override
-    public void updateSelectedItems(HashSet<String> set) {
+    public void updateSelectedItems(ArrayList<String> titles) {
+        titleSet.clear();
+        for(Layer l : stack)
+            titleSet.add(l.getTitle());
 
+        mSelectedPositions.clear();
+        for (int i = 0; i < titles.size(); i++)
+            if(titleSet.contains(titles.get(i)))
+                setItemChecked(i, true);
     }
 
     @Override
     public void setItemChecked(int position, boolean isSelected) {
-
+        mSelectedPositions.put(position, isSelected);
     }
 
     @Override
     public boolean isItemChecked(int position) {
-        return false;
+        return mSelectedPositions.get(position);
     }
 
     @Override
-    public Layer searchLayer(int pos) {
+    public Layer searchLayerById(String id) {
+        if(dataSource != null) {
+            ArrayList<Layer> layers = dataSource.getLayers();
+
+            for (Layer l : layers)
+                if (l.getIdentifier().equals(id))
+                    return l;
+        }
         return null;
+    }
+
+    @Override
+    public Layer searchLayerByTitle(String title) {
+        if(dataSource != null) {
+            ArrayList<Layer> layers = dataSource.getLayers();
+
+            for (Layer l : layers)
+                if (l.getTitle().equals(title))
+                    return l;
+        }
+        return null;
+    }
+
+    @Override
+    public void getData(LoaderManager manager, Context c) {
+        dataSource = new LocalDataSource(manager, c);
+        dataSource.loadData(this);
+    }
+
+    @Override
+    public void changeStack(Layer l, boolean queue) {
+        if(queue)
+            stack.add(l);
+        else
+            stack.remove(l);
+    }
+
+    @Override
+    public void onDataLoaded() {
+        view.populateList(dataSource.getLayers());
+    }
+
+    @Override
+    public void onDataNotAvailable() {
+
     }
 }

@@ -10,31 +10,31 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.iamtechknow.worldview.R;
-import com.iamtechknow.worldview.adapter.DataAdapter;
+import com.iamtechknow.worldview.adapter.LayerDataAdapter;
 import com.iamtechknow.worldview.model.Layer;
 import com.iamtechknow.worldview.util.Utils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
 public class LayerFragment extends Fragment implements LayerView {
     private LayerPresenter presenter;
     private RxBus _rxBus;
     private RecyclerView mRecyclerView;
-    private ArrayList<Layer> layers, stack;
-
-    //HashSet to keep track of selected elements from stack
-    private HashSet<String> layerSet;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(false);
 
-        presenter = new LayerPresenterImpl(this);
-        stack = getArguments().getParcelableArrayList(LayerActivity.RESULT_STACK);
-        layerSet = new HashSet<>();
+        ArrayList<Layer> stack = getArguments().getParcelableArrayList(LayerActivity.RESULT_STACK);
+        presenter = new LayerPresenterImpl(this, stack);
         _rxBus = RxBus.getInstance();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        presenter.getData(getLoaderManager(), getActivity());
     }
 
     //Inflate the fragment view and setup the RecyclerView
@@ -45,14 +45,19 @@ public class LayerFragment extends Fragment implements LayerView {
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        DataAdapter l = new DataAdapter(_rxBus, 2);
+        LayerDataAdapter l = new LayerDataAdapter(presenter);
         mRecyclerView.setAdapter(l);
         return rootView;
     }
 
     @Override
-    public void insertList(ArrayList<String> strings) {
-
+    public void populateList(ArrayList<Layer> layers) {
+        LayerDataAdapter adapter = (LayerDataAdapter) mRecyclerView.getAdapter();
+        ArrayList<String> layer_list = new ArrayList<>();
+        for (Layer l: layers)
+            layer_list.add(l.getTitle());
+        adapter.insertList(layer_list);
+        presenter.updateSelectedItems(layer_list);
     }
 
     @Override
