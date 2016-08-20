@@ -30,14 +30,9 @@ public class LayerActivity extends AppCompatActivity {
     private TabLayout mTabLayout;
     private RxBus _rxBus;
 
-    //List for layers to be displayed handled as a stack
-    private ArrayList<Layer> result;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        //Setup tabs, view pager, fragments
         setContentView(R.layout.activity_layer);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -47,16 +42,18 @@ public class LayerActivity extends AppCompatActivity {
 		//Create arguments for each fragments which will be used when they're created
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
         Adapter adapter = new Adapter(getSupportFragmentManager());
-        LayerPageFragment frag1 = new LayerPageFragment(), frag2 = new LayerPageFragment();
+        NonLayerFragment frag1 = new NonLayerFragment(), frag2 = new NonLayerFragment();
         LayerFragment frag3 = new LayerFragment();
         Bundle extra1 = new Bundle(), extra2 = new Bundle(), extra3 = new Bundle();
-        extra1.putInt(LayerPageFragment.EXTRA_ARG, LayerPageFragment.ARG_CAT);
-        extra2.putInt(LayerPageFragment.EXTRA_ARG, LayerPageFragment.ARG_MEASURE);
+
+        extra1.putBoolean(LayerPageFragment.EXTRA_ARG, true);
+        extra2.putBoolean(LayerPageFragment.EXTRA_ARG, false);
         frag1.setArguments(extra1);
         frag2.setArguments(extra2);
 
         //Check if intent extras are received, which would be the layer data from WorldActivity
-        result = getIntent().getParcelableArrayListExtra(WorldActivity.RESULT_LIST);
+        //List for layers to be displayed handled as a stack
+        ArrayList<Layer> result = getIntent().getParcelableArrayListExtra(WorldActivity.RESULT_LIST);
         if(result != null) //if it exists, send to data adapter in layer tab
             extra3.putParcelableArrayList(RESULT_STACK, result);
         frag3.setArguments(extra3);
@@ -120,8 +117,11 @@ public class LayerActivity extends AppCompatActivity {
     }
 
     private void setResult() {
+        //Need to get a hold of the presenter first, but there is only one instance so should be okay
+        LayerPresenter presenter = LayerPresenterImpl.getInstance(null, null);
+
         Bundle b = new Bundle();
-        b.putParcelableArrayList(RESULT_STACK, result);
+        b.putParcelableArrayList(RESULT_STACK, presenter.getCurrStack());
         Intent i = new Intent().putExtras(b);
 
         setResult(RESULT_OK, i);

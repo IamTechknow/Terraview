@@ -8,7 +8,7 @@ import rx.subjects.Subject;
 public class RxBus {
 	//A subject is both an Observable and an Observer, which allows items to be emitted and observed on by subscribers
     private final Subject<Object, Object> _bus = new SerializedSubject<>(PublishSubject.create());
-    private static RxBus INSTANCE = null;
+    private static RxBus INSTANCE;
 
     /**
      * Returns the single instance of this class, creating it if necessary.
