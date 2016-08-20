@@ -13,47 +13,25 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.iamtechknow.worldview.R;
-import com.iamtechknow.worldview.model.TapEvent;
-import com.iamtechknow.worldview.api.MetadataAPI;
 import com.iamtechknow.worldview.map.WorldActivity;
 import com.iamtechknow.worldview.model.Layer;
-import com.iamtechknow.worldview.util.Utils;
+import com.iamtechknow.worldview.model.TapEvent;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import rx.Observable;
-import rx.Observer;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 
 public class LayerActivity extends AppCompatActivity {
     //Constants for RxBus events and Intent
     public static final int LAYER_QUEUE = 0, MEASURE_TAB = 1, LAYER_TAB = 2, LAYER_DEQUE = 3, LOAD_HTML = 4;
-    public static final String RESULT_STACK = "result", BASE_URL = "https://worldview.earthdata.nasa.gov/";
+    public static final String RESULT_STACK = "result";
 
     //UI handling
     private TabLayout mTabLayout;
     private RxBus _rxBus;
-    private Retrofit retrofit;
 
     //List for layers to be displayed handled as a stack
     private ArrayList<Layer> result;
-
-    // This is better done with a DI Library like Dagger
-    public RxBus getRxBusSingleton() {
-        if (_rxBus == null)
-            _rxBus = new RxBus();
-
-        return _rxBus;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,8 +69,7 @@ public class LayerActivity extends AppCompatActivity {
         mTabLayout = (TabLayout) findViewById(R.id.tabs);
         mTabLayout.setupWithViewPager(viewPager);
 
-        _rxBus = getRxBusSingleton();
-        retrofit = new Retrofit.Builder().baseUrl(BASE_URL).build();
+        _rxBus = RxBus.getInstance();
     }
 
     @Override
@@ -136,9 +113,8 @@ public class LayerActivity extends AppCompatActivity {
                                 result.remove(((TapEvent) event).getLayer());
                                 break;
 
-                            case LOAD_HTML:
+                            case LOAD_HTML: //TODO call retrofit method at DataAdapter
                                 TapEvent e = (TapEvent) event;
-                                useRetrofit(e.getMeasurement());
 
                             default: //layer queue
                                 result.add(((TapEvent) event).getLayer());
@@ -192,47 +168,5 @@ public class LayerActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             return mFragmentTitleList.get(position);
         }
-    }
-
-    private void useRetrofit(String description) {
-        if(description == null)
-            return;
-
-        MetadataAPI api = retrofit.create(MetadataAPI.class);
-        String[] temp = description.split("/"); //must split data for URL to work
-        final Call<ResponseBody> result = api.fetchData(temp[0], temp[1]);
-        Subscription sub = Observable.just(true).map(new Func1<Boolean, Response<ResponseBody> >() {
-            @Override
-            public Response<ResponseBody> call(Boolean aBoolean) {
-                Response<ResponseBody> r = null;
-                try {
-                    r = result.execute();
-                } catch(IOException e) {
-                    e.printStackTrace();
-                }
-                return r;
-            }
-        }).subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(new Observer<Response<ResponseBody>>() {
-              @Override
-              public void onCompleted() {
-                  //TODO: need to cancel sub?
-              }
-
-              @Override
-              public void onError(Throwable e) {
-
-              }
-
-              @Override
-              public void onNext(Response<ResponseBody> r) {
-                  try {
-                      Utils.showWebPage(LayerActivity.this, r.body().string());
-                  } catch (IOException e) {
-                      e.printStackTrace();
-                  }
-              }
-          });
     }
 }

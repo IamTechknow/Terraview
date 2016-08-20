@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.iamtechknow.worldview.picker.LayerActivity;
 import com.iamtechknow.worldview.R;
 import com.iamtechknow.worldview.picker.RxBus;
 import com.iamtechknow.worldview.model.TapEvent;
@@ -51,7 +50,7 @@ public class LayerPageFragment extends Fragment implements LoaderManager.LoaderC
         setHasOptionsMenu(false);
 
         mode = getArguments().getInt(EXTRA_ARG, ARG_CAT);
-        _rxBus = ((LayerActivity) getActivity()).getRxBusSingleton();
+        _rxBus = RxBus.getInstance();
 
         //For the layer tab fragment, check what layers were sent from LayerActivity
         if(mode == ARG_LAYER) {
