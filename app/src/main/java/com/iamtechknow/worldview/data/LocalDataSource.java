@@ -17,13 +17,13 @@ public class LocalDataSource implements DataSource, LoaderManager.LoaderCallback
     //Loading objects
     private LoaderManager manager;
     private LoadCallback loadCallback;
-    private Context context;
+    private LayerLoader loader;
 
     //Data
     private DataWrapper allData;
 
     public LocalDataSource(LoaderManager loadermanager, Context c) {
-        context = c;
+        loader = new LayerLoader(c);
         manager = loadermanager;
     }
 
@@ -50,16 +50,14 @@ public class LocalDataSource implements DataSource, LoaderManager.LoaderCallback
 
     @Override
     public Loader<DataWrapper> onCreateLoader(int id, Bundle args) {
-        return new LayerLoader(context);
+        return loader;
     }
 
     @Override
     public void onLoadFinished(Loader<DataWrapper> loader, DataWrapper data) {
         allData = data;
-
-        //Prevent loitering
-        context = null;
-        manager = null;
+        
+        manager = null; //Prevent loitering
 
         loadCallback.onDataLoaded();
     }
