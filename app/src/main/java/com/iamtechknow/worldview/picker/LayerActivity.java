@@ -1,4 +1,4 @@
-package com.iamtechknow.worldview;
+package com.iamtechknow.worldview.picker;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,52 +12,30 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import com.iamtechknow.worldview.api.MetadataAPI;
-import com.iamtechknow.worldview.fragment.LayerPageFragment;
+import com.iamtechknow.worldview.R;
+import com.iamtechknow.worldview.map.WorldActivity;
 import com.iamtechknow.worldview.model.Layer;
-import com.iamtechknow.worldview.util.Utils;
+import com.iamtechknow.worldview.model.TapEvent;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import rx.Observable;
-import rx.Observer;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 
 public class LayerActivity extends AppCompatActivity {
     //Constants for RxBus events and Intent
-    public static final int LAYER_QUEUE = 0, MEASURE_TAB = 1, LAYER_TAB = 2, LAYER_DEQUE = 3, LOAD_HTML = 4;
-    public static final String RESULT_STACK = "result", BASE_URL = "https://worldview.earthdata.nasa.gov/";
+    public static final int SELECT_MEASURE_TAB = 1, SELECT_LAYER_TAB = 2;
+    public static final String RESULT_STACK = "result";
 
     //UI handling
     private TabLayout mTabLayout;
     private RxBus _rxBus;
-    private Retrofit retrofit;
 
-    //List for layers to be displayed handled as a stack
+    //Reference to layer stack from map
     private ArrayList<Layer> result;
-
-    // This is better done with a DI Library like Dagger
-    public RxBus getRxBusSingleton() {
-        if (_rxBus == null)
-            _rxBus = new RxBus();
-
-        return _rxBus;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        //Setup tabs, view pager, fragments
         setContentView(R.layout.activity_layer);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -67,15 +45,17 @@ public class LayerActivity extends AppCompatActivity {
 		//Create arguments for each fragments which will be used when they're created
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
         Adapter adapter = new Adapter(getSupportFragmentManager());
-        LayerPageFragment frag1 = new LayerPageFragment(), frag2 = new LayerPageFragment(), frag3 = new LayerPageFragment();
+        NonLayerFragment frag1 = new NonLayerFragment(), frag2 = new NonLayerFragment();
+        LayerFragment frag3 = new LayerFragment();
         Bundle extra1 = new Bundle(), extra2 = new Bundle(), extra3 = new Bundle();
-        extra1.putInt(LayerPageFragment.EXTRA_ARG, LayerPageFragment.ARG_CAT);
-        extra2.putInt(LayerPageFragment.EXTRA_ARG, LayerPageFragment.ARG_MEASURE);
-        extra3.putInt(LayerPageFragment.EXTRA_ARG, LayerPageFragment.ARG_LAYER);
+
+        extra1.putBoolean(NonLayerFragment.EXTRA_ARG, true);
+        extra2.putBoolean(NonLayerFragment.EXTRA_ARG, false);
         frag1.setArguments(extra1);
         frag2.setArguments(extra2);
 
         //Check if intent extras are received, which would be the layer data from WorldActivity
+        //List for layers to be displayed handled as a stack
         result = getIntent().getParcelableArrayListExtra(WorldActivity.RESULT_LIST);
         if(result != null) //if it exists, send to data adapter in layer tab
             extra3.putParcelableArrayList(RESULT_STACK, result);
@@ -89,8 +69,7 @@ public class LayerActivity extends AppCompatActivity {
         mTabLayout = (TabLayout) findViewById(R.id.tabs);
         mTabLayout.setupWithViewPager(viewPager);
 
-        _rxBus = getRxBusSingleton();
-        retrofit = new Retrofit.Builder().baseUrl(BASE_URL).build();
+        _rxBus = RxBus.getInstance();
     }
 
     @Override
@@ -109,7 +88,7 @@ public class LayerActivity extends AppCompatActivity {
 
 	/**
 	 * Subscribes to the RxBus with a response to new events.
-	 * The Activity can find out what layers are selected, and what tab should be shown when an item is tapped.
+	 * The Activity just changes the current tab shown depending on the event
 	 */
     @Override
     public void onStart() {
@@ -122,24 +101,12 @@ public class LayerActivity extends AppCompatActivity {
                         //If we have an event due to a button press then go to the tab
                         //And in the fragment that is also listening load the right data!
                         switch(((TapEvent) event).getTab()) {
-                            case LAYER_TAB:
-                                mTabLayout.getTabAt(LayerPageFragment.ARG_LAYER).select();
+                            case SELECT_LAYER_TAB:
+                                mTabLayout.getTabAt(SELECT_LAYER_TAB).select();
                                 break;
 
-                            case MEASURE_TAB:
-                                mTabLayout.getTabAt(LayerPageFragment.ARG_MEASURE).select();
-                                break;
-
-                            case LAYER_DEQUE:
-                                result.remove(((TapEvent) event).getLayer());
-                                break;
-
-                            case LOAD_HTML:
-                                TapEvent e = (TapEvent) event;
-                                useRetrofit(e.getMeasurement());
-
-                            default: //layer queue
-                                result.add(((TapEvent) event).getLayer());
+                            case SELECT_MEASURE_TAB:
+                                mTabLayout.getTabAt(SELECT_MEASURE_TAB).select();
                                 break;
                         }
                 }
@@ -152,6 +119,10 @@ public class LayerActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
+    /**
+     * Put the layer stack in a bundle to be returned. If the layer fragment is never created
+     * (user doesn't go to layer tab) result is unchanged, otherwise it may be changed by LayerPresenter
+     */
     private void setResult() {
         Bundle b = new Bundle();
         b.putParcelableArrayList(RESULT_STACK, result);
@@ -190,47 +161,5 @@ public class LayerActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             return mFragmentTitleList.get(position);
         }
-    }
-
-    private void useRetrofit(String description) {
-        if(description == null)
-            return;
-
-        MetadataAPI api = retrofit.create(MetadataAPI.class);
-        String[] temp = description.split("/"); //must split data for URL to work
-        final Call<ResponseBody> result = api.fetchData(temp[0], temp[1]);
-        Subscription sub = Observable.just(true).map(new Func1<Boolean, Response<ResponseBody> >() {
-            @Override
-            public Response<ResponseBody> call(Boolean aBoolean) {
-                Response<ResponseBody> r = null;
-                try {
-                    r = result.execute();
-                } catch(IOException e) {
-                    e.printStackTrace();
-                }
-                return r;
-            }
-        }).subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(new Observer<Response<ResponseBody>>() {
-              @Override
-              public void onCompleted() {
-                  //TODO: need to cancel sub?
-              }
-
-              @Override
-              public void onError(Throwable e) {
-
-              }
-
-              @Override
-              public void onNext(Response<ResponseBody> r) {
-                  try {
-                      Utils.showWebPage(LayerActivity.this, r.body().string());
-                  } catch (IOException e) {
-                      e.printStackTrace();
-                  }
-              }
-          });
     }
 }

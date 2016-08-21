@@ -46,7 +46,7 @@
             </body>
         </html>
     ]]></string>
-    <string name="search_hint">Enter location…</string>
+    <string name="internet">Turn on connection to get data</string>
     <string name="no_results">No result</string>
     <string name="retry">Retry</string>
 </resources>

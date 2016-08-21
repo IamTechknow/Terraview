@@ -1,17 +1,15 @@
-package com.iamtechknow.worldview;
-
-import com.iamtechknow.worldview.model.Layer;
+package com.iamtechknow.worldview.model;
 
 public class TapEvent { //Container with event parameter
     private int tab;
     private Layer layer;
     private String measurement, category;
 
-    public TapEvent(int num, Layer l, String s, String c) {
+    public TapEvent(int num, Layer l, String _measurement, String _category) {
         tab = num;
         layer = l;
-        measurement = s;
-        category = c;
+        measurement = _measurement;
+        category = _category;
     }
 
     public int getTab() {
