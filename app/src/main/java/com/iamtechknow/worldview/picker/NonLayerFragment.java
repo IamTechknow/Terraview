@@ -10,26 +10,50 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.iamtechknow.worldview.R;
-import com.iamtechknow.worldview.adapter.DataAdapter;
-import com.iamtechknow.worldview.model.Layer;
+import com.iamtechknow.worldview.adapter.NonLayerDataAdapter;
+import com.iamtechknow.worldview.model.TapEvent;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
+
+import rx.functions.Action1;
+
+import static com.iamtechknow.worldview.picker.LayerActivity.SELECT_MEASURE_TAB;
 
 public class NonLayerFragment extends Fragment implements NonLayerView {
+    public static final String EXTRA_ARG = "arg";
     private boolean isCategoryTab;
 
     private NonLayerPresenter presenter;
     private RxBus _rxBus;
     private RecyclerView mRecyclerView;
-    private ArrayList<Layer> layers, stack;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(false);
 
+        presenter = new NonLayerPresenterImpl(this); //Should work, b/c seperate instance for frags
         _rxBus = RxBus.getInstance();
-        presenter = new NonLayerPresenterImpl(this);
+        isCategoryTab = getArguments().getBoolean(EXTRA_ARG);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        presenter.getData(getLoaderManager(), getActivity());
+
+        _rxBus.toObserverable()
+            .subscribe(new Action1<Object>() {
+                @Override
+                public void call(Object event) {
+                    if (event instanceof TapEvent && ((TapEvent) event).getTab() == SELECT_MEASURE_TAB) { //call from Category tab
+                        ArrayList<String> _measurelist = presenter.getMeasurementList(((TapEvent) event).getCategory());
+                        ((NonLayerDataAdapter) (mRecyclerView.getAdapter())).insertList(_measurelist);
+                    }
+                }
+            });
     }
 
     //Inflate the fragment view and setup the RecyclerView
@@ -40,13 +64,20 @@ public class NonLayerFragment extends Fragment implements NonLayerView {
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        DataAdapter l = new DataAdapter(_rxBus, isCategoryTab ? 0 : 1 );
+        NonLayerDataAdapter l = new NonLayerDataAdapter(RxBus.getInstance(), isCategoryTab ? 0 : 1);
         mRecyclerView.setAdapter(l);
         return rootView;
     }
 
+    //Called when presenter has finished loading data, set up lists
     @Override
-    public void insertList(ArrayList<String> strings) {
+    public void insertList() {
+        ArrayList<String> result = new ArrayList<>();
+        TreeMap<String, ArrayList<String>> map = presenter.getMap(isCategoryTab);
+        NonLayerDataAdapter adapter = (NonLayerDataAdapter) (mRecyclerView.getAdapter());
 
+        for (Map.Entry<String, ArrayList<String>> e : map.entrySet())
+            result.add(e.getKey());
+        adapter.insertList(result);
     }
 }

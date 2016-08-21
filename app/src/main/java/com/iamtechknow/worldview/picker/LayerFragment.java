@@ -12,9 +12,14 @@ import android.view.ViewGroup;
 import com.iamtechknow.worldview.R;
 import com.iamtechknow.worldview.adapter.LayerDataAdapter;
 import com.iamtechknow.worldview.model.Layer;
+import com.iamtechknow.worldview.model.TapEvent;
 import com.iamtechknow.worldview.util.Utils;
 
 import java.util.ArrayList;
+
+import rx.functions.Action1;
+
+import static com.iamtechknow.worldview.picker.LayerActivity.SELECT_LAYER_TAB;
 
 public class LayerFragment extends Fragment implements LayerView {
     private LayerPresenter presenter;
@@ -35,6 +40,17 @@ public class LayerFragment extends Fragment implements LayerView {
     public void onStart() {
         super.onStart();
         presenter.getData(getLoaderManager(), getActivity());
+        _rxBus.toObserverable()
+            .subscribe(new Action1<Object>() {
+                @Override
+                public void call(Object event) {
+                    if (event instanceof TapEvent && ((TapEvent) event).getTab() == SELECT_LAYER_TAB) { //call from measurement tab
+                        ArrayList<String> layerTitles = presenter.getLayerTitlesForMeasurement(((TapEvent) event).getMeasurement());
+                        ((LayerDataAdapter) mRecyclerView.getAdapter()).insertList(layerTitles);
+                        presenter.updateSelectedItems(layerTitles);
+                    }
+                }
+            });
     }
 
     //Inflate the fragment view and setup the RecyclerView

@@ -15,7 +15,9 @@ import java.util.TreeMap;
 public interface NonLayerPresenter {
     void onStart();
 
-    TreeMap<String, ArrayList<String>> getMap(int type);
+    TreeMap<String, ArrayList<String>> getMap(boolean isCategoryTab);
+
+    ArrayList<String> getMeasurementList(String category);
 
     void getData(LoaderManager manager, Context c);
 }

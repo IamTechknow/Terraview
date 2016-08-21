@@ -23,11 +23,11 @@ public interface LayerPresenter {
 
     boolean isItemChecked(int position);
 
-    Layer searchLayerById(String id);
-
     Layer searchLayerByTitle(String title);
 
     void getData(LoaderManager manager, Context c);
 
     void changeStack(Layer l, boolean queue);
+
+    ArrayList<String> getLayerTitlesForMeasurement(String measurement);
 }

@@ -23,12 +23,15 @@ import rx.functions.Action1;
 
 public class LayerActivity extends AppCompatActivity {
     //Constants for RxBus events and Intent
-    public static final int LAYER_QUEUE = 0, MEASURE_TAB = 1, LAYER_TAB = 2, LAYER_DEQUE = 3, LOAD_HTML = 4;
+    public static final int SELECT_MEASURE_TAB = 1, SELECT_LAYER_TAB = 2;
     public static final String RESULT_STACK = "result";
 
     //UI handling
     private TabLayout mTabLayout;
     private RxBus _rxBus;
+
+    //Reference to layer stack from map
+    private ArrayList<Layer> result;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,14 +49,14 @@ public class LayerActivity extends AppCompatActivity {
         LayerFragment frag3 = new LayerFragment();
         Bundle extra1 = new Bundle(), extra2 = new Bundle(), extra3 = new Bundle();
 
-        extra1.putBoolean(LayerPageFragment.EXTRA_ARG, true);
-        extra2.putBoolean(LayerPageFragment.EXTRA_ARG, false);
+        extra1.putBoolean(NonLayerFragment.EXTRA_ARG, true);
+        extra2.putBoolean(NonLayerFragment.EXTRA_ARG, false);
         frag1.setArguments(extra1);
         frag2.setArguments(extra2);
 
         //Check if intent extras are received, which would be the layer data from WorldActivity
         //List for layers to be displayed handled as a stack
-        ArrayList<Layer> result = getIntent().getParcelableArrayListExtra(WorldActivity.RESULT_LIST);
+        result = getIntent().getParcelableArrayListExtra(WorldActivity.RESULT_LIST);
         if(result != null) //if it exists, send to data adapter in layer tab
             extra3.putParcelableArrayList(RESULT_STACK, result);
         frag3.setArguments(extra3);
@@ -98,12 +101,12 @@ public class LayerActivity extends AppCompatActivity {
                         //If we have an event due to a button press then go to the tab
                         //And in the fragment that is also listening load the right data!
                         switch(((TapEvent) event).getTab()) {
-                            case LAYER_TAB:
-                                mTabLayout.getTabAt(LayerPageFragment.ARG_LAYER).select();
+                            case SELECT_LAYER_TAB:
+                                mTabLayout.getTabAt(SELECT_LAYER_TAB).select();
                                 break;
 
-                            case MEASURE_TAB:
-                                mTabLayout.getTabAt(LayerPageFragment.ARG_MEASURE).select();
+                            case SELECT_MEASURE_TAB:
+                                mTabLayout.getTabAt(SELECT_MEASURE_TAB).select();
                                 break;
                         }
                 }
@@ -116,12 +119,13 @@ public class LayerActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
+    /**
+     * Put the layer stack in a bundle to be returned. If the layer fragment is never created
+     * (user doesn't go to layer tab) result is unchanged, otherwise it may be changed by LayerPresenter
+     */
     private void setResult() {
-        //Need to get a hold of the presenter first, but there is only one instance so should be okay
-        LayerPresenter presenter = LayerPresenterImpl.getInstance(null, null);
-
         Bundle b = new Bundle();
-        b.putParcelableArrayList(RESULT_STACK, presenter.getCurrStack());
+        b.putParcelableArrayList(RESULT_STACK, result);
         Intent i = new Intent().putExtras(b);
 
         setResult(RESULT_OK, i);

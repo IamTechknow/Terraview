@@ -22,10 +22,18 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
 
     }
 
-    public TreeMap<String, ArrayList<String>> getMap(int type) {
-        return dataSource == null ? null : (type == 0 ? dataSource.getCategories() : dataSource.getMeasurements());
+    @Override
+    public TreeMap<String, ArrayList<String>> getMap(boolean isCategoryTab) {
+        return dataSource == null ? null : (isCategoryTab ? dataSource.getCategories() : dataSource.getMeasurements());
     }
 
+    @Override
+    public ArrayList<String> getMeasurementList(String category) {
+        TreeMap<String, ArrayList<String>> categories = dataSource.getCategories();
+        return categories.get(category);
+    }
+
+    @Override
     public void getData(LoaderManager manager, Context c) {
         dataSource = new LocalDataSource(manager, c);
         dataSource.loadData(this);
@@ -33,7 +41,7 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
 
     @Override
     public void onDataLoaded() {
-
+        view.insertList();
     }
 
     @Override

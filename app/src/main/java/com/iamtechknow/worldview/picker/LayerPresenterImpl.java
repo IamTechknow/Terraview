@@ -12,6 +12,7 @@ import com.iamtechknow.worldview.model.Layer;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.TreeMap;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -125,18 +126,6 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     }
 
     @Override
-    public Layer searchLayerById(String id) {
-        if(dataSource != null) {
-            ArrayList<Layer> layers = dataSource.getLayers();
-
-            for (Layer l : layers)
-                if (l.getIdentifier().equals(id))
-                    return l;
-        }
-        return null;
-    }
-
-    @Override
     public Layer searchLayerByTitle(String title) {
         if(dataSource != null) {
             ArrayList<Layer> layers = dataSource.getLayers();
@@ -163,6 +152,19 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     }
 
     @Override
+    public ArrayList<String> getLayerTitlesForMeasurement(String measurement) {
+        TreeMap<String, ArrayList<String>> measurements = dataSource.getMeasurements();
+
+        ArrayList<String> id_list = measurements.get(measurement), _layerlist = new ArrayList<>();
+        for(String id: id_list) {
+            Layer temp = searchLayerById(id);
+            _layerlist.add(temp != null ? temp.getTitle() : id);
+        }
+
+        return _layerlist;
+    }
+
+    @Override
     public void onDataLoaded() {
         view.populateList(dataSource.getLayers());
     }
@@ -170,5 +172,16 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     @Override
     public void onDataNotAvailable() {
 
+    }
+
+    private Layer searchLayerById(String id) {
+        if(dataSource != null) {
+            ArrayList<Layer> layers = dataSource.getLayers();
+
+            for (Layer l : layers)
+                if (l.getIdentifier().equals(id))
+                    return l;
+        }
+        return null;
     }
 }
