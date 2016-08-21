@@ -39,6 +39,10 @@ public class NonLayerFragment extends Fragment implements NonLayerView {
         isCategoryTab = getArguments().getBoolean(EXTRA_ARG);
     }
 
+    /**
+     * Set up the event bus for the measurement tab to response to taps on a category
+     * to load all measurements in the category
+     */
     @Override
     public void onStart() {
         super.onStart();

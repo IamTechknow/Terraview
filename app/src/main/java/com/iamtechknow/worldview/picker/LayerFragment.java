@@ -36,6 +36,10 @@ public class LayerFragment extends Fragment implements LayerView {
         _rxBus = RxBus.getInstance();
     }
 
+    /**
+     * Set up the event bus for the layer tab to response to taps on a measurement
+     * to load all layers that are part of that measurement.
+     */
     @Override
     public void onStart() {
         super.onStart();
@@ -66,6 +70,10 @@ public class LayerFragment extends Fragment implements LayerView {
         return rootView;
     }
 
+    /**
+     * Called when data is loaded to make the view populate the RecyclerView
+     * @param layers List of all available layers from data source
+     */
     @Override
     public void populateList(ArrayList<Layer> layers) {
         LayerDataAdapter adapter = (LayerDataAdapter) mRecyclerView.getAdapter();

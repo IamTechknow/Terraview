@@ -26,6 +26,9 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
+/**
+ * Implementation of a remote data source by communicating with the NASA GIBS to obtain and parse data.
+ */
 public class RemoteDataSource implements DataSource {
     private static final String XML_METADATA = "https://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml",
                                 JSON_METADATA = "https://worldview.earthdata.nasa.gov/config/wv.json",
@@ -40,6 +43,11 @@ public class RemoteDataSource implements DataSource {
         context = c;
     }
 
+    /**
+     * Loads the data by downloading the XML and JSON with OkHttpClient and parsing through both.
+     * Uses an observable to load the data in a background thread, then calls callbacks on the subscriber
+     * @param callback Callbacks from the presenter to indicate completion or failure
+     */
     @Override
     public void loadData(@NonNull LoadCallback callback) {
         OkHttpClient client = new OkHttpClient();

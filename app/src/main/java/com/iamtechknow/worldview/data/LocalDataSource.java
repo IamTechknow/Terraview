@@ -13,6 +13,9 @@ import com.iamtechknow.worldview.model.LayerLoader;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
+/**
+ * Implementation of a local data source by using loaders to access a SQLite database in the background.
+ */
 public class LocalDataSource implements DataSource, LoaderManager.LoaderCallbacks<DataWrapper> {
     //Loading objects
     private LoaderManager manager;
@@ -27,6 +30,10 @@ public class LocalDataSource implements DataSource, LoaderManager.LoaderCallback
         manager = loadermanager;
     }
 
+    /**
+     * Presenter call to start the load with loader callbacks
+     * @param callback Used upon load completion to inform the presenter
+     */
     @Override
     public void loadData(@NonNull LoadCallback callback) {
         loadCallback = callback;
@@ -56,7 +63,7 @@ public class LocalDataSource implements DataSource, LoaderManager.LoaderCallback
     @Override
     public void onLoadFinished(Loader<DataWrapper> loader, DataWrapper data) {
         allData = data;
-        
+
         manager = null; //Prevent loitering
 
         loadCallback.onDataLoaded();

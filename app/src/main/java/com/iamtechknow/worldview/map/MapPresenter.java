@@ -11,7 +11,7 @@ import java.util.Date;
 
 public interface MapPresenter {
 
-    void onMapReady(GoogleMap gmaps); //TODO: Fetch data here then insert tile overlays
+    void onMapReady(GoogleMap gmaps);
 
     void onDateChanged(Date date);
 

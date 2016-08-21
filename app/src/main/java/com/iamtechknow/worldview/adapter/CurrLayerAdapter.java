@@ -81,6 +81,12 @@ public class CurrLayerAdapter extends RecyclerView.Adapter<CurrLayerAdapter.Curr
         return mLayers.size();
     }
 
+    /**
+     * Swaps all layers inside the interval defined by the positions
+     * @param fromPosition The start position of the moved item.
+     * @param toPosition   Then resolved position of the moved item.
+     * @return Always true
+     */
     @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
         if (fromPosition < toPosition)

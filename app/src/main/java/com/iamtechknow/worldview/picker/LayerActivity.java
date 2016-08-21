@@ -88,7 +88,7 @@ public class LayerActivity extends AppCompatActivity {
 
 	/**
 	 * Subscribes to the RxBus with a response to new events.
-	 * The Activity can find out what layers are selected, and what tab should be shown when an item is tapped.
+	 * The Activity just changes the current tab shown depending on the event
 	 */
     @Override
     public void onStart() {

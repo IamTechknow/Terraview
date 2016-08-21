@@ -54,6 +54,11 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
         return stack;
     }
 
+
+    /**
+     * Simple use of Retrofit by obtaining the HTML page of a layer's description to be shown
+     * @param description The portion of the URL for a layer's description
+     */
     @Override
     public void useRetrofit(String description) {
         if(description == null)
@@ -93,6 +98,12 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
             });
     }
 
+    /**
+     * Update the sparse boolean array by placing all layer titles onto the set
+     * and then checking whether a given title from the measurement list is in the set,
+     * then the list item should be highlighted by marking its position.
+     * @param titles The list of titles currently shown on the layer tab
+     */
     @Override
     public void updateSelectedItems(ArrayList<String> titles) {
         titleSet.clear();
@@ -133,6 +144,11 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
         dataSource.loadData(this);
     }
 
+    /**
+     * Modify the list of layers to be shown on the map
+     * @param l The layer in question
+     * @param queue Whether to place to or remove from the stack
+     */
     @Override
     public void changeStack(Layer l, boolean queue) {
         if(queue)
@@ -141,6 +157,12 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
             stack.remove(l);
     }
 
+    /**
+     * Get a list of the identifiers from the measurement and return all titles of corresponding layers
+     * TODO: Use a hashtable to map the identifiers with the title, can be done when loading data
+     * @param measurement String of the measurement that was tapped
+     * @return A list of all titles of the layers belonging to the measurement
+     */
     @Override
     public ArrayList<String> getLayerTitlesForMeasurement(String measurement) {
         TreeMap<String, ArrayList<String>> measurements = dataSource.getMeasurements();
@@ -164,6 +186,11 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
 
     }
 
+    /**
+     * Performs a linear search of the layer list with the id as the key
+     * @param id the layer's identifier
+     * @return Either the layer containing that identifier or null
+     */
     private Layer searchLayerById(String id) {
         if(dataSource != null) {
             ArrayList<Layer> layers = dataSource.getLayers();

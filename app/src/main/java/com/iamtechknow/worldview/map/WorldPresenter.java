@@ -87,6 +87,11 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
 
     }
 
+    /**
+     * Called whenever layers are to be added at startup or when selected
+     * Create the tile overlays to be shown on the map
+     * @param stack list representing current layers to be shown
+     */
     @Override
     public void setLayersAndUpdateMap(ArrayList<Layer> stack) {
         layer_stack = stack;
@@ -118,12 +123,21 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         Collections.swap(mCurrLayers, i, i_new);
     }
 
+    /**
+     * Access the tile overlay to change its visibility
+     * @param l The layer corresponding to the tile overlay
+     * @param hide Visibility of the tile overlay
+     */
     @Override
     public void onToggleLayer(Layer l, boolean hide) {
         int pos = layer_stack.indexOf(l);
         mCurrLayers.get(pos).setVisible(hide);
     }
 
+    /**
+     * Called from the current layer adapter to delete a layer at the model level
+     * @param position the position of the deleted list item
+     */
     @Override
     public void onLayerSwiped(int position) {
         TileOverlay temp = mCurrLayers.remove(position);
@@ -156,6 +170,10 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         mapView.setLayerList(layer_stack);
     }
 
+    /**
+     * Set up the tile provider for the specified layer by allowing giving the necessary endpoint
+     * @param layer Layer containing necessary data
+     */
     private void addTileOverlay(final Layer layer) {
         //Make a tile overlay
         UrlTileProvider provider = new UrlTileProvider(TILE_SIZE, TILE_SIZE) {
@@ -177,10 +195,12 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         mCurrLayers.add(gMaps.addTileOverlay(new TileOverlayOptions().tileProvider(provider)));
     }
 
+    /**
+     * After tile overlays added, set the Z-Order from the default of 0.0
+     * Layers at the top of the list have the highest Z-order
+     * Base layers will be not affected to avoid covering overlays
+     */
     private void initZOffsets() {
-        //After tile overlays added, set the Z-Order from the default of 0.0
-        //Layers at the top of the list have the highest Z-order
-        //Base layers will be not affected to avoid covering overlays
         for(int i = 0; i < mCurrLayers.size(); i++)
             if(layer_stack.get(i).isBaseLayer())
                 mCurrLayers.get(i).setZIndex(BASE_Z_OFFSET);
@@ -189,7 +209,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     }
 
     //Remove all tile overlays, used to replace with new set
-    //Remember that the default GMaps tile remains
+    //The default GMaps tile is always present
     private void removeAllTileOverlays() {
         for(TileOverlay t : mCurrLayers)
             t.remove();
