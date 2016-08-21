@@ -41,17 +41,7 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     //HashSet to keep track of selected elements from stack
     private HashSet<String> titleSet;
 
-    //There is only one LayerPresenter, so keep an instance
-    private static LayerPresenterImpl INSTANCE;
-
-    public static LayerPresenterImpl getInstance(LayerView _view, ArrayList<Layer> list) {
-        if(INSTANCE == null)
-            INSTANCE = new LayerPresenterImpl(_view, list);
-
-        return INSTANCE;
-    }
-
-    private LayerPresenterImpl(LayerView _view, ArrayList<Layer> list) {
+    public LayerPresenterImpl(LayerView _view, ArrayList<Layer> list) {
         view = _view;
         stack = list;
         retrofit = new Retrofit.Builder().baseUrl(BASE_URL).build();

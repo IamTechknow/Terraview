@@ -32,7 +32,7 @@ public class LayerFragment extends Fragment implements LayerView {
         setHasOptionsMenu(false);
 
         ArrayList<Layer> stack = getArguments().getParcelableArrayList(LayerActivity.RESULT_STACK);
-        presenter = LayerPresenterImpl.getInstance(this, stack);
+        presenter = new LayerPresenterImpl(this, stack);
         _rxBus = RxBus.getInstance();
     }
 
