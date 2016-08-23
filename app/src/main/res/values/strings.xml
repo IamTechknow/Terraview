@@ -1,10 +1,10 @@
 <resources>
     <string name="app_name">Worldview</string>
-    <string name="layers">Layers</string>
+    <string name="layers">Choose Layers</string>
     <string name="layers_nav">Layers - Swipe to left to delete</string>
-    <string name="explore">Explore</string>
+    <string name="layer_info">Layer Info</string>
     <string name="about">About</string>
-    <string name="date">Date</string>
+    <string name="date">Change Date</string>
     <string name="about_html"><![CDATA[
         <!DOCTYPE html>
         <html lang=\'en\'>
