@@ -1,6 +1,7 @@
 package com.iamtechknow.worldview.model;
 
 
+import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 
@@ -9,10 +10,11 @@ import java.util.ArrayList;
 /**
  * Deserialized representation of a color map XML. The root element is ColorMap,
  * ColorMapEntry elements. This allows the elements to be parsed as an element list
+ * Non-strict parsing is used to avoid errors with the noNamespaceSchemaLocation atttribute
  */
-@Root(name="ColorMap")
+@Root(name="ColorMap", strict = false)
 public class ColorMap {
-    @ElementList(inline=true)
+
     private ArrayList<ColorMapEntry> list;
 
     public ColorMap(@ElementList(inline=true) ArrayList<ColorMapEntry> list) {

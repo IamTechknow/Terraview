@@ -18,7 +18,7 @@ public class ColorMapEntry {
     @Attribute(name="transparent")
     private boolean transparent;
 
-    private final byte r, g, b;
+    private final int r, g, b;
 
     private final boolean isInvalid;
 
@@ -31,9 +31,9 @@ public class ColorMapEntry {
 
         //Get RGB values
         String[] temp = rgb.split(",");
-        r = Byte.parseByte(temp[0]);
-        g = Byte.parseByte(temp[1]);
-        b = Byte.parseByte(temp[2]);
+        r = Integer.parseInt(temp[0]);
+        g = Integer.parseInt(temp[1]);
+        b = Integer.parseInt(temp[2]);
 
         isInvalid = label.contains("No Data") || label.contains("Unknown");
     }
@@ -54,15 +54,15 @@ public class ColorMapEntry {
         this.transparent = transparent;
     }
 
-    public byte getR() {
+    public int getR() {
         return r;
     }
 
-    public byte getG() {
+    public int getG() {
         return g;
     }
 
-    public byte getB() {
+    public int getB() {
         return b;
     }
 
