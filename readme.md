@@ -26,6 +26,11 @@ I worked on improvements on the project in an internship in NASA's Goddard Space
     the [WMTSCapabilities.xml](http://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml) file made available to developers who want to use GIBS's REST endpoints.
     Worldview is licensed under [NASA's open source license] (https://worldview.earthdata.nasa.gov/pages/license.html), I believe this is an appropriate use of the metadata.
 
+## Screenshots
+<img src="art/map.png" />
+<img src="art/picker.png" />
+<img src="art/colormaps.png" />
+	
 ## Libraries
 * [Google Maps API for Android](https://developers.google.com/maps/android/)
 * [RxJava](https://github.com/ReactiveX/RxJava) and [RxAndroid](https://github.com/ReactiveX/RxAndroid)
