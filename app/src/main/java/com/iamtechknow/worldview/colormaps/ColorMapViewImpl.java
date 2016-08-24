@@ -1,20 +1,24 @@
 package com.iamtechknow.worldview.colormaps;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
 
+import com.iamtechknow.worldview.R;
 import com.iamtechknow.worldview.model.ColorMap;
 import com.iamtechknow.worldview.model.ColorMapEntry;
 
 public class ColorMapViewImpl extends View implements ColorMapView {
+    private float RECT_HEIGHT = dPToPixel();
+
     private Paint mPaint;
 
     private ColorMapPresenter presenter;
 
-    //TODO: set presenter for view on fragment setup, view tells presenter to get colorMap, then when callback done call setColorMap here
     private ColorMap colorMap;
     private float rectLength;
 
@@ -50,8 +54,14 @@ public class ColorMapViewImpl extends View implements ColorMapView {
         if(colorMap != null)
             for(ColorMapEntry e : colorMap.getList()) {
                 mPaint.setARGB(255, e.getR(), e.getG(), e.getB());
-                canvas.drawRect(index * rectLength, 0, index + 1 * rectLength, rectLength, mPaint);
+                //Log.d(getClass().getSimpleName(), String.format("drawRect(%f, %f, %f, %f)", index * rectLength, 0f, (index + 1) * rectLength, RECT_HEIGHT));
+                canvas.drawRect(index * rectLength, 0f, (index + 1) * rectLength, RECT_HEIGHT, mPaint);
                 index++;
             }
+    }
+
+    private float dPToPixel() {
+        Resources r = getResources();
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(R.dimen.md_keylines), r.getDisplayMetrics());
     }
 }

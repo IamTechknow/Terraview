@@ -43,11 +43,12 @@ public class ColorMapAdapter extends RecyclerView.Adapter<ColorMapAdapter.ViewHo
      */
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        if(!mItems.get(position).isBaseLayer()) {
-            holder.text.setText(mItems.get(position).getTitle());
-            holder.canvas.setLayerId(mItems.get(position).getIdentifier());
+        Layer l = mItems.get(position);
+        if(!l.isBaseLayer() && !l.getIdentifier().equals("Coastlines") && !l.getIdentifier().equals("Reference_Labels")) {
+            holder.text.setText(l.getTitle());
+            holder.canvas.setLayerId(l.getIdentifier());
         } else
-            holder.text.setText(String.format(Locale.US, "%s%s", mItems.get(position).getTitle(), " - no color map available"));
+            holder.text.setText(String.format(Locale.US, "%s%s", l.getTitle(), " - no color map available"));
     }
 
     @Override
