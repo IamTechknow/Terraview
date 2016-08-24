@@ -22,8 +22,10 @@ public class ColorMapFragment extends BottomSheetDialogFragment{
     private RecyclerView mRecyclerView;
     private ColorMapAdapter adapter;
 
+    /**
+     * Behaviour for the bottom sheet, just dismiss it when swiped down
+     */
     private BottomSheetBehavior.BottomSheetCallback mCallback = new BottomSheetBehavior.BottomSheetCallback() {
-
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
             if(newState == BottomSheetBehavior.STATE_HIDDEN)
@@ -36,6 +38,9 @@ public class ColorMapFragment extends BottomSheetDialogFragment{
         }
     };
 
+    /**
+     * Setup the bottom sheet behaviour and pass the current layer data to the list
+     */
     @Override
     public void setupDialog(Dialog dialog, int style) {
         super.setupDialog(dialog, style);

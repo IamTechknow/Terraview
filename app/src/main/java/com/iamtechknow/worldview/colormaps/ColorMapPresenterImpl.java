@@ -26,6 +26,11 @@ public class ColorMapPresenterImpl implements ColorMapPresenter {
         view = _view;
     }
 
+    /**
+     * Given the id, use a background thread to retrieve and parse the XML via RxJava and Retrofit.
+     * When finished call the view to draw the colorMap.
+     * @param id the layer's identifier
+     */
     @Override
     public void parseColorMap(String id) {
         Retrofit retrofit = new Retrofit.Builder()

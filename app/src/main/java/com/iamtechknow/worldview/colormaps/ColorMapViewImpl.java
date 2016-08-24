@@ -12,6 +12,10 @@ import com.iamtechknow.worldview.R;
 import com.iamtechknow.worldview.model.ColorMap;
 import com.iamtechknow.worldview.model.ColorMapEntry;
 
+/**
+ * View implementation for the color map list item. Needs a reference to the presenter
+ * to prevent it from being GCed, and to allow it to be called to draw the color map
+ */
 public class ColorMapViewImpl extends View implements ColorMapView {
     private float RECT_HEIGHT = dPToPixel();
 
@@ -38,7 +42,8 @@ public class ColorMapViewImpl extends View implements ColorMapView {
         presenter.parseColorMap(id);
     }
 
-    //Called by the presenter when data is received
+    //Called by the presenter when data is received. Calculate the length of each rectangle
+    //Then invalidate the view to have onDraw() be called
     @Override
     public void setColorMapData(ColorMap map) {
         colorMap = map;
@@ -46,6 +51,10 @@ public class ColorMapViewImpl extends View implements ColorMapView {
         invalidate(); //will call onDraw()
     }
 
+    /**
+     * Iterate through the color map to set the paint object's RGB color,
+     * then calculate the width of the rectangle to draw. Do this for all color map entries.
+     */
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -54,12 +63,15 @@ public class ColorMapViewImpl extends View implements ColorMapView {
         if(colorMap != null)
             for(ColorMapEntry e : colorMap.getList()) {
                 mPaint.setARGB(255, e.getR(), e.getG(), e.getB());
-                //Log.d(getClass().getSimpleName(), String.format("drawRect(%f, %f, %f, %f)", index * rectLength, 0f, (index + 1) * rectLength, RECT_HEIGHT));
                 canvas.drawRect(index * rectLength, 0f, (index + 1) * rectLength, RECT_HEIGHT, mPaint);
                 index++;
             }
     }
 
+    /**
+     * Do some preprocessing by converting the DP dimension to pixels to get the rectangle height
+     * @return pixel size of the DP
+     */
     private float dPToPixel() {
         Resources r = getResources();
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(R.dimen.md_keylines), r.getDisplayMetrics());
