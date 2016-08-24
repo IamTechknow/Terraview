@@ -2,6 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <TextView
+        android:text="@string/colormap_info"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/colormap_title_margin"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
     <android.support.v7.widget.RecyclerView
         android:id="@+id/color_map_rv"
         android:layout_width="match_parent"

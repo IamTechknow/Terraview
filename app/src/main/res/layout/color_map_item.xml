@@ -7,12 +7,12 @@
         android:id="@+id/color_map_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:paddingStart="@dimen/md_keylines"
-        android:layout_marginBottom="4dp" />
+        android:layout_marginBottom="@dimen/colormap_margin" />
     <com.iamtechknow.worldview.colormaps.ColorMapViewImpl
         android:id="@+id/color_map_palette"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/md_keylines"
-        android:layout_marginBottom="4dp" />
+        android:layout_marginBottom="@dimen/colormap_margin" />
 </LinearLayout>

@@ -49,4 +49,5 @@
     <string name="internet">Turn on connection to get data</string>
     <string name="no_results">No result</string>
     <string name="retry">Retry</string>
+    <string name="colormap_info">Colormap Information</string>
 </resources>
