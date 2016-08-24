@@ -69,4 +69,25 @@ public class ColorMapEntry {
     public boolean isInvalid() {
         return isInvalid;
     }
+
+    /**
+     * Formula for the hash code, use the 31x + y rule then combine with String hashcode
+     * @return hash code for a color map entry
+     */
+    @Override
+    public int hashCode() {
+        int hash = 17;
+        hash = 31 * hash + r;
+        hash = 31 * hash + g;
+        hash = 31 * hash + b;
+        return hash + label.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null || !(obj instanceof ColorMapEntry))
+            return false;
+        ColorMapEntry entry = (ColorMapEntry) obj;
+        return r == entry.getR() && g == entry.getG() && b == entry.getB();
+    }
 }

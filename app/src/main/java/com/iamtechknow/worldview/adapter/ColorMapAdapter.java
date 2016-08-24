@@ -11,6 +11,7 @@ import com.iamtechknow.worldview.colormaps.ColorMapViewImpl;
 import com.iamtechknow.worldview.model.Layer;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class ColorMapAdapter extends RecyclerView.Adapter<ColorMapAdapter.ViewHolder> {
     private ArrayList<Layer> mItems;
@@ -37,9 +38,16 @@ public class ColorMapAdapter extends RecyclerView.Adapter<ColorMapAdapter.ViewHo
         return new ColorMapAdapter.ViewHolder(v);
     }
 
+    /**
+     * Upon binding, start XML parsing and draw the colormap
+     */
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.text.setText(mItems.get(position).getTitle());
+        if(!mItems.get(position).isBaseLayer()) {
+            holder.text.setText(mItems.get(position).getTitle());
+            holder.canvas.setLayerId(mItems.get(position).getIdentifier());
+        } else
+            holder.text.setText(String.format(Locale.US, "%s%s", mItems.get(position).getTitle(), " - no color map available"));
     }
 
     @Override
