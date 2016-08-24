@@ -66,13 +66,13 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
 
         MetadataAPI api = retrofit.create(MetadataAPI.class);
         String[] temp = description.split("/"); //must split data for URL to work
-        final Call<ResponseBody> result = api.fetchData(temp[0], temp[1]);
-        Observable.just(true).map(new Func1<Boolean, Response<ResponseBody> >() {
+        Call<ResponseBody> result = api.fetchData(temp[0], temp[1]);
+        Observable.just(result).map(new Func1<Call<ResponseBody>, Response<ResponseBody>>() {
             @Override
-            public Response<ResponseBody> call(Boolean aBoolean) {
+            public Response<ResponseBody> call(Call<ResponseBody> call) {
                 Response<ResponseBody> r = null;
                 try {
-                    r = result.execute();
+                    r = call.execute();
                 } catch(IOException e) {
                     e.printStackTrace();
                 }
