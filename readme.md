@@ -27,9 +27,9 @@ I worked on improvements on the project in an internship in NASA's Goddard Space
     Worldview is licensed under [NASA's open source license] (https://worldview.earthdata.nasa.gov/pages/license.html), I believe this is an appropriate use of the metadata.
 
 ## Screenshots
-<img src="art/map.png" />
-<img src="art/picker.png" />
-<img src="art/colormaps.png" />
+<img src="art/map.png" width="33%" />
+<img src="art/picker.png" width="33%" />
+<img src="art/colormaps.png" width="33%" />
 	
 ## Libraries
 * [Google Maps API for Android](https://developers.google.com/maps/android/)
