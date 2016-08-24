@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -27,6 +28,7 @@ import android.widget.Toolbar;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.iamtechknow.worldview.colormaps.ColorMapFragment;
 import com.iamtechknow.worldview.picker.LayerActivity;
 import com.iamtechknow.worldview.R;
 import com.iamtechknow.worldview.adapter.CurrLayerAdapter;
@@ -113,6 +115,14 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_layerinfo:
+                BottomSheetDialogFragment frag = new ColorMapFragment();
+                Bundle args = new Bundle();
+                args.putParcelableArrayList(ColorMapFragment.COLORMAP_ARG, mapPresenter.getCurrLayerStack());
+
+                frag.setArguments(args);
+                frag.show(getSupportFragmentManager(), frag.getTag());
+                break;
             case R.id.action_about:
                 Utils.showAbout(WorldActivity.this);
                 break;
