@@ -170,6 +170,13 @@ public class Layer implements Parcelable, Comparable<Layer> {
         return str + "%d/%d/%d." + format;
     }
 
+    /**
+     * Determines if the layer is an overlay that contains a colormap
+     */
+    public boolean hasColorMap() {
+        return !isBaseLayer && !identifier.equals("Coastlines") && !identifier.equals("Reference_Labels");
+    }
+
     @Override
     public int describeContents() {
         return hashCode();
