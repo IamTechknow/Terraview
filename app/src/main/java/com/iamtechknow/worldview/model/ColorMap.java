@@ -1,7 +1,5 @@
 package com.iamtechknow.worldview.model;
 
-
-import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 

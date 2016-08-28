@@ -21,7 +21,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
     public static final String URLtemplate = "http://gibs.earthdata.nasa.gov/wmts/epsg3857/best/%s/default/%s/%s/";
 
     //Fields for XML tags that are stored to database
-    private String identifier, tileMatrixSet, format, title, subtitle, endDate, startDate, description;
+    private String identifier, tileMatrixSet, format, title, subtitle, endDate, startDate, description, palette;
     private boolean isBaseLayer;
 
     //ISO 8601 date format
@@ -29,7 +29,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
 
     public Layer() {}
 
-    public Layer(String _identifier, String matrixSet, String _format, String _title, String sub, String end, String start, String _description, boolean isBase) {
+    public Layer(String _identifier, String matrixSet, String _format, String _title, String sub, String end, String start, String _description, String _palette, boolean isBase) {
         identifier = _identifier;
         tileMatrixSet = matrixSet;
         format = _format;
@@ -38,6 +38,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
         endDate = end;
         startDate = start;
         description = _description;
+        palette = _palette;
         isBaseLayer = isBase;
     }
 
@@ -50,6 +51,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
         endDate = in.readString();
         startDate = in.readString();
         description = in.readString();
+        palette = in.readString();
         isBaseLayer = in.readByte() != 0;
     }
 
@@ -145,6 +147,14 @@ public class Layer implements Parcelable, Comparable<Layer> {
         return description;
     }
 
+    public void setPalette(String _palette) {
+        palette = _palette;
+    }
+
+    public String getPalette() {
+        return palette;
+    }
+
     /**
      * Formats a string with layer data and specified date to be used for a tile provider
      * A date is needed even when a layer does not have a time interval, in which it is unused
@@ -174,7 +184,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
      * Determines if the layer is an overlay that contains a colormap
      */
     public boolean hasColorMap() {
-        return !isBaseLayer && !identifier.equals("Coastlines") && !identifier.equals("Reference_Labels");
+        return palette != null;
     }
 
     @Override
@@ -192,6 +202,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
         dest.writeString(endDate);
         dest.writeString(startDate);
         dest.writeString(description);
+        dest.writeString(palette);
         dest.writeByte((byte) (isBaseLayer ? 1 : 0));
     }
 

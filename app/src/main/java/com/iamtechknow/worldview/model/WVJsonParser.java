@@ -75,7 +75,10 @@ public class WVJsonParser {
                 JsonObject source = measureSources.getAsJsonObject(source_name);
                 for(JsonElement e : source.getAsJsonArray("settings")) { //Now we can access the layer names to put in the list and map
                     measurement_layers.add(e.getAsString());
-                    desc_map.put(e.getAsString(), source.get("description").getAsString());
+
+                    JsonElement desc = source.get("description");
+                    if(desc != null && !desc.getAsString().isEmpty()) //may be blank or null
+                        desc_map.put(e.getAsString(), desc.getAsString());
                 }
             }
             Collections.sort(measurement_layers); //To display measurements in order
@@ -107,9 +110,9 @@ public class WVJsonParser {
             JsonElement element = layer_json.get(layer.getIdentifier());
 
             if(element != null) {
-                JsonObject jsonLayer = element.getAsJsonObject();
+                JsonObject jsonLayer = element.getAsJsonObject(), palObj;
                 JsonPrimitive subPrimitive, startPrimitive, endPrimitive;
-                String subtitle = null, endDate = null, startDate = null;
+                String subtitle = null, endDate = null, startDate = null, palette = null;
                 boolean isBaseLayer;
 
                 isBaseLayer = jsonLayer.getAsJsonPrimitive("group").getAsString().equals("baselayers");
@@ -118,6 +121,7 @@ public class WVJsonParser {
                 subPrimitive = jsonLayer.getAsJsonPrimitive("subtitle");
                 startPrimitive = jsonLayer.getAsJsonPrimitive("startDate");
                 endPrimitive = jsonLayer.getAsJsonPrimitive("endDate");
+                palObj = jsonLayer.getAsJsonObject("palette");
 
                 if(subPrimitive != null)
                     subtitle = subPrimitive.getAsString();
@@ -125,11 +129,14 @@ public class WVJsonParser {
                     startDate = startPrimitive.getAsString();
                 if(endPrimitive != null)
                     endDate = endPrimitive.getAsString();
+                if(palObj != null)
+                    palette = palObj.getAsJsonPrimitive("id").getAsString();
 
                 layer.setBaseLayer(isBaseLayer);
                 layer.setSubtitle(subtitle);
                 layer.setStartDate(startDate);
                 layer.setEndDate(endDate);
+                layer.setPalette(palette);
 
                 if(desc_map.containsKey(layer.getIdentifier()))
                     layer.setDescription(desc_map.get(layer.getIdentifier()));
