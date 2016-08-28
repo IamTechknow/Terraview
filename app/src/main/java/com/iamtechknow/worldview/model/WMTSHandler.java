@@ -21,6 +21,9 @@ public class WMTSHandler extends DefaultHandler {
     //The current element right now
     private String currentElement;
 
+    //used to fill single string for multiple character() calls
+    private StringBuilder buffer;
+
     //Avoid unwanted elements, indicate that we're in the layer element, not style or dimension
     private boolean inLayerTag, inTileMatrixSetLink;
 
@@ -50,15 +53,19 @@ public class WMTSHandler extends DefaultHandler {
                 case "TileMatrixSet":
                 case "Title":
                     currentElement = localName;
+                    buffer = new StringBuilder();
                     break;
                 case "TileMatrixSetLink":
                     inTileMatrixSetLink = true;
             }
     }
 
+    /**
+     * At the end of an element, we can find out if we're done with a layer object, gone into or out of something relevant
+     * and know that the current contents of the buffer are valid.
+     */
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        //At the end of an element, we just need to know if we're finished with a Layer element
         switch (localName) {
             case "Layer":
                 contents.add(currLayer);
@@ -70,31 +77,43 @@ public class WMTSHandler extends DefaultHandler {
                 break;
             case "TileMatrixSet":
                 inLayerTag = inTileMatrixSetLink; //TileMatrixSet may appear outside of a layer tag, we only want the ones that come after TileMatrixSetLink
+                if(inLayerTag)
+                    currLayer.setTileMatrixSet(buffer.toString());
                 break;
             case "TileMatrixSetLink":
                 inTileMatrixSetLink = false;
+                break;
+            case "Identifier":
+                if(inLayerTag)
+                    currLayer.setIdentifier(buffer.toString());
+                break;
+            case "Format":
+                if(inLayerTag) {
+                    String str = buffer.toString();
+                    currLayer.setFormat(str.substring(str.indexOf('/') + 1));
+                }
+                break;
+            case "Title":
+                if(inLayerTag)
+                    currLayer.setTitle(buffer.toString());
         }
+        currentElement = null;
     }
 
+    /**
+     * Check if the current text is inside a desirable tag, then append it to the buffer
+     * because per spec characters() may be called mutiple times
+     */
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException {
-        //We have access to the element text, check element then save it
         if(currentElement != null && inLayerTag) {
             switch (currentElement) {
                 case "Identifier":
-                    currLayer.setIdentifier(new String(ch, start, length));
-                    break;
                 case "Format":
-                    String str = new String(ch, start, length);
-                    currLayer.setFormat(str.substring(str.indexOf('/') + 1));
-                    break;
                 case "TileMatrixSet":
-                    currLayer.setTileMatrixSet(new String(ch, start, length));
-                    break;
                 case "Title":
-                    currLayer.setTitle(new String(ch, start, length));
+                    buffer.append(ch, start, length);
             }
-            currentElement = null; //we are done, reset current element and wait for next one
         }
     }
 
