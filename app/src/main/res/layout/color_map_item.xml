@@ -15,4 +15,22 @@
         android:layout_width="wrap_content"
         android:layout_height="@dimen/md_keylines"
         android:layout_marginBottom="@dimen/colormap_margin" />
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/colormap_margin">
+        <TextView
+            android:id="@+id/color_map_start"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@+id/color_map_end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+        <TextView
+            android:id="@id/color_map_end"
+            android:layout_alignParentEnd="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+    </RelativeLayout>
 </LinearLayout>

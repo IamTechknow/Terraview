@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
+import android.widget.TextView;
 
 import com.iamtechknow.worldview.R;
 import com.iamtechknow.worldview.model.ColorMap;
@@ -54,18 +55,25 @@ public class ColorMapViewImpl extends View implements ColorMapView {
     /**
      * Iterate through the color map to set the paint object's RGB color,
      * then calculate the width of the rectangle to draw. Do this for all color map entries.
+     * Finally get the text views for the start and end labels and display them
      */
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
         int index = 0;
-        if(colorMap != null)
-            for(ColorMapEntry e : colorMap.getList()) {
+        if(colorMap != null) {
+            for (ColorMapEntry e : colorMap.getList()) {
                 mPaint.setARGB(255, e.getR(), e.getG(), e.getB());
                 canvas.drawRect(index * rectLength, 0f, (index + 1) * rectLength, RECT_HEIGHT, mPaint);
                 index++;
             }
+            View parent = (View) getParent();
+            TextView start = (TextView) parent.findViewById(R.id.color_map_start),
+                    end = (TextView) parent.findViewById(R.id.color_map_end);
+            start.setText(colorMap.getList().get(0).getLabel());
+            end.setText(colorMap.getList().get(index - 1).getLabel());
+        }
     }
 
     /**

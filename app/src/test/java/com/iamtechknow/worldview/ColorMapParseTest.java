@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.io.IOException;
 
 import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 
@@ -23,8 +24,11 @@ public class ColorMapParseTest {
         final Call<ColorMap> map = api.fetchData("MODIS_Combined_Value_Added_AOD");
 
         try {
-            ColorMap result = map.execute().body();
-            System.out.println(result);
+            Response<ColorMap> result = map.execute();
+            if(result.errorBody() != null)
+                System.out.println(result.errorBody());
+            else
+                System.out.println(result.body());
         } catch (IOException e) {
             e.printStackTrace();
         }
