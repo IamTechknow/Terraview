@@ -1,5 +1,7 @@
 package com.iamtechknow.worldview.colormaps;
 
+import android.util.Log;
+
 import com.iamtechknow.worldview.api.ColorMapAPI;
 import com.iamtechknow.worldview.model.ColorMap;
 import com.iamtechknow.worldview.model.ColorMapEntry;
@@ -59,7 +61,9 @@ public class ColorMapPresenterImpl implements ColorMapPresenter {
                 public void onCompleted() {}
 
                 @Override
-                public void onError(Throwable e) {}
+                public void onError(Throwable e) {
+                    Log.w(getClass().getSimpleName(), e);
+                }
 
                 @Override
                 public void onNext(Response<ColorMap> r) {

@@ -2,6 +2,7 @@ package com.iamtechknow.worldview.picker;
 
 import android.content.Context;
 import android.support.v4.app.LoaderManager;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 
 import com.iamtechknow.worldview.api.MetadataAPI;
@@ -87,7 +88,9 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
                 public void onCompleted() {}
 
                 @Override
-                public void onError(Throwable e) {}
+                public void onError(Throwable e) {
+                    Log.w(getClass().getSimpleName(), e);
+                }
 
                 @Override
                 public void onNext(Response<ResponseBody> r) {
