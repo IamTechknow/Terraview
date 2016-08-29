@@ -43,6 +43,7 @@ import java.util.Calendar;
 public class WorldActivity extends AppCompatActivity implements MapView, OnMapReadyCallback,
         NavigationView.OnNavigationItemSelectedListener, DragAndHideListener {
     public static final String RESULT_LIST = "list", PREFS_FILE = "settings", PREFS_DB_KEY = "have_db";
+    public static final String TIME_EXTRA = "time", LAYER_EXTRA = "layer";
     public static final int LAYER_CODE = 1, SECONDS_PER_DAY = 24*60*60*1000;
 
     //UI fields
@@ -93,6 +94,22 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         //Request the map - control flow goes to onMapReady()
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        //Save current date and layers
+        outState.putParcelableArrayList(LAYER_EXTRA, mapPresenter.getCurrLayerStack());
+        outState.putLong(TIME_EXTRA, mapPresenter.getCurrDate().getTime());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        mapPresenter.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override
@@ -162,7 +179,6 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         ArrayList<Layer> layer_stack = data.getParcelableArrayListExtra(LayerActivity.RESULT_STACK);
-        mItemAdapter.insertList(layer_stack);
         mapPresenter.setLayersAndUpdateMap(layer_stack);
     }
 
@@ -216,12 +232,19 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     };
 
     @Override
-    public void setDateDialog(long maxDate) {
+    public void setDateDialog(long today) {
         Calendar c = Calendar.getInstance();
-        c.setTimeInMillis(maxDate);
+        c.setTimeInMillis(today);
 
         mDateDialog = new DatePickerDialog(this, mDateListener, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
-        mDateDialog.getDatePicker().setMaxDate(maxDate + SECONDS_PER_DAY); //HACK: Increase max date to select current day
+        mDateDialog.getDatePicker().setMaxDate(today + SECONDS_PER_DAY); //HACK: Increase max date to select current day
+    }
+
+    @Override
+    public void updateDateDialog(long currDate) {
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(currDate);
+        mDateDialog.updateDate(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
     }
 
     @Override

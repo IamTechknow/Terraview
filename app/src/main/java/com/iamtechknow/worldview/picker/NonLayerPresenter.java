@@ -20,4 +20,8 @@ public interface NonLayerPresenter {
     ArrayList<String> getMeasurementList(String category);
 
     void getData(LoaderManager manager, Context c);
+
+    void setCategory(String cat);
+
+    String getCategory();
 }

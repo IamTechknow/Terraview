@@ -1,6 +1,7 @@
 package com.iamtechknow.worldview.map;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -20,12 +21,17 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 
+import static com.iamtechknow.worldview.map.WorldActivity.*;
+
 public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     private static final int TILE_SIZE = 256;
     private static final float Z_OFFSET = 5.0f, BASE_Z_OFFSET = -50.0f; //base layers cannot cover overlays
 
     private MapView mapView;
     private DataSource dataSource;
+
+    //Used to let presenter know to restore state after map loads
+    private boolean isRestoring;
 
     //Worldview data
     private GoogleMap gMaps;
@@ -48,12 +54,29 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         mapView.setDateDialog(c.getTimeInMillis());
     }
 
+    //Just restore model here
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        isRestoring = true;
+
+        layer_stack = savedInstanceState.getParcelableArrayList(LAYER_EXTRA);
+        Long l = savedInstanceState.getLong(TIME_EXTRA);
+        currentDate = new Date(l);
+        mapView.updateDateDialog(l);
+    }
+
+    //If needed, restore map tiles or set default
     @Override
     public void onMapReady(GoogleMap gmaps) {
         gMaps = gmaps;
         gMaps.setMaxZoomPreference(9.0f);
 
-        showDefaultTiles();
+        if(isRestoring) {
+            isRestoring = false;
+            setLayersAndUpdateMap(layer_stack);
+            onDateChanged(currentDate);
+        } else
+            showDefaultTiles();
     }
 
     @Override
@@ -63,6 +86,11 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         for(Layer l: layer_stack)
             addTileOverlay(l);
         initZOffsets();
+    }
+
+    @Override
+    public Date getCurrDate() {
+        return currentDate;
     }
 
     @Override
@@ -89,11 +117,16 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
 
     /**
      * Called whenever layers are to be added at startup or when selected
-     * Create the tile overlays to be shown on the map
+     * Create the tile overlays to be shown on the map.
+     * If layers were added and the screen is rotated, this can get called when gMaps in null
+     * so wait until it gets called later.
      * @param stack list representing current layers to be shown
      */
     @Override
     public void setLayersAndUpdateMap(ArrayList<Layer> stack) {
+        if(isRestoring)
+            return;
+
         layer_stack = stack;
         mapView.setLayerList(layer_stack);
         removeAllTileOverlays();

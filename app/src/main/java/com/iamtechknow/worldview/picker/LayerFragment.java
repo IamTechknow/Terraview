@@ -22,6 +22,8 @@ import rx.functions.Action1;
 import static com.iamtechknow.worldview.picker.LayerActivity.SELECT_LAYER_TAB;
 
 public class LayerFragment extends Fragment implements LayerView {
+    private static final String MEAS_EXTRA = "measurement";
+
     private LayerPresenter presenter;
     private RxBus _rxBus;
     private RecyclerView mRecyclerView;
@@ -34,6 +36,16 @@ public class LayerFragment extends Fragment implements LayerView {
         ArrayList<Layer> stack = getArguments().getParcelableArrayList(LayerActivity.RESULT_STACK);
         presenter = new LayerPresenterImpl(this, stack);
         _rxBus = RxBus.getInstance();
+
+        if(savedInstanceState != null)
+            presenter.setMeasurement(savedInstanceState.getString(MEAS_EXTRA));
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putString(MEAS_EXTRA, presenter.getMeasurement());
     }
 
     /**
@@ -48,11 +60,8 @@ public class LayerFragment extends Fragment implements LayerView {
             .subscribe(new Action1<Object>() {
                 @Override
                 public void call(Object event) {
-                    if (event instanceof TapEvent && ((TapEvent) event).getTab() == SELECT_LAYER_TAB) { //call from measurement tab
-                        ArrayList<String> layerTitles = presenter.getLayerTitlesForMeasurement(((TapEvent) event).getMeasurement());
-                        ((LayerDataAdapter) mRecyclerView.getAdapter()).insertList(layerTitles);
-                        presenter.updateSelectedItems(layerTitles);
-                    }
+                    if (event instanceof TapEvent && ((TapEvent) event).getTab() == SELECT_LAYER_TAB) //call from measurement tab
+                        onNewMeasurement(((TapEvent) event).getMeasurement());
                 }
             });
     }
@@ -82,6 +91,13 @@ public class LayerFragment extends Fragment implements LayerView {
             layer_list.add(l.getTitle());
         adapter.insertList(layer_list);
         presenter.updateSelectedItems(layer_list);
+    }
+
+    @Override
+    public void onNewMeasurement(String measurement) {
+        ArrayList<String> layerTitles = presenter.getLayerTitlesForMeasurement(measurement);
+        ((LayerDataAdapter) mRecyclerView.getAdapter()).insertList(layerTitles);
+        presenter.updateSelectedItems(layerTitles);
     }
 
     @Override
