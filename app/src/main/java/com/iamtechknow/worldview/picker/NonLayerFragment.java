@@ -22,7 +22,7 @@ import rx.functions.Action1;
 import static com.iamtechknow.worldview.picker.LayerActivity.SELECT_MEASURE_TAB;
 
 public class NonLayerFragment extends Fragment implements NonLayerView {
-    public static final String EXTRA_ARG = "arg";
+    public static final String EXTRA_ARG = "arg", CAT_EXTRA = "category";
     private boolean isCategoryTab;
 
     private NonLayerPresenter presenter;
@@ -37,6 +37,16 @@ public class NonLayerFragment extends Fragment implements NonLayerView {
         presenter = new NonLayerPresenterImpl(this); //Should work, b/c seperate instance for frags
         _rxBus = RxBus.getInstance();
         isCategoryTab = getArguments().getBoolean(EXTRA_ARG);
+
+        if(savedInstanceState != null && !isCategoryTab)
+            presenter.setCategory(savedInstanceState.getString(CAT_EXTRA));
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putString(CAT_EXTRA, presenter.getCategory());
     }
 
     /**
@@ -48,16 +58,15 @@ public class NonLayerFragment extends Fragment implements NonLayerView {
         super.onStart();
         presenter.getData(getLoaderManager(), getActivity());
 
-        _rxBus.toObserverable()
-            .subscribe(new Action1<Object>() {
-                @Override
-                public void call(Object event) {
-                    if (event instanceof TapEvent && ((TapEvent) event).getTab() == SELECT_MEASURE_TAB) { //call from Category tab
-                        ArrayList<String> _measurelist = presenter.getMeasurementList(((TapEvent) event).getCategory());
-                        ((NonLayerDataAdapter) (mRecyclerView.getAdapter())).insertList(_measurelist);
+        if(!isCategoryTab)
+            _rxBus.toObserverable()
+                .subscribe(new Action1<Object>() {
+                    @Override
+                    public void call(Object event) {
+                        if (event instanceof TapEvent && ((TapEvent) event).getTab() == SELECT_MEASURE_TAB) //call from Category tab
+                            insertMeasurements(((TapEvent) event).getCategory());
                     }
-                }
-            });
+                });
     }
 
     //Inflate the fragment view and setup the RecyclerView
@@ -74,14 +83,24 @@ public class NonLayerFragment extends Fragment implements NonLayerView {
     }
 
     //Called when presenter has finished loading data, set up lists
+    //The measurement tab needs to determine whether to display the previous measurement due to config change
     @Override
     public void insertList() {
-        ArrayList<String> result = new ArrayList<>();
-        TreeMap<String, ArrayList<String>> map = presenter.getMap(isCategoryTab);
-        NonLayerDataAdapter adapter = (NonLayerDataAdapter) (mRecyclerView.getAdapter());
+        if(!isCategoryTab && presenter.getCategory() != null)
+            insertMeasurements(presenter.getCategory());
+        else {
+            ArrayList<String> result = new ArrayList<>();
+            TreeMap<String, ArrayList<String>> map = presenter.getMap(isCategoryTab);
+            NonLayerDataAdapter adapter = (NonLayerDataAdapter) (mRecyclerView.getAdapter());
 
-        for (Map.Entry<String, ArrayList<String>> e : map.entrySet())
-            result.add(e.getKey());
-        adapter.insertList(result);
+            for (Map.Entry<String, ArrayList<String>> e : map.entrySet())
+                result.add(e.getKey());
+            adapter.insertList(result);
+        }
+    }
+
+    private void insertMeasurements(String cat) {
+        ArrayList<String> measure_list = presenter.getMeasurementList(cat);
+        ((NonLayerDataAdapter) (mRecyclerView.getAdapter())).insertList(measure_list);
     }
 }

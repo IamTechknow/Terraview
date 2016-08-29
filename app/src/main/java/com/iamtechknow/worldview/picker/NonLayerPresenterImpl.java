@@ -13,6 +13,9 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
     private NonLayerView view;
     private DataSource dataSource;
 
+    //Used for state restoration in config change
+    private String category;
+
     public NonLayerPresenterImpl(NonLayerView _view) {
         view = _view;
     }
@@ -29,6 +32,7 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
 
     @Override
     public ArrayList<String> getMeasurementList(String category) {
+        this.category = category;
         TreeMap<String, ArrayList<String>> categories = dataSource.getCategories();
         return categories.get(category);
     }
@@ -37,6 +41,16 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
     public void getData(LoaderManager manager, Context c) {
         dataSource = new LocalDataSource(manager, c);
         dataSource.loadData(this);
+    }
+
+    @Override
+    public void setCategory(String cat) {
+        category = cat;
+    }
+
+    @Override
+    public String getCategory() {
+        return category;
     }
 
     @Override
