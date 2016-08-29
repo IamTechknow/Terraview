@@ -51,8 +51,10 @@ public class ColorMapFragment extends BottomSheetDialogFragment{
         CoordinatorLayout.LayoutParams layoutParams =
                 (CoordinatorLayout.LayoutParams) ((View) contentView.getParent()).getLayoutParams();
         CoordinatorLayout.Behavior behavior = layoutParams.getBehavior();
-        if (behavior != null && behavior instanceof BottomSheetBehavior)
+        if (behavior != null && behavior instanceof BottomSheetBehavior) {
             ((BottomSheetBehavior) behavior).setBottomSheetCallback(mCallback);
+            ((BottomSheetBehavior) behavior).setState(BottomSheetBehavior.STATE_EXPANDED);
+        }
         ArrayList<Layer> colorMapLayers = getArguments().getParcelableArrayList(COLORMAP_ARG);
 
         mRecyclerView = (RecyclerView) contentView.findViewById(R.id.color_map_rv);

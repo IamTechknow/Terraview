@@ -1,6 +1,7 @@
 package com.iamtechknow.worldview.map;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -11,9 +12,13 @@ import java.util.Date;
 
 public interface MapPresenter {
 
+    void onRestoreInstanceState(Bundle savedInstanceState);
+
     void onMapReady(GoogleMap gmaps);
 
     void onDateChanged(Date date);
+
+    Date getCurrDate();
 
     void getRemoteData(Context c);
 
