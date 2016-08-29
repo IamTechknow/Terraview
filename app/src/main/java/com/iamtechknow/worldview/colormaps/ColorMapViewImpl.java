@@ -48,7 +48,7 @@ public class ColorMapViewImpl extends View implements ColorMapView {
     @Override
     public void setColorMapData(ColorMap map) {
         colorMap = map;
-        rectLength = getWidth() / colorMap.getList().size();
+        rectLength = (float) getWidth() / (float) colorMap.getList().size();
         invalidate(); //will call onDraw()
     }
 

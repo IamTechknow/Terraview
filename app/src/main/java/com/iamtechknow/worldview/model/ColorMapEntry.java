@@ -35,7 +35,7 @@ public class ColorMapEntry {
         g = Integer.parseInt(temp[1]);
         b = Integer.parseInt(temp[2]);
 
-        isInvalid = label.contains("No Data") || label.contains("Unknown");
+        isInvalid = label.equalsIgnoreCase("No Data") || label.contains("Unknown") || label.equals("Fill") || label.equals("Land") || label.equals("Ice") || label.equals("Water");
     }
 
     public String getVal() {
@@ -44,14 +44,6 @@ public class ColorMapEntry {
 
     public String getLabel() {
         return label;
-    }
-
-    public boolean isTransparent() {
-        return transparent;
-    }
-
-    public void setTransparent(boolean transparent) {
-        this.transparent = transparent;
     }
 
     public int getR() {
