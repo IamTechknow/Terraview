@@ -29,5 +29,9 @@ public interface LayerPresenter {
 
     void changeStack(Layer l, boolean queue);
 
+    void setMeasurement(String str);
+
+    String getMeasurement();
+
     ArrayList<String> getLayerTitlesForMeasurement(String measurement);
 }

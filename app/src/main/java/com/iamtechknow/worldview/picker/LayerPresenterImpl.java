@@ -41,6 +41,9 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     //HashSet to keep track of selected elements from stack
     private HashSet<String> titleSet;
 
+    //Used for state restoration in config change
+    private String measurement;
+
     public LayerPresenterImpl(LayerView _view, ArrayList<Layer> list) {
         view = _view;
         stack = list;
@@ -53,7 +56,6 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     public ArrayList<Layer> getCurrStack() {
         return stack;
     }
-
 
     /**
      * Simple use of Retrofit by obtaining the HTML page of a layer's description to be shown
@@ -165,6 +167,7 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
      */
     @Override
     public ArrayList<String> getLayerTitlesForMeasurement(String measurement) {
+        this.measurement = measurement;
         TreeMap<String, ArrayList<String>> measurements = dataSource.getMeasurements();
 
         ArrayList<String> id_list = measurements.get(measurement), _layerlist = new ArrayList<>();
@@ -177,8 +180,25 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     }
 
     @Override
+    public void setMeasurement(String str) {
+        measurement = str;
+    }
+
+    @Override
+    public String getMeasurement() {
+        return measurement;
+    }
+
+    /**
+     * If state restoration occurred and a measurement was saved (not when layer tab selected),
+     * show the layer titles for that measurement, or show all the layer titles
+     */
+    @Override
     public void onDataLoaded() {
-        view.populateList(dataSource.getLayers());
+        if(measurement != null)
+            view.onNewMeasurement(measurement);
+        else
+            view.populateList(dataSource.getLayers());
     }
 
     @Override

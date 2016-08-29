@@ -117,11 +117,16 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
 
     /**
      * Called whenever layers are to be added at startup or when selected
-     * Create the tile overlays to be shown on the map
+     * Create the tile overlays to be shown on the map.
+     * If layers were added and the screen is rotated, this can get called when gMaps in null
+     * so wait until it gets called later.
      * @param stack list representing current layers to be shown
      */
     @Override
     public void setLayersAndUpdateMap(ArrayList<Layer> stack) {
+        if(isRestoring)
+            return;
+
         layer_stack = stack;
         mapView.setLayerList(layer_stack);
         removeAllTileOverlays();

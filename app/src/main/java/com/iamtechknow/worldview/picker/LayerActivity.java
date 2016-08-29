@@ -24,7 +24,7 @@ import rx.functions.Action1;
 public class LayerActivity extends AppCompatActivity {
     //Constants for RxBus events and Intent
     public static final int SELECT_MEASURE_TAB = 1, SELECT_LAYER_TAB = 2;
-    public static final String RESULT_STACK = "result";
+    public static final String RESULT_STACK = "result", LAYER_EXTRA = "layer";
 
     //UI handling
     private TabLayout mTabLayout;
@@ -56,7 +56,11 @@ public class LayerActivity extends AppCompatActivity {
 
         //Check if intent extras are received, which would be the layer data from WorldActivity
         //List for layers to be displayed handled as a stack
-        result = getIntent().getParcelableArrayListExtra(WorldActivity.RESULT_LIST);
+        if(getIntent() != null)
+            result = getIntent().getParcelableArrayListExtra(WorldActivity.RESULT_LIST);
+        else
+            result = savedInstanceState.getParcelableArrayList(LAYER_EXTRA);
+
         if(result != null) //if it exists, send to data adapter in layer tab
             extra3.putParcelableArrayList(RESULT_STACK, result);
         frag3.setArguments(extra3);
@@ -70,6 +74,13 @@ public class LayerActivity extends AppCompatActivity {
         mTabLayout.setupWithViewPager(viewPager);
 
         _rxBus = RxBus.getInstance();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelableArrayList(LAYER_EXTRA, result);
     }
 
     @Override
