@@ -150,8 +150,11 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
                 Intent i = new Intent(WorldActivity.this, LayerActivity.class).putParcelableArrayListExtra(RESULT_LIST, mapPresenter.getCurrLayerStack());
                 startActivityForResult(i, LAYER_CODE);
                 break;
+            case R.id.action_layersettings:
+                mDrawerLayout.openDrawer(GravityCompat.END);
+                break;
         }
-        mDrawerLayout.closeDrawers();
+        mDrawerLayout.closeDrawer(GravityCompat.START);
         return false;
     }
 

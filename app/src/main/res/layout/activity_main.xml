@@ -20,9 +20,9 @@
             android:layout_height="match_parent"
             tools:context="com.iamtechknow.worldview.map.WorldActivity" />
     </android.support.design.widget.CoordinatorLayout>
-    <!-- Nav view for selecting layers -->
+    <!-- Navigation menu view -->
     <include layout="@layout/nav_left" />
 
-    <!-- Nav view for selecting date -->
+    <!-- Nav view for selecting layers -->
     <include layout="@layout/nav_layers" />
 </android.support.v4.widget.DrawerLayout>

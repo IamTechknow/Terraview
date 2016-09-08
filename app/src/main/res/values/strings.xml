@@ -50,4 +50,5 @@
     <string name="no_results">No result</string>
     <string name="retry">Retry</string>
     <string name="colormap_info">Colormap Information</string>
+    <string name="layer_settings">Layer Settings</string>
 </resources>
