@@ -3,16 +3,20 @@ package com.iamtechknow.worldview.map;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.util.LruCache;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.UrlTileProvider;
+import com.iamtechknow.worldview.api.ImageAPI;
 import com.iamtechknow.worldview.data.DataSource;
 import com.iamtechknow.worldview.data.LocalDataSource;
 import com.iamtechknow.worldview.data.RemoteDataSource;
 import com.iamtechknow.worldview.model.Layer;
+import com.iamtechknow.worldview.util.Utils;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -21,9 +25,14 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Retrofit;
+
 import static com.iamtechknow.worldview.map.WorldActivity.*;
 
-public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
+public class WorldPresenter implements MapPresenter, CachePresenter, DataSource.LoadCallback {
+    private static final String BASE_URL = "http://gibs.earthdata.nasa.gov";
     private static final int TILE_SIZE = 256;
     private static final float Z_OFFSET = 5.0f, BASE_Z_OFFSET = -50.0f; //base layers cannot cover overlays
 
@@ -39,10 +48,21 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     private ArrayList<TileOverlay> mCurrLayers;
     private Date currentDate;
 
+    //Cache data
+    private LruCache<String, byte[]> byteCache;
+
     public WorldPresenter(MapView view) {
         mapView = view;
         mCurrLayers = new ArrayList<>();
         layer_stack = new ArrayList<>();
+
+        byteCache = new LruCache<String, byte[]>((int) (Runtime.getRuntime().maxMemory() / 1024 / 8)) {
+            @Override
+            protected int sizeOf(String key, byte[] array) {
+                // The cache size will be measured in kilobytes rather than number of items.
+                return array.length / 1024;
+            }
+        };
 
         currentDate = new Date();
         Calendar c = Calendar.getInstance();
@@ -188,6 +208,19 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         return layer_stack;
     }
 
+    @Override
+    public byte[] getMapTile(Layer l, int zoom, int y, int x) {
+        String key = getCacheKey(l, zoom, y, x);
+        byte[] data = byteCache.get(key);
+
+        if(data == null) {
+            data = fetchImage(l, Utils.parseDate(currentDate), zoom, y, x);
+            byteCache.put(key, data);
+        }
+
+        return data;
+    }
+
     /**
      * Show the VIIRS Corrected Reflectance (True Color) overlay for today and coastlines
      */
@@ -247,5 +280,23 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         for(TileOverlay t : mCurrLayers)
             t.remove();
         mCurrLayers.clear();
+    }
+
+    private String getCacheKey(Layer layer, int zoom, int y, int x) {
+        return String.format(Locale.US, "%s/%s/%d/%d/%d", layer.getIdentifier(), Utils.parseDate(currentDate), zoom, y, x);
+    }
+
+    private byte[] fetchImage(Layer l, String date, int zoom, int y, int x) {
+        Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL).build();
+        ImageAPI api = retrofit.create(ImageAPI.class);
+        Call<ResponseBody> result = api.fetchImage(l.getIdentifier(), date, l.getTileMatrixSet(), Integer.toString(zoom), Integer.toString(y), Integer.toString(x), l.getFormat());
+        byte[] temp = null;
+
+        try {
+            temp = result.execute().body().bytes();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return temp;
     }
 }

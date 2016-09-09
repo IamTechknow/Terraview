@@ -16,6 +16,12 @@ import android.webkit.WebView;
 
 import com.iamtechknow.worldview.R;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class Utils {
     private static final String HTML_EXTRA = "html", ABOUT_TAG = "dialog_about";
 
@@ -28,6 +34,14 @@ public class Utils {
         ConnectivityManager manager = (ConnectivityManager) c.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = manager.getActiveNetworkInfo();
         return info != null && info.isConnected();
+    }
+
+    /**
+     * Helper method to parse a Date object into a ISO 8601 date String
+     * @return the date String in
+     */
+    public static String parseDate(Date d) {
+        return new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(d);
     }
 
     /**
