@@ -216,8 +216,8 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     }
 
     @Override
-    public void onLayerSwiped(int position) {
-        mapPresenter.onLayerSwiped(position);
+    public void onLayerSwiped(int position, Layer l) {
+        mapPresenter.onLayerSwiped(position, l);
     }
 
     /**

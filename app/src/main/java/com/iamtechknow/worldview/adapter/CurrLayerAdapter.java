@@ -107,9 +107,9 @@ public class CurrLayerAdapter extends RecyclerView.Adapter<CurrLayerAdapter.Curr
     //Called when an item is swiped, delete layer from map
     @Override
     public void onItemDismiss(int position) {
-        mLayers.remove(position);
+        Layer temp = mLayers.remove(position);
         notifyItemRemoved(position);
-        mDragListener.onLayerSwiped(position);
+        mDragListener.onLayerSwiped(position, temp);
     }
 
     public void insertList(ArrayList<Layer> list) {
