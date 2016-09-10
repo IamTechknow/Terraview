@@ -33,7 +33,7 @@ import static com.iamtechknow.worldview.map.WorldActivity.*;
 
 public class WorldPresenter implements MapPresenter, CachePresenter, DataSource.LoadCallback {
     private static final String BASE_URL = "http://gibs.earthdata.nasa.gov";
-    private static final float Z_OFFSET = 5.0f, BASE_Z_OFFSET = -50.0f; //base layers cannot cover overlays
+    private static final float Z_OFFSET = 5.0f, BASE_Z_OFFSET = -50.0f, MAX_ZOOM = 9.0f; //base layers cannot cover overlays
 
     private MapView mapView;
     private DataSource dataSource;
@@ -47,7 +47,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, DataSource.
     private ArrayList<TileOverlay> mCurrLayers;
     private Date currentDate;
 
-    //Cache data
+    //Cache data to hold tile image data for a given parsable key
     private LruCache<String, byte[]> byteCache;
 
     public WorldPresenter(MapView view) {
@@ -55,6 +55,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, DataSource.
         mCurrLayers = new ArrayList<>();
         layer_stack = new ArrayList<>();
 
+        //Set a overall size limit of the cache to 1/8 of memory available, defining cache size by the array length.
         byteCache = new LruCache<String, byte[]>((int) (Runtime.getRuntime().maxMemory() / 1024 / 8)) {
             @Override
             protected int sizeOf(String key, byte[] array) {
@@ -86,9 +87,9 @@ public class WorldPresenter implements MapPresenter, CachePresenter, DataSource.
 
     //If needed, restore map tiles or set default
     @Override
-    public void onMapReady(GoogleMap gmaps) {
-        gMaps = gmaps;
-        gMaps.setMaxZoomPreference(9.0f);
+    public void onMapReady(GoogleMap googleMap) {
+        gMaps = googleMap;
+        gMaps.setMaxZoomPreference(MAX_ZOOM);
         gMaps.setMapType(GoogleMap.MAP_TYPE_NONE);
 
         if(isRestoring) {
@@ -214,6 +215,11 @@ public class WorldPresenter implements MapPresenter, CachePresenter, DataSource.
         return layer_stack;
     }
 
+    /**
+     * First the cache is checked to ensure tiles exist for the arguments
+     * and the layer by generating a key and checking if it is in the cache already.
+     * If not then go download them all via Retrofit and store them into its image cache.
+     */
     @Override
     public byte[] getMapTile(Layer l, int zoom, int y, int x) {
         String key = getCacheKey(l, zoom, y, x);
@@ -274,10 +280,21 @@ public class WorldPresenter implements MapPresenter, CachePresenter, DataSource.
         mCurrLayers.clear();
     }
 
+    /**
+     * Return a key to be used in the cache based on given arguments.
+     * Done by concatenating the parameters between slashes to allow parsing if needed
+     * @return String to be used as a key for the byte cache
+     */
     private String getCacheKey(Layer layer, int zoom, int y, int x) {
         return String.format(Locale.US, "%s/%s/%d/%d/%d", layer.getIdentifier(), Utils.parseDate(currentDate), zoom, y, x);
     }
 
+    /**
+     * Fetch the image from GIBS to put onto the cache with Retrofit. This method is
+     * executed in a GMaps background thread so RxJava is not necessary. Do account for
+     * 404 error codes if no tile exists (can happen if zoomed in too far).
+     * @return byte array of the image
+     */
     private byte[] fetchImage(Layer l, String date, int zoom, int y, int x) {
         Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL).build();
         ImageAPI api = retrofit.create(ImageAPI.class);

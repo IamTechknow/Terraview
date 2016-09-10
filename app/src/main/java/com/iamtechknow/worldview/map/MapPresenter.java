@@ -10,6 +10,9 @@ import com.iamtechknow.worldview.model.Layer;
 import java.util.ArrayList;
 import java.util.Date;
 
+/**
+ * Presenter portion of the Map contract, exposes all methods needed by the map view.
+ */
 public interface MapPresenter {
 
     void onRestoreInstanceState(Bundle savedInstanceState);

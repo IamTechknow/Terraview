@@ -21,9 +21,7 @@ public class CacheTileProvider implements TileProvider {
     }
 
     /**
-     * This method runs on a custom background thread. First the cache is checked to ensure tiles
-     * exist for the arguments and the layer by generating a key and checking if it is in the cache already.
-     * If not then go download them all via Retrofit and store them into its image cache.
+     * This method runs on a custom background thread.
      * The images should be in the cache now, so we can use the arguments to get the image, and then create a tile.
      */
     @Override

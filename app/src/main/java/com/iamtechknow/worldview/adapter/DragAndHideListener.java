@@ -27,6 +27,7 @@ public interface DragAndHideListener {
 
     /**
      * Called when an item is swiped to remove the corresponding tile overlay
+     * Get the layer removed which will be passed onto the map presenter to clean the cache
      */
     void onLayerSwiped(int position, Layer l);
 }
