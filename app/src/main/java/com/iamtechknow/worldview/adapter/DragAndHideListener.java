@@ -28,5 +28,5 @@ public interface DragAndHideListener {
     /**
      * Called when an item is swiped to remove the corresponding tile overlay
      */
-    void onLayerSwiped(int position);
+    void onLayerSwiped(int position, Layer l);
 }

@@ -4,11 +4,11 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.util.LruCache;
+import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
-import com.google.android.gms.maps.model.UrlTileProvider;
 import com.iamtechknow.worldview.api.ImageAPI;
 import com.iamtechknow.worldview.data.DataSource;
 import com.iamtechknow.worldview.data.LocalDataSource;
@@ -17,23 +17,22 @@ import com.iamtechknow.worldview.model.Layer;
 import com.iamtechknow.worldview.util.Utils;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Set;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 
 import static com.iamtechknow.worldview.map.WorldActivity.*;
 
 public class WorldPresenter implements MapPresenter, CachePresenter, DataSource.LoadCallback {
     private static final String BASE_URL = "http://gibs.earthdata.nasa.gov";
-    private static final int TILE_SIZE = 256;
     private static final float Z_OFFSET = 5.0f, BASE_Z_OFFSET = -50.0f; //base layers cannot cover overlays
 
     private MapView mapView;
@@ -90,6 +89,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, DataSource.
     public void onMapReady(GoogleMap gmaps) {
         gMaps = gmaps;
         gMaps.setMaxZoomPreference(9.0f);
+        gMaps.setMapType(GoogleMap.MAP_TYPE_NONE);
 
         if(isRestoring) {
             isRestoring = false;
@@ -192,13 +192,19 @@ public class WorldPresenter implements MapPresenter, CachePresenter, DataSource.
      * @param position the position of the deleted list item
      */
     @Override
-    public void onLayerSwiped(int position) {
+    public void onLayerSwiped(int position, Layer l) {
         TileOverlay temp = mCurrLayers.remove(position);
         temp.remove();
 
+        //Get all keys and remove all entries that start with the identifier
+        Set<String> keys =  byteCache.snapshot().keySet();
+        for(String key : keys)
+            if(key.startsWith(l.getIdentifier()))
+                byteCache.remove(key);
+
         //Fix Z-Order of other overlays
         for(int i = 0; i < mCurrLayers.size(); i++) {
-            TileOverlay t = mCurrLayers.get(0);
+            TileOverlay t = mCurrLayers.get(i);
             t.setZIndex(t.getZIndex() - Z_OFFSET);
         }
     }
@@ -242,23 +248,9 @@ public class WorldPresenter implements MapPresenter, CachePresenter, DataSource.
      */
     private void addTileOverlay(final Layer layer) {
         //Make a tile overlay
-        UrlTileProvider provider = new UrlTileProvider(TILE_SIZE, TILE_SIZE) {
-            @Override
-            public URL getTileUrl(int x, int y, int zoom) {
-                String s = String.format(Locale.US, layer.generateURL(currentDate), zoom, y, x);
-                URL url = null;
+        CacheTileProvider provider = new CacheTileProvider(layer, this);
 
-                try {
-                    url = new URL(s);
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
-
-                return url;
-            }
-        };
-
-        mCurrLayers.add(gMaps.addTileOverlay(new TileOverlayOptions().tileProvider(provider)));
+        mCurrLayers.add(gMaps.addTileOverlay(new TileOverlayOptions().tileProvider(provider).fadeIn(false)));
     }
 
     /**
@@ -290,12 +282,14 @@ public class WorldPresenter implements MapPresenter, CachePresenter, DataSource.
         Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL).build();
         ImageAPI api = retrofit.create(ImageAPI.class);
         Call<ResponseBody> result = api.fetchImage(l.getIdentifier(), date, l.getTileMatrixSet(), Integer.toString(zoom), Integer.toString(y), Integer.toString(x), l.getFormat());
-        byte[] temp = null;
+        byte[] temp = new byte[0];
 
         try {
-            temp = result.execute().body().bytes();
+            Response<ResponseBody> r = result.execute();
+            if(r.isSuccessful())
+                temp = r.body().bytes();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.w(getClass().getSimpleName(), e);
         }
         return temp;
     }

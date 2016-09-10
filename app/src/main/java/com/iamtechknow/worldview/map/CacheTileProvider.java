@@ -10,6 +10,7 @@ import com.iamtechknow.worldview.model.Layer;
  */
 public class CacheTileProvider implements TileProvider {
     private static final int SIZE = 256; //Assume all images are 256x256 pixels
+    private static final byte[] EMPTY_ARRAY = new byte[0];
 
     private CachePresenter presenter;
     private Layer layer;
@@ -28,6 +29,6 @@ public class CacheTileProvider implements TileProvider {
     @Override
     public Tile getTile(int x, int y, int zoom) {
         byte[] imageData = presenter.getMapTile(layer, zoom, y, x);
-        return new Tile(SIZE, SIZE, imageData);
+        return imageData.length != EMPTY_ARRAY.length ? new Tile(SIZE, SIZE, imageData) : TileProvider.NO_TILE;
     }
 }

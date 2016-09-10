@@ -30,7 +30,7 @@ public interface MapPresenter {
 
     void onToggleLayer(Layer l, boolean hide);
 
-    void onLayerSwiped(int position);
+    void onLayerSwiped(int position, Layer l);
 
     ArrayList<Layer> getCurrLayerStack();
 }
