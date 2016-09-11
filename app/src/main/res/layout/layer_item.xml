@@ -4,8 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/item_height"
     android:clickable="true"
-    android:foreground="?android:attr/selectableItemBackground"
-    android:background="@drawable/layerstate">
+    android:foreground="?android:attr/selectableItemBackground">
     <TextView
         android:id="@+id/layer_text"
         android:layout_width="wrap_content"
