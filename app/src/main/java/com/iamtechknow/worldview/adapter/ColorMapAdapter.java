@@ -11,7 +11,6 @@ import com.iamtechknow.worldview.colormaps.ColorMapViewImpl;
 import com.iamtechknow.worldview.model.Layer;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
 public class ColorMapAdapter extends RecyclerView.Adapter<ColorMapAdapter.ViewHolder> {
     private ArrayList<Layer> mItems;
@@ -21,13 +20,14 @@ public class ColorMapAdapter extends RecyclerView.Adapter<ColorMapAdapter.ViewHo
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
-        TextView text;
+        TextView text, none;
         ColorMapViewImpl canvas;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
             text = (TextView) itemView.findViewById(R.id.color_map_id);
+            none = (TextView) itemView.findViewById(R.id.color_map_none);
             canvas = (ColorMapViewImpl) itemView.findViewById(R.id.color_map_palette);
         }
     }
@@ -39,16 +39,19 @@ public class ColorMapAdapter extends RecyclerView.Adapter<ColorMapAdapter.ViewHo
     }
 
     /**
-     * Upon binding, start XML parsing and draw the colormap
+     * Upon binding, start XML parsing and draw the colormap, or set no color map text
      */
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Layer l = mItems.get(position);
-        if(l.hasColorMap()) {
-            holder.text.setText(l.getTitle());
+        holder.text.setText(l.getTitle());
+        if(l.hasColorMap())
             holder.canvas.setLayerId(l.getIdentifier());
-        } else
-            holder.text.setText(String.format(Locale.US, "%s%s", l.getTitle(), " - no color map available"));
+        else {
+            holder.canvas.setVisibility(View.GONE);
+            holder.none.setVisibility(View.VISIBLE);
+            holder.none.setText(R.string.colormap_none);
+        }
     }
 
     @Override

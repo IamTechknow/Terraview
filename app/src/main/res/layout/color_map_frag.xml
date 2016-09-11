@@ -7,6 +7,7 @@
         android:layout_gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/colormap_title_margin"
         android:layout_marginBottom="@dimen/colormap_title_margin"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
     <android.support.v7.widget.RecyclerView
