@@ -16,7 +16,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1px"
-        android:background="@color/selectedColor" />
+        android:background="@color/dividerColor" />
 
     <!-- Set visible when no color map available -->
     <TextView
