@@ -7,4 +7,5 @@
     <dimen name="item_sub_height">72dp</dimen>
     <dimen name="colormap_margin">4dp</dimen>
     <dimen name="colormap_title_margin">8dp</dimen>
+    <dimen name="anim_margin">8dp</dimen>
 </resources>

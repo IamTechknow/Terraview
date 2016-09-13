@@ -28,6 +28,7 @@ import android.widget.Toolbar;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.iamtechknow.worldview.anim.AnimDialogFragment;
 import com.iamtechknow.worldview.colormaps.ColorMapFragment;
 import com.iamtechknow.worldview.picker.LayerActivity;
 import com.iamtechknow.worldview.R;
@@ -146,6 +147,15 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
             case R.id.action_date:
                 mDateDialog.show();
                 break;
+            case R.id.action_anim:
+                AnimDialogFragment anim_frag = new AnimDialogFragment();
+                anim_frag.setListener(mListener);
+                Bundle anim_args = new Bundle();
+                anim_args.putString(AnimDialogFragment.ANIM_ARG, Utils.parseDate(mapPresenter.getCurrDate()));
+
+                anim_frag.setArguments(anim_args);
+                anim_frag.show(getSupportFragmentManager(), anim_frag.getTag());
+                break;
             case R.id.action_layers:
                 Intent i = new Intent(WorldActivity.this, LayerActivity.class).putParcelableArrayListExtra(RESULT_LIST, mapPresenter.getCurrLayerStack());
                 startActivityForResult(i, LAYER_CODE);
@@ -254,4 +264,11 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     public void setLayerList(ArrayList<Layer> stack) {
         mItemAdapter.insertList(stack);
     }
+
+    private AnimDialogFragment.Listener mListener = new AnimDialogFragment.Listener() {
+        @Override
+        public void onDialogResult() {
+
+        }
+    };
 }
