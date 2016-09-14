@@ -1,6 +1,5 @@
 package com.iamtechknow.worldview.map;
 
-import android.app.ActionBar;
 import android.app.DatePickerDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -15,20 +14,21 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.DatePicker;
-import android.widget.Toolbar;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.iamtechknow.worldview.anim.AnimDialogFragment;
+import com.iamtechknow.worldview.anim.AnimDialogActivity;
 import com.iamtechknow.worldview.colormaps.ColorMapFragment;
 import com.iamtechknow.worldview.picker.LayerActivity;
 import com.iamtechknow.worldview.R;
@@ -45,7 +45,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         NavigationView.OnNavigationItemSelectedListener, DragAndHideListener {
     public static final String RESULT_LIST = "list", PREFS_FILE = "settings", PREFS_DB_KEY = "have_db";
     public static final String TIME_EXTRA = "time", LAYER_EXTRA = "layer";
-    public static final int LAYER_CODE = 1, SECONDS_PER_DAY = 24*60*60*1000;
+    public static final int LAYER_CODE = 1, ANIM_CODE = 2, SECONDS_PER_DAY = 24*60*60*1000;
 
     //UI fields
     private DrawerLayout mDrawerLayout;
@@ -74,11 +74,11 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         mNavLayers = (NavigationView) findViewById(R.id.nav_layers);
         mCurrList = (RecyclerView) findViewById(R.id.layer_list);
         Toolbar mToolbar = (Toolbar) findViewById(R.id.tool_bar);
-        setActionBar(mToolbar);
+        setSupportActionBar(mToolbar);
         mNavLeft.setNavigationItemSelectedListener(this);
 
         // Adding menu icon to Toolbar
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -148,13 +148,8 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
                 mDateDialog.show();
                 break;
             case R.id.action_anim:
-                AnimDialogFragment anim_frag = new AnimDialogFragment();
-                anim_frag.setListener(mListener);
-                Bundle anim_args = new Bundle();
-                anim_args.putString(AnimDialogFragment.ANIM_ARG, Utils.parseDate(mapPresenter.getCurrDate()));
-
-                anim_frag.setArguments(anim_args);
-                anim_frag.show(getSupportFragmentManager(), anim_frag.getTag());
+                Intent anim_i = new Intent(WorldActivity.this, AnimDialogActivity.class).putExtra(AnimDialogActivity.ANIM_ARG, Utils.parseDate(mapPresenter.getCurrDate()));
+                startActivityForResult(anim_i, ANIM_CODE);
                 break;
             case R.id.action_layers:
                 Intent i = new Intent(WorldActivity.this, LayerActivity.class).putParcelableArrayListExtra(RESULT_LIST, mapPresenter.getCurrLayerStack());
@@ -191,8 +186,16 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        ArrayList<Layer> layer_stack = data.getParcelableArrayListExtra(LayerActivity.RESULT_STACK);
-        mapPresenter.setLayersAndUpdateMap(layer_stack);
+        switch(requestCode) {
+            case ANIM_CODE: //TODO: create animation
+                if(resultCode == RESULT_OK) {
+
+                }
+                break;
+            default:
+                ArrayList<Layer> layer_stack = data.getParcelableArrayListExtra(LayerActivity.RESULT_STACK);
+                mapPresenter.setLayersAndUpdateMap(layer_stack);
+        }
     }
 
     //Reload layers on date change. Cut off time, dates should always be midnight
@@ -264,11 +267,4 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     public void setLayerList(ArrayList<Layer> stack) {
         mItemAdapter.insertList(stack);
     }
-
-    private AnimDialogFragment.Listener mListener = new AnimDialogFragment.Listener() {
-        @Override
-        public void onDialogResult() {
-
-        }
-    };
 }

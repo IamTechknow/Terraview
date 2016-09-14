@@ -63,5 +63,5 @@
     <string name="options">Options</string>
     <string name="loop">Loop</string>
     <string name="save">Save to GIF</string>
-    <string name="make_animation">Make Animation</string>
+    <string name="make_animation">New Animation</string>
 </resources>
