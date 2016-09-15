@@ -66,4 +66,5 @@
     <string name="make_animation">New Animation</string>
     <string name="anim_warning">From and to cannot be empty</string>
     <string name="anim_warning_same">From and to dates cannot be the same</string>
+    <string name="to_hint">Set end date</string>
 </resources>

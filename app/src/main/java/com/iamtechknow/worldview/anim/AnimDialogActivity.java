@@ -17,11 +17,15 @@ import android.support.v7.widget.Toolbar;
 import com.iamtechknow.worldview.R;
 import com.iamtechknow.worldview.util.Utils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 public class AnimDialogActivity extends AppCompatActivity implements View.OnClickListener, DatePickerDialog.OnDateSetListener {
     public static final String ANIM_ARG = "anim", FROM_EXTRA = "day", TO_EXTRA = "month", INTERVAL_EXTRA = "year",
-                               LOOP_EXTRA = "loop", SAVE_EXTRA = "save";
+                               LOOP_EXTRA = "loop", SAVE_EXTRA = "save", DIALOG_FMT = "EEE, MMM dd, yyyy";
     public static final int DAY = 0, MONTH = 1, YEAR = 2;
 
     private enum DateState {
@@ -66,7 +70,7 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
 
         //Get date and set text
         String date = getIntent().getStringExtra(ANIM_ARG);
-        from.setText(String.format("%s   ", date));
+        from.setText(date);
     }
 
     @Override
@@ -112,9 +116,9 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
         c.set(year, month, dayOfMonth);
 
         if(dateState == DateState.FROM)
-            from.setText(String.format("%s   ", Utils.parseDate(c.getTime())));
+            from.setText(Utils.parseDateForDialog(c.getTime()));
         else
-            to.setText(String.format("%s   ", Utils.parseDate(c.getTime())));
+            to.setText(Utils.parseDateForDialog(c.getTime()));
 
         dateState = DateState.NONE;
     }
@@ -127,8 +131,8 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
         int interval = day.isChecked() ? DAY : month.isChecked() ? MONTH : YEAR;
 
         Intent result = new Intent();
-        result.putExtra(FROM_EXTRA, from.getText())
-            .putExtra(TO_EXTRA, to.getText())
+        result.putExtra(FROM_EXTRA, convertToISODate(from.getText().toString()))
+            .putExtra(TO_EXTRA, convertToISODate(to.getText().toString()))
             .putExtra(LOOP_EXTRA, loop.isChecked())
             .putExtra(SAVE_EXTRA, saveGIF.isChecked())
             .putExtra(INTERVAL_EXTRA, interval);
@@ -164,5 +168,23 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
      */
     private void warnUserSameDates() {
         Snackbar.make(findViewById(R.id.thelayout), R.string.anim_warning_same, Snackbar.LENGTH_LONG).show();
+    }
+
+    /**
+     * Converts a string from the readable date format
+     * @param s String from one of the date text fields
+     * @return String in ISO 8601 format
+     */
+    private String convertToISODate(String s) {
+        String result;
+
+        try {
+            Date d = new SimpleDateFormat(DIALOG_FMT, Locale.US).parse(s);
+            result = Utils.parseDate(d);
+        } catch (ParseException e) {
+            result = "";
+        }
+
+        return result;
     }
 }

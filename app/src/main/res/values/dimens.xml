@@ -8,4 +8,7 @@
     <dimen name="colormap_margin">4dp</dimen>
     <dimen name="colormap_title_margin">8dp</dimen>
     <dimen name="anim_margin">8dp</dimen>
+    <dimen name="dialog_text_width">192dp</dimen>
+    <dimen name="anim_top_margin">72dp</dimen>
+    <dimen name="anim_header_margin">4dp</dimen>
 </resources>

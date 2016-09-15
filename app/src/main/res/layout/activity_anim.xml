@@ -11,35 +11,43 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize"
+        android:layout_marginTop="@dimen/anim_top_margin"
         android:layout_marginStart="@dimen/md_keylines">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:layout_marginStart="@dimen/anim_header_margin"
+            android:textAppearance="@style/TextAppearance.AppCompat.Menu"
             android:text="@string/from" />
         <TextView
             android:id="@+id/from_date"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/dialog_text_width"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/anim_margin"
+            android:textAppearance="@style/TextAppearance.AppCompat.Menu"
             style="@style/Widget.AppCompat.Spinner.Underlined" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:layout_marginStart="@dimen/anim_header_margin"
+            android:textAppearance="@style/TextAppearance.AppCompat.Menu"
             android:text="@string/to" />
         <TextView
             android:id="@+id/to_date"
-            android:layout_width="wrap_content"
+            android:hint="@string/to_hint"
+            android:layout_width="@dimen/dialog_text_width"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/anim_margin"
+            android:textAppearance="@style/TextAppearance.AppCompat.Menu"
             style="@style/Widget.AppCompat.Spinner.Underlined" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/anim_header_margin"
             android:layout_marginBottom="@dimen/anim_margin"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textAppearance="@style/TextAppearance.AppCompat.Menu"
             android:text="@string/interval" />
         <RadioGroup
             android:orientation="horizontal"
@@ -52,34 +60,40 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/md_keylines"
                 android:text="@string/day"
+                android:textAppearance="@style/TextAppearance.AppCompat.Menu"
                 android:checked="true" />
             <RadioButton
                 android:id="@+id/month_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/md_keylines"
-                android:text="@string/month" />
+                android:text="@string/month"
+                android:textAppearance="@style/TextAppearance.AppCompat.Menu" />
             <RadioButton
                 android:id="@+id/year_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/md_keylines"
-                android:text="@string/year" />
+                android:text="@string/year"
+                android:textAppearance="@style/TextAppearance.AppCompat.Menu" />
         </RadioGroup>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/anim_header_margin"
             android:layout_marginBottom="@dimen/anim_margin"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textAppearance="@style/TextAppearance.AppCompat.Menu"
             android:text="@string/options" />
         <CheckBox
             android:text="@string/loop"
+            android:textAppearance="@style/TextAppearance.AppCompat.Menu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/loop_checkbox" />
         <CheckBox
             android:text="@string/save"
+            android:textAppearance="@style/TextAppearance.AppCompat.Menu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/save_checkbox" />

@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.Locale;
 
 public class Utils {
-    private static final String HTML_EXTRA = "html", ABOUT_TAG = "dialog_about";
+    private static final String HTML_EXTRA = "html", ABOUT_TAG = "dialog_about", ISO_FMT = "yyyy-MM-dd", DIALOG_FMT = "EEE, MMM dd, yyyy";
 
     /**
      * Helper method to determine whether or not there is internet access
@@ -37,11 +37,19 @@ public class Utils {
     }
 
     /**
-     * Helper method to parse a Date object into a ISO 8601 date String
-     * @return the date String in
+     * Helper method to parse a Date object into a ISO 8601 date String for REST transactions
+     * @return the date in a String format
      */
     public static String parseDate(Date d) {
-        return new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(d);
+        return new SimpleDateFormat(ISO_FMT, Locale.US).format(d);
+    }
+
+    /**
+     * Helper method to parse a Date object into the String format EEE, MMM dd, yyyy for the dialog
+     * @return the date in a String format
+     */
+    public static String parseDateForDialog(Date d) {
+        return new SimpleDateFormat(DIALOG_FMT, Locale.US).format(d);
     }
 
     /**
