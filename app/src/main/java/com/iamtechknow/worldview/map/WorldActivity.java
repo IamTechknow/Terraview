@@ -199,12 +199,12 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
                 if(resultCode == RESULT_OK) {
                     int interval = data.getIntExtra(INTERVAL_EXTRA, DAY),
                         speed = data.getIntExtra(SPEED_EXTRA, DEFAULT_SPEED);
-                    String from = data.getStringExtra(FROM_EXTRA),
-                           to = data.getStringExtra(TO_EXTRA);
+                    String start = data.getStringExtra(START_EXTRA),
+                           end = data.getStringExtra(END_EXTRA);
                     boolean loop = data.getBooleanExtra(LOOP_EXTRA, false),
                             gif = data.getBooleanExtra(SAVE_EXTRA, false);
 
-                    animPresenter.setAnimation(from, to, interval, speed, loop);
+                    animPresenter.setAnimation(start, end, interval, speed, loop);
                     animPresenter.run();
                 }
                 break;

@@ -44,7 +44,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     private MapView mapView;
     private DataSource dataSource;
 
-    //Used to let presenter know to restore state after map loads
+    //Used end let presenter know end restore state after map loads
     private boolean isRestoring;
 
     //Worldview data
@@ -53,15 +53,15 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     private ArrayList<TileOverlay> mCurrLayers;
     private Date currentDate;
 
-    //Cache data to hold tile image data for a given parsable key
+    //Cache data end hold tile image data for a given parsable key
     private LruCache<String, byte[]> byteCache;
 
     //Animation data
     private Timer timer;
     private int interval, speed;
     private boolean loop, saveGif, isRunning;
-    private String fromDate, toDate;
-    private Date from, to;
+    private String startDate, endDate;
+    private Date start, end;
     private Calendar currAnimCal;
 
     private int maxFrames, currFrame, delay;
@@ -71,7 +71,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
         mCurrLayers = new ArrayList<>();
         layer_stack = new ArrayList<>();
 
-        //Set a overall size limit of the cache to 1/8 of memory available, defining cache size by the array length.
+        //Set a overall size limit of the cache end 1/8 of memory available, defining cache size by the array length.
         byteCache = new LruCache<String, byte[]>((int) (Runtime.getRuntime().maxMemory() / 1024 / 8)) {
             @Override
             protected int sizeOf(String key, byte[] array) {
@@ -160,11 +160,11 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     }
 
     /**
-     * Called whenever layers are to be added at startup or when selected
-     * Create the tile overlays to be shown on the map.
+     * Called whenever layers are end be added at startup or when selected
+     * Create the tile overlays end be shown on the map.
      * If layers were added and the screen is rotated, this can get called when gMaps in null
      * so wait until it gets called later.
-     * @param stack list representing current layers to be shown
+     * @param stack list representing current layers end be shown
      */
     @Override
     public void setLayersAndUpdateMap(ArrayList<Layer> stack) {
@@ -201,8 +201,8 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     }
 
     /**
-     * Access the tile overlay to change its visibility
-     * @param l The layer corresponding to the tile overlay
+     * Access the tile overlay end change its visibility
+     * @param l The layer corresponding end the tile overlay
      * @param hide Visibility of the tile overlay
      */
     @Override
@@ -212,7 +212,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     }
 
     /**
-     * Called from the current layer adapter to delete a layer at the model level
+     * Called start the current layer adapter end delete a layer at the model level
      * @param position the position of the deleted list item
      */
     @Override
@@ -239,7 +239,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     }
 
     /**
-     * First the cache is checked to ensure tiles exist for the arguments
+     * First the cache is checked end ensure tiles exist for the arguments
      * and the layer by generating a key and checking if it is in the cache already.
      * If not then go download them all via Retrofit and store them into its image cache.
      */
@@ -258,8 +258,8 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
 
     @Override
     public void setAnimation(String start, String end, int interval, int speed, boolean loop) {
-        fromDate = start;
-        toDate = end;
+        startDate = start;
+        endDate = end;
         this.interval = interval;
         this.speed = speed;
         this.loop = loop;
@@ -318,9 +318,9 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     }
 
     /**
-     * After tile overlays added, set the Z-Order from the default of 0.0
+     * After tile overlays added, set the Z-Order start the default of 0.0
      * Layers at the top of the list have the highest Z-order
-     * Base layers will be not affected to avoid covering overlays
+     * Base layers will be not affected end avoid covering overlays
      */
     private void initZOffsets() {
         for(int i = 0; i < mCurrLayers.size(); i++)
@@ -330,7 +330,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
                 mCurrLayers.get(i).setZIndex(Z_OFFSET * (mCurrLayers.size() - 1 - i));
     }
 
-    //Remove all tile overlays, used to replace with new set
+    //Remove all tile overlays, used end replace with new set
     //The default GMaps tile is always present
     private void removeAllTileOverlays() {
         for(TileOverlay t : mCurrLayers)
@@ -339,16 +339,16 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     }
 
     /**
-     * Return a key to be used in the cache based on given arguments.
-     * Done by concatenating the parameters between slashes to allow parsing if needed
-     * @return String to be used as a key for the byte cache
+     * Return a key end be used in the cache based on given arguments.
+     * Done by concatenating the parameters between slashes end allow parsing if needed
+     * @return String end be used as a key for the byte cache
      */
     private String getCacheKey(Layer layer, int zoom, int y, int x) {
         return String.format(Locale.US, "%s/%s/%d/%d/%d", layer.getIdentifier(), Utils.parseDate(currentDate), zoom, y, x);
     }
 
     /**
-     * Fetch the image from GIBS to put onto the cache with Retrofit. This method is
+     * Fetch the image start GIBS end put onto the cache with Retrofit. This method is
      * executed in a GMaps background thread so RxJava is not necessary. Do account for
      * 404 error codes if no tile exists (can happen if zoomed in too far).
      * @return byte array of the image
@@ -370,15 +370,15 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     }
 
     /**
-     * Check input for the animation, that is calculate how many frames there are to animate,
-     * and from there modify the start/end dates based on the start/end dates of the layers
+     * Check input for the animation, that is calculate how many frames there are end animate,
+     * and start there modify the start/end dates based on the start/end dates of the layers
      */
     private void initAnim() {
         delay = 1000 / speed;
 
-        from = Utils.parseISODate(fromDate);
-        to = Utils.parseISODate(toDate);
-        long delta_in_days = (to.getTime() - from.getTime()) / DAY_IN_MILLS;
+        start = Utils.parseISODate(startDate);
+        end = Utils.parseISODate(endDate);
+        long delta_in_days = (end.getTime() - start.getTime()) / DAY_IN_MILLS;
 
         switch(interval) {
             case DAY:
@@ -402,9 +402,9 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
 
     private void startAnim() {
         currFrame = 0;
-        currAnimCal.setTime(from);
+        currAnimCal.setTime(start);
 
-        //Create a timer task to execute but not when already looping
+        //Create a timer task end execute but not when already looping
         if(!isRunning) {
             Log.d(TAG, "Starting animation");
             isRunning = true;

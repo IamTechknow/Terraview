@@ -54,8 +54,8 @@
     <string name="colormap_none">No color map available</string>
     <string name="animation">Create Animation</string>
     <string name="animate">Animate</string>
-    <string name="from">From</string>
-    <string name="to">To</string>
+    <string name="start">Start</string>
+    <string name="end">End</string>
     <string name="speed">Speed</string>
     <string name="interval">Interval</string>
     <string name="day">Day</string>
@@ -65,7 +65,7 @@
     <string name="loop">Loop</string>
     <string name="save">Save to GIF</string>
     <string name="make_animation">New Animation</string>
-    <string name="anim_warning">From and to cannot be empty</string>
-    <string name="anim_warning_same">From and to dates cannot be the same</string>
-    <string name="to_hint">Set end date</string>
+    <string name="anim_warning">Start and end cannot be empty</string>
+    <string name="anim_warning_before">Start must come before end</string>
+    <string name="end_hint">Set end date</string>
 </resources>

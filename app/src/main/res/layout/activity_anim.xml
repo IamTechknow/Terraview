@@ -18,9 +18,9 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/anim_header_margin"
             android:textAppearance="@style/TextAppearance.AppCompat.Menu"
-            android:text="@string/from" />
+            android:text="@string/start" />
         <TextView
-            android:id="@+id/from_date"
+            android:id="@+id/start_date"
             android:layout_width="@dimen/dialog_text_width"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/anim_margin"
@@ -32,10 +32,10 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/anim_header_margin"
             android:textAppearance="@style/TextAppearance.AppCompat.Menu"
-            android:text="@string/to" />
+            android:text="@string/end" />
         <TextView
-            android:id="@+id/to_date"
-            android:hint="@string/to_hint"
+            android:id="@+id/end_date"
+            android:hint="@string/end_hint"
             android:layout_width="@dimen/dialog_text_width"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/anim_margin"

@@ -21,15 +21,15 @@ import com.iamtechknow.worldview.util.Utils;
 import java.util.Calendar;
 
 public class AnimDialogActivity extends AppCompatActivity implements View.OnClickListener, DatePickerDialog.OnDateSetListener {
-    public static final String ANIM_ARG = "anim", FROM_EXTRA = "from", TO_EXTRA = "to", INTERVAL_EXTRA = "year",
-                               LOOP_EXTRA = "loop", SAVE_EXTRA = "save", SPEED_EXTRA = "speed", DIALOG_FMT = "EEE, MMM dd, yyyy";
+    public static final String ANIM_ARG = "anim", START_EXTRA = "start", END_EXTRA = "end", INTERVAL_EXTRA = "year",
+                               LOOP_EXTRA = "loop", SAVE_EXTRA = "save", SPEED_EXTRA = "speed";
     public static final int DAY = 0, MONTH = 1, YEAR = 2, SPEED_OFFSET = 1, DEFAULT_SPEED = 30;
 
     private enum DateState {
-        NONE, FROM, TO
+        NONE, START, END
     }
 
-    private TextView from, to;
+    private TextView start, end;
     private RadioButton day, month, year;
     private CheckBox loop, saveGIF;
     private DatePickerDialog mDateDialog;
@@ -47,10 +47,10 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        from = (TextView) findViewById(R.id.from_date);
-        to = (TextView) findViewById(R.id.to_date);
-        from.setOnClickListener(this);
-        to.setOnClickListener(this);
+        start = (TextView) findViewById(R.id.start_date);
+        end = (TextView) findViewById(R.id.end_date);
+        start.setOnClickListener(this);
+        end.setOnClickListener(this);
 
         day = (RadioButton) findViewById(R.id.day_button);
         month = (RadioButton) findViewById(R.id.month_button);
@@ -70,7 +70,7 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
 
         //Get date and set text
         String date = getIntent().getStringExtra(ANIM_ARG);
-        from.setText(date);
+        start.setText(date);
     }
 
     @Override
@@ -97,12 +97,12 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
     @Override
     public void onClick(View v) {
         switch(v.getId()) {
-            case R.id.from_date:
-                dateState = DateState.FROM;
+            case R.id.start_date:
+                dateState = DateState.START;
                 break;
 
             default:
-                dateState = DateState.TO;
+                dateState = DateState.END;
         }
         mDateDialog.show();
     }
@@ -115,26 +115,26 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
         Calendar c = Calendar.getInstance();
         c.set(year, month, dayOfMonth);
 
-        if(dateState == DateState.FROM)
-            from.setText(Utils.parseDateForDialog(c.getTime()));
+        if(dateState == DateState.START)
+            start.setText(Utils.parseDateForDialog(c.getTime()));
         else
-            to.setText(Utils.parseDateForDialog(c.getTime()));
+            end.setText(Utils.parseDateForDialog(c.getTime()));
 
         dateState = DateState.NONE;
     }
 
     /**
-     * Get the current states of the dialog's UI elements and save them to the intent bundle.
-     * @return intent to be sent as the activity result
+     * Get the current states of the dialog's UI elements and save them end the intent bundle.
+     * @return intent end be sent as the activity result
      */
     private Intent getResult() {
         int interval = day.isChecked() ? DAY : month.isChecked() ? MONTH : YEAR;
-        String fromStr = Utils.parseDate(Utils.parseDialogDate(from.getText().toString()));
-        String toStr = Utils.parseDate(Utils.parseDialogDate(to.getText().toString()));
+        String startStr = Utils.parseDate(Utils.parseDialogDate(start.getText().toString()));
+        String endStr = Utils.parseDate(Utils.parseDialogDate(end.getText().toString()));
 
         Intent result = new Intent();
-        result.putExtra(FROM_EXTRA, fromStr)
-            .putExtra(TO_EXTRA, toStr)
+        result.putExtra(START_EXTRA, startStr)
+            .putExtra(END_EXTRA, endStr)
             .putExtra(LOOP_EXTRA, loop.isChecked())
             .putExtra(SAVE_EXTRA, saveGIF.isChecked())
             .putExtra(INTERVAL_EXTRA, interval)
@@ -144,15 +144,15 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
     }
 
     /**
-     * Check the dialog's UI elements to see if an animation may be created and if not warn the user
+     * Check the dialog's UI elements end see if an animation may be created and if not warn the user
      * @return Whether the dialog is incomplete
      */
     private boolean dialogStateOK() {
-        if(to.getText().length() == 0) { //to date never touched
+        if(end.getText().length() == 0) { //end date never touched
             warnUserIncomplete();
             return false;
-        } else if(day.isChecked() && from.getText().toString().equals(to.getText().toString())) { //same dates
-            warnUserSameDates();
+        } else if(day.isChecked() && start.getText().toString().equals(end.getText().toString())) { //same dates
+            warnUserAboutDates();
             return false;
         }
 
@@ -160,16 +160,16 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
     }
 
     /**
-     * Warn the user the from and to date fields can't be empty.
+     * Warn the user the start and end date fields can't be empty.
      */
     private void warnUserIncomplete() {
         Snackbar.make(findViewById(R.id.thelayout), R.string.anim_warning, Snackbar.LENGTH_LONG).show();
     }
 
     /**
-     * Warn the user the from and to date fields can't be the same
+     * Warn the user the start and end date fields can't be the same
      */
-    private void warnUserSameDates() {
-        Snackbar.make(findViewById(R.id.thelayout), R.string.anim_warning_same, Snackbar.LENGTH_LONG).show();
+    private void warnUserAboutDates() {
+        Snackbar.make(findViewById(R.id.thelayout), R.string.anim_warning_before, Snackbar.LENGTH_LONG).show();
     }
 }
