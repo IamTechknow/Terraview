@@ -268,6 +268,18 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     }
 
     @Override
+    public Bundle getAnimationSettings() {
+        Bundle b = new Bundle();
+        b.putString(START_EXTRA, Utils.parseDateForDialog(start));
+        b.putString(END_EXTRA, Utils.parseDateForDialog(end));
+        b.putBoolean(LOOP_EXTRA, loop);
+        b.putInt(INTERVAL_EXTRA, interval);
+        b.putInt(SPEED_EXTRA, speed);
+
+        return b;
+    }
+
+    @Override
     public void run() {
         if(!isRunning)
             startAnim();

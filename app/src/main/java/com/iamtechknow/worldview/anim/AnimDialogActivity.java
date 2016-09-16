@@ -18,6 +18,7 @@ import android.support.v7.widget.Toolbar;
 import com.iamtechknow.worldview.R;
 import com.iamtechknow.worldview.util.Utils;
 
+import java.util.Date;
 import java.util.Calendar;
 
 public class AnimDialogActivity extends AppCompatActivity implements View.OnClickListener, DatePickerDialog.OnDateSetListener {
@@ -68,9 +69,8 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
         c.set(Calendar.MILLISECOND, 0);
         mDateDialog = new DatePickerDialog(this, this, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
 
-        //Get date and set text
-        String date = getIntent().getStringExtra(ANIM_ARG);
-        start.setText(date);
+        //Restore prior settings, or get date and set text
+        initDialog(getIntent());
     }
 
     @Override
@@ -123,6 +123,29 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
         dateState = DateState.NONE;
     }
 
+    private void initDialog(Intent extras) {
+        if(extras.getStringExtra(START_EXTRA) != null) {
+            start.setText(extras.getStringExtra(START_EXTRA));
+            end.setText(extras.getStringExtra(END_EXTRA));
+            seekBar.setProgress(extras.getIntExtra(SPEED_EXTRA, DEFAULT_SPEED));
+            loop.setChecked(extras.getBooleanExtra(LOOP_EXTRA, false));
+
+            switch(extras.getIntExtra(INTERVAL_EXTRA, DAY)) {
+                case DAY:
+                    day.setChecked(true);
+                    break;
+
+                case MONTH:
+                    month.setChecked(true);
+                    break;
+
+                default:
+                    year.setChecked(true);
+            }
+        } else
+            start.setText(extras.getStringExtra(ANIM_ARG));
+    }
+
     /**
      * Get the current states of the dialog's UI elements and save them end the intent bundle.
      * @return intent end be sent as the activity result
@@ -151,12 +174,17 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
         if(end.getText().length() == 0) { //end date never touched
             warnUserIncomplete();
             return false;
-        } else if(day.isChecked() && start.getText().toString().equals(end.getText().toString())) { //same dates
+        } else if(areDatesNotInOrder(start.getText().toString(), end.getText().toString())) { //same dates
             warnUserAboutDates();
             return false;
         }
 
         return true;
+    }
+
+    private boolean areDatesNotInOrder(String start, String end) {
+        Date startDate = Utils.parseDialogDate(start), endDate = Utils.parseDialogDate(end);
+        return startDate.compareTo(endDate) >= 0;
     }
 
     /**

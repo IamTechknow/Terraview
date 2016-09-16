@@ -9,6 +9,8 @@ public interface AnimPresenter {
 
     void setAnimation(String start, String end, int interval, int speed, boolean loop);
 
+    Bundle getAnimationSettings();
+
     void run();
 
     boolean isRunning();

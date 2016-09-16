@@ -157,6 +157,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
                 break;
             case R.id.action_anim:
                 Intent anim_i = new Intent(WorldActivity.this, AnimDialogActivity.class).putExtra(AnimDialogActivity.ANIM_ARG, Utils.parseDateForDialog(mapPresenter.getCurrDate()));
+                anim_i.putExtras(animPresenter.getAnimationSettings());
                 startActivityForResult(anim_i, ANIM_CODE);
                 break;
             case R.id.action_layers:
