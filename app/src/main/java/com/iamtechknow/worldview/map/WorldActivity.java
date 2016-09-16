@@ -29,6 +29,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.iamtechknow.worldview.anim.AnimDialogActivity;
+import com.iamtechknow.worldview.anim.AnimPresenter;
 import com.iamtechknow.worldview.colormaps.ColorMapFragment;
 import com.iamtechknow.worldview.picker.LayerActivity;
 import com.iamtechknow.worldview.R;
@@ -40,6 +41,8 @@ import com.iamtechknow.worldview.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+
+import static com.iamtechknow.worldview.anim.AnimDialogActivity.*;
 
 public class WorldActivity extends AppCompatActivity implements MapView, OnMapReadyCallback,
         NavigationView.OnNavigationItemSelectedListener, DragAndHideListener {
@@ -56,8 +59,9 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     private CurrLayerAdapter mItemAdapter;
     private ItemTouchHelper mDragHelper;
 
-    //Presenter
+    //Presenters
     private MapPresenter mapPresenter;
+    private AnimPresenter animPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -187,8 +191,15 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch(requestCode) {
-            case ANIM_CODE: //TODO: create animation
+            case ANIM_CODE:
                 if(resultCode == RESULT_OK) {
+                    int interval = data.getIntExtra(INTERVAL_EXTRA, DAY),
+                        speed = data.getIntExtra(SPEED_EXTRA, DEFAULT_SPEED);
+                    String from = data.getStringExtra(FROM_EXTRA),
+                           to = data.getStringExtra(TO_EXTRA);
+                    boolean loop = data.getBooleanExtra(LOOP_EXTRA, false),
+                            gif = data.getBooleanExtra(SAVE_EXTRA, false);
+
 
                 }
                 break;
@@ -237,7 +248,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
      * Used to indicate internet connectivity is available to load Worldview and GIBS data.
      * Not used when internet is already available or data already obtained
      */
-    BroadcastReceiver connectReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver connectReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION) && Utils.isOnline(context)) {

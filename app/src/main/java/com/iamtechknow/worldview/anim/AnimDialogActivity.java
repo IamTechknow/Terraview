@@ -27,7 +27,7 @@ import java.util.Locale;
 public class AnimDialogActivity extends AppCompatActivity implements View.OnClickListener, DatePickerDialog.OnDateSetListener {
     public static final String ANIM_ARG = "anim", FROM_EXTRA = "day", TO_EXTRA = "month", INTERVAL_EXTRA = "year",
                                LOOP_EXTRA = "loop", SAVE_EXTRA = "save", SPEED_EXTRA = "speed", DIALOG_FMT = "EEE, MMM dd, yyyy";
-    public static final int DAY = 0, MONTH = 1, YEAR = 2, SPEED_OFFSET = 1;
+    public static final int DAY = 0, MONTH = 1, YEAR = 2, SPEED_OFFSET = 1, DEFAULT_SPEED = 30;
 
     private enum DateState {
         NONE, FROM, TO
