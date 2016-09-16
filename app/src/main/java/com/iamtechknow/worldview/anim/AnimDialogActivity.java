@@ -18,14 +18,10 @@ import android.support.v7.widget.Toolbar;
 import com.iamtechknow.worldview.R;
 import com.iamtechknow.worldview.util.Utils;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 
 public class AnimDialogActivity extends AppCompatActivity implements View.OnClickListener, DatePickerDialog.OnDateSetListener {
-    public static final String ANIM_ARG = "anim", FROM_EXTRA = "day", TO_EXTRA = "month", INTERVAL_EXTRA = "year",
+    public static final String ANIM_ARG = "anim", FROM_EXTRA = "from", TO_EXTRA = "to", INTERVAL_EXTRA = "year",
                                LOOP_EXTRA = "loop", SAVE_EXTRA = "save", SPEED_EXTRA = "speed", DIALOG_FMT = "EEE, MMM dd, yyyy";
     public static final int DAY = 0, MONTH = 1, YEAR = 2, SPEED_OFFSET = 1, DEFAULT_SPEED = 30;
 
@@ -133,10 +129,12 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
      */
     private Intent getResult() {
         int interval = day.isChecked() ? DAY : month.isChecked() ? MONTH : YEAR;
+        String fromStr = Utils.parseDate(Utils.parseDialogDate(from.getText().toString()));
+        String toStr = Utils.parseDate(Utils.parseDialogDate(to.getText().toString()));
 
         Intent result = new Intent();
-        result.putExtra(FROM_EXTRA, convertToISODate(from.getText().toString()))
-            .putExtra(TO_EXTRA, convertToISODate(to.getText().toString()))
+        result.putExtra(FROM_EXTRA, fromStr)
+            .putExtra(TO_EXTRA, toStr)
             .putExtra(LOOP_EXTRA, loop.isChecked())
             .putExtra(SAVE_EXTRA, saveGIF.isChecked())
             .putExtra(INTERVAL_EXTRA, interval)
@@ -173,23 +171,5 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
      */
     private void warnUserSameDates() {
         Snackbar.make(findViewById(R.id.thelayout), R.string.anim_warning_same, Snackbar.LENGTH_LONG).show();
-    }
-
-    /**
-     * Converts a string from the readable date format
-     * @param s String from one of the date text fields
-     * @return String in ISO 8601 format
-     */
-    private String convertToISODate(String s) {
-        String result;
-
-        try {
-            Date d = new SimpleDateFormat(DIALOG_FMT, Locale.US).parse(s);
-            result = Utils.parseDate(d);
-        } catch (ParseException e) {
-            result = "";
-        }
-
-        return result;
     }
 }

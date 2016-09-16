@@ -12,6 +12,7 @@ import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.webkit.WebView;
 
 import com.iamtechknow.worldview.R;
@@ -24,6 +25,7 @@ import java.util.Locale;
 
 public class Utils {
     private static final String HTML_EXTRA = "html", ABOUT_TAG = "dialog_about", ISO_FMT = "yyyy-MM-dd", DIALOG_FMT = "EEE, MMM dd, yyyy";
+    private static final String TAG = "Utils";
 
     /**
      * Helper method to determine whether or not there is internet access
@@ -50,6 +52,35 @@ public class Utils {
      */
     public static String parseDateForDialog(Date d) {
         return new SimpleDateFormat(DIALOG_FMT, Locale.US).format(d);
+    }
+
+    /**
+     * Given a formatted standard ISO 8601 string, get the corresponding date object.
+     * @param date The ISO 8601 string
+     * @return Returns the date object assuming correct input
+     */
+    public static Date parseISODate(String date) {
+        Date result = null;
+
+        try {
+            result = new SimpleDateFormat(ISO_FMT, Locale.US).parse(date);
+        } catch (ParseException e) {
+            Log.w(TAG, e);
+        }
+
+        return result;
+    }
+
+    public static Date parseDialogDate(String date) {
+        Date result = null;
+
+        try {
+            result = new SimpleDateFormat(DIALOG_FMT, Locale.US).parse(date);
+        } catch (ParseException e) {
+            Log.w(TAG, e);
+        }
+
+        return result;
     }
 
     /**

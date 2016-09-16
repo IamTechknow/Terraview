@@ -68,7 +68,9 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mapPresenter = new WorldPresenter(this);
+        WorldPresenter presenter = new WorldPresenter(this);
+        mapPresenter = presenter;
+        animPresenter = presenter;
 
         //Setup UI
         mItemAdapter = new CurrLayerAdapter(this);
@@ -104,6 +106,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        animPresenter.stop();
 
         //Save current date and layers
         outState.putParcelableArrayList(LAYER_EXTRA, mapPresenter.getCurrLayerStack());
@@ -127,6 +130,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         // Handle item selection
         switch (item.getItemId()) {
             case android.R.id.home:
+                animPresenter.stop();
                 mDrawerLayout.openDrawer(GravityCompat.START);
                 return true;
             default:
@@ -200,7 +204,8 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
                     boolean loop = data.getBooleanExtra(LOOP_EXTRA, false),
                             gif = data.getBooleanExtra(SAVE_EXTRA, false);
 
-
+                    animPresenter.setAnimation(from, to, interval, speed, loop);
+                    animPresenter.run();
                 }
                 break;
             default:

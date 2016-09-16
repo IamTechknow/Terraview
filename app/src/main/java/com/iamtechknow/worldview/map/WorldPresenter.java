@@ -9,6 +9,7 @@ import android.util.Log;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
+import com.iamtechknow.worldview.anim.AnimPresenter;
 import com.iamtechknow.worldview.api.ImageAPI;
 import com.iamtechknow.worldview.data.DataSource;
 import com.iamtechknow.worldview.data.LocalDataSource;
@@ -23,6 +24,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Set;
+import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -30,10 +34,12 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 import static com.iamtechknow.worldview.map.WorldActivity.*;
+import static com.iamtechknow.worldview.anim.AnimDialogActivity.*;
 
-public class WorldPresenter implements MapPresenter, CachePresenter, DataSource.LoadCallback {
-    private static final String BASE_URL = "http://gibs.earthdata.nasa.gov";
+public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresenter, DataSource.LoadCallback {
+    private static final String BASE_URL = "http://gibs.earthdata.nasa.gov", TAG = "WorldPresenter";
     private static final float Z_OFFSET = 5.0f, BASE_Z_OFFSET = -50.0f, MAX_ZOOM = 9.0f; //base layers cannot cover overlays
+    private static final int DAY_IN_MILLS = 24*60*60*1000, DAYS_IN_MONTH = 30, DAYS_IN_YEAR = 365, MIN_FRAMES = 1;
 
     private MapView mapView;
     private DataSource dataSource;
@@ -49,6 +55,16 @@ public class WorldPresenter implements MapPresenter, CachePresenter, DataSource.
 
     //Cache data to hold tile image data for a given parsable key
     private LruCache<String, byte[]> byteCache;
+
+    //Animation data
+    private Timer timer;
+    private int interval, speed;
+    private boolean loop, saveGif, isRunning;
+    private String fromDate, toDate;
+    private Date from, to;
+    private Calendar currAnimCal;
+
+    private int maxFrames, currFrame, delay;
 
     public WorldPresenter(MapView view) {
         mapView = view;
@@ -72,6 +88,13 @@ public class WorldPresenter implements MapPresenter, CachePresenter, DataSource.
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
         mapView.setDateDialog(c.getTimeInMillis());
+
+        speed = DEFAULT_SPEED;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        //TODO: move all state restoration here
     }
 
     //Just restore model here
@@ -233,6 +256,41 @@ public class WorldPresenter implements MapPresenter, CachePresenter, DataSource.
         return data;
     }
 
+    @Override
+    public void setAnimation(String start, String end, int interval, int speed, boolean loop) {
+        fromDate = start;
+        toDate = end;
+        this.interval = interval;
+        this.speed = speed;
+        this.loop = loop;
+
+        initAnim();
+    }
+
+    @Override
+    public void run() {
+        if(!isRunning)
+            startAnim();
+    }
+
+    @Override
+    public boolean isRunning() {
+        return isRunning;
+    }
+
+    /**
+     * Called when an animation ends. If there is a loop then the animation restarts.
+     */
+    @Override
+    public void stop() {
+        if(isRunning && currFrame == maxFrames && loop)
+            startAnim();
+        else if(isRunning) {
+            isRunning = false;
+            stopAnimTimer();
+        }
+    }
+
     /**
      * Show the VIIRS Corrected Reflectance (True Color) overlay for today and coastlines
      */
@@ -309,5 +367,87 @@ public class WorldPresenter implements MapPresenter, CachePresenter, DataSource.
             Log.w(getClass().getSimpleName(), e);
         }
         return temp;
+    }
+
+    /**
+     * Check input for the animation, that is calculate how many frames there are to animate,
+     * and from there modify the start/end dates based on the start/end dates of the layers
+     */
+    private void initAnim() {
+        delay = 1000 / speed;
+
+        from = Utils.parseISODate(fromDate);
+        to = Utils.parseISODate(toDate);
+        long delta_in_days = (to.getTime() - from.getTime()) / DAY_IN_MILLS;
+
+        switch(interval) {
+            case DAY:
+                maxFrames = (int) delta_in_days;
+                break;
+
+            case MONTH:
+                maxFrames = (int) delta_in_days / DAYS_IN_MONTH;
+                break;
+
+            default: //year
+                maxFrames = (int) delta_in_days / DAYS_IN_YEAR;
+        }
+
+        if(++maxFrames == MIN_FRAMES) //No looping if 1 frame, always at least 1
+            loop = false;
+
+        currAnimCal = Calendar.getInstance();
+        currAnimCal.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+
+    private void startAnim() {
+        currFrame = 0;
+        currAnimCal.setTime(from);
+
+        //Create a timer task to execute but not when already looping
+        if(!isRunning) {
+            Log.d(TAG, "Starting animation");
+            isRunning = true;
+            timer = new Timer();
+            timer.scheduleAtFixedRate(getAnimTask(), 0, delay);
+        } else
+            Log.d(TAG, "Looping");
+    }
+
+    private void stopAnimTimer() {
+        Log.d(TAG, "Stopping animation");
+        timer.cancel();
+        timer.purge();
+        isRunning = false;
+    }
+
+    private TimerTask getAnimTask() {
+        return new TimerTask() {
+            @Override
+            public void run() {
+                //Increment calendar depending on interval
+                switch (interval) {
+                    case DAY:
+                        currAnimCal.set(Calendar.DAY_OF_MONTH, currAnimCal.get(Calendar.DAY_OF_MONTH) + 1);
+                        break;
+
+                    case MONTH:
+                        currAnimCal.set(Calendar.MONTH, currAnimCal.get(Calendar.MONTH) + 1);
+                        break;
+
+                    default: //year
+                        currAnimCal.set(Calendar.YEAR, currAnimCal.get(Calendar.YEAR) + 1);
+                }
+                Log.d(TAG, String.format(Locale.US, "Date: %d", currAnimCal.getTimeInMillis()));
+
+                //Hide previous layers and show current layers
+                //TODO: Keep a hashtable of date strings and the array of tile overlays
+                //String date = Utils.parseDate(currAnimCal.getTime());
+
+                //Increment frame count
+                if (++currFrame == maxFrames)
+                    stop();
+            }
+        };
     }
 }
