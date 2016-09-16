@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.RadioButton;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.support.v7.widget.Toolbar;
 
@@ -25,8 +26,8 @@ import java.util.Locale;
 
 public class AnimDialogActivity extends AppCompatActivity implements View.OnClickListener, DatePickerDialog.OnDateSetListener {
     public static final String ANIM_ARG = "anim", FROM_EXTRA = "day", TO_EXTRA = "month", INTERVAL_EXTRA = "year",
-                               LOOP_EXTRA = "loop", SAVE_EXTRA = "save", DIALOG_FMT = "EEE, MMM dd, yyyy";
-    public static final int DAY = 0, MONTH = 1, YEAR = 2;
+                               LOOP_EXTRA = "loop", SAVE_EXTRA = "save", SPEED_EXTRA = "speed", DIALOG_FMT = "EEE, MMM dd, yyyy";
+    public static final int DAY = 0, MONTH = 1, YEAR = 2, SPEED_OFFSET = 1;
 
     private enum DateState {
         NONE, FROM, TO
@@ -36,6 +37,7 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
     private RadioButton day, month, year;
     private CheckBox loop, saveGIF;
     private DatePickerDialog mDateDialog;
+    private SeekBar seekBar;
 
     //Save the text view that was selected
     private DateState dateState;
@@ -60,6 +62,8 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
 
         loop = (CheckBox) findViewById(R.id.loop_checkbox);
         saveGIF = (CheckBox) findViewById(R.id.save_checkbox);
+
+        seekBar = (SeekBar) findViewById(R.id.anim_speed);
 
         Calendar c = Calendar.getInstance();
         c.set(Calendar.HOUR_OF_DAY, 0);
@@ -135,7 +139,8 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
             .putExtra(TO_EXTRA, convertToISODate(to.getText().toString()))
             .putExtra(LOOP_EXTRA, loop.isChecked())
             .putExtra(SAVE_EXTRA, saveGIF.isChecked())
-            .putExtra(INTERVAL_EXTRA, interval);
+            .putExtra(INTERVAL_EXTRA, interval)
+            .putExtra(SPEED_EXTRA, seekBar.getProgress() + SPEED_OFFSET); //1 - 30 FPS
 
         return result;
     }

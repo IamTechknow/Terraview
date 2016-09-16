@@ -56,6 +56,7 @@
     <string name="animate">Animate</string>
     <string name="from">From</string>
     <string name="to">To</string>
+    <string name="speed">Speed</string>
     <string name="interval">Interval</string>
     <string name="day">Day</string>
     <string name="month">Month</string>
