@@ -23,6 +23,7 @@ import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.DatePicker;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -45,7 +46,7 @@ import java.util.Calendar;
 import static com.iamtechknow.worldview.anim.AnimDialogActivity.*;
 
 public class WorldActivity extends AppCompatActivity implements MapView, OnMapReadyCallback,
-        NavigationView.OnNavigationItemSelectedListener, DragAndHideListener {
+        NavigationView.OnNavigationItemSelectedListener, DragAndHideListener, DrawerLayout.DrawerListener {
     public static final String RESULT_LIST = "list", PREFS_FILE = "settings", PREFS_DB_KEY = "have_db";
     public static final String TIME_EXTRA = "time", LAYER_EXTRA = "layer";
     public static final int LAYER_CODE = 1, ANIM_CODE = 2, SECONDS_PER_DAY = 24*60*60*1000;
@@ -130,7 +131,6 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         // Handle item selection
         switch (item.getItemId()) {
             case android.R.id.home:
-                animPresenter.stop();
                 mDrawerLayout.openDrawer(GravityCompat.START);
                 return true;
             default:
@@ -214,6 +214,28 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
                 mapPresenter.setLayersAndUpdateMap(layer_stack);
         }
     }
+
+    @Override
+    public void onBackPressed() {
+        if(animPresenter.isRunning())
+            animPresenter.stop();
+        else
+            super.onBackPressed();
+    }
+
+    @Override
+    public void onDrawerOpened(View drawerView) {
+        animPresenter.stop();
+    }
+
+    @Override
+    public void onDrawerSlide(View drawerView, float slideOffset) {}
+
+    @Override
+    public void onDrawerClosed(View drawerView) {}
+
+    @Override
+    public void onDrawerStateChanged(int newState) {}
 
     //Reload layers on date change. Cut off time, dates should always be midnight
     private DatePickerDialog.OnDateSetListener mDateListener = new DatePickerDialog.OnDateSetListener() {

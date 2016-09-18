@@ -127,7 +127,7 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
         if(extras.getStringExtra(START_EXTRA) != null) {
             start.setText(extras.getStringExtra(START_EXTRA));
             end.setText(extras.getStringExtra(END_EXTRA));
-            seekBar.setProgress(extras.getIntExtra(SPEED_EXTRA, DEFAULT_SPEED));
+            seekBar.setProgress(extras.getIntExtra(SPEED_EXTRA, DEFAULT_SPEED - SPEED_OFFSET) - SPEED_OFFSET);
             loop.setChecked(extras.getBooleanExtra(LOOP_EXTRA, false));
 
             switch(extras.getIntExtra(INTERVAL_EXTRA, DAY)) {

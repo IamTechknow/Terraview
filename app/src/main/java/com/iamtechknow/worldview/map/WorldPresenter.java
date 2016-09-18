@@ -22,16 +22,20 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import rx.Observable;
+import rx.Observer;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 
 import static com.iamtechknow.worldview.map.WorldActivity.*;
 import static com.iamtechknow.worldview.anim.AnimDialogActivity.*;
@@ -57,7 +61,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     private LruCache<String, byte[]> byteCache;
 
     //Animation data
-    private Timer timer;
+    private Subscription animSub;
     private int interval, speed;
     private boolean loop, saveGif, isRunning;
     private String startDate, endDate;
@@ -66,10 +70,14 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
 
     private int maxFrames, currFrame, delay;
 
+    //Date string and overlay mapping for quick access
+    private Hashtable<String, ArrayList<TileOverlay>> animCache;
+
     public WorldPresenter(MapView view) {
         mapView = view;
         mCurrLayers = new ArrayList<>();
         layer_stack = new ArrayList<>();
+        animCache = new Hashtable<>();
 
         //Set a overall size limit of the cache end 1/8 of memory available, defining cache size by the array length.
         byteCache = new LruCache<String, byte[]>((int) (Runtime.getRuntime().maxMemory() / 1024 / 8)) {
@@ -242,6 +250,10 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
      * First the cache is checked end ensure tiles exist for the arguments
      * and the layer by generating a key and checking if it is in the cache already.
      * If not then go download them all via Retrofit and store them into its image cache.
+     *
+     * This method isn't executed when invisible tile overlays are created, only when they
+     * become visible. Therefore the tiles for animation overlays are downloaded when shown during
+     * an overlay's animation frame, so we can get the date on real-time.
      */
     @Override
     public byte[] getMapTile(Layer l, int zoom, int y, int x) {
@@ -249,7 +261,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
         byte[] data = byteCache.get(key);
 
         if(data == null) {
-            data = fetchImage(l, Utils.parseDate(currentDate), zoom, y, x);
+            data = fetchImage(l, isRunning ? Utils.parseDate(currAnimCal.getTime()) : Utils.parseDate(currentDate), zoom, y, x);
             byteCache.put(key, data);
         }
 
@@ -270,8 +282,10 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     @Override
     public Bundle getAnimationSettings() {
         Bundle b = new Bundle();
-        b.putString(START_EXTRA, Utils.parseDateForDialog(start));
-        b.putString(END_EXTRA, Utils.parseDateForDialog(end));
+        if(start != null && end != null) { //no dialog restore on first animation
+            b.putString(START_EXTRA, Utils.parseDateForDialog(start));
+            b.putString(END_EXTRA, Utils.parseDateForDialog(end));
+        }
         b.putBoolean(LOOP_EXTRA, loop);
         b.putInt(INTERVAL_EXTRA, interval);
         b.putInt(SPEED_EXTRA, speed);
@@ -291,16 +305,25 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     }
 
     /**
-     * Called when an animation ends. If there is a loop then the animation restarts.
+     * Called by the view to stop the animation.
      */
     @Override
     public void stop() {
-        if(isRunning && currFrame == maxFrames && loop)
-            startAnim();
-        else if(isRunning) {
+        if(isRunning) {
             isRunning = false;
             stopAnimTimer();
+            restoreCurrentLayers();
         }
+    }
+
+    /**
+     * Called when an animation ends. If there is a loop then the animation restarts.
+     */
+    private void stopOrRepeat() {
+        if(loop)
+            startAnim();
+        else
+            stop();
     }
 
     /**
@@ -327,6 +350,14 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
         CacheTileProvider provider = new CacheTileProvider(layer, this);
 
         mCurrLayers.add(gMaps.addTileOverlay(new TileOverlayOptions().tileProvider(provider).fadeIn(false)));
+    }
+
+    private TileOverlay addAnimOverlay(final Layer layer, float z) {
+        return gMaps.addTileOverlay(new TileOverlayOptions()
+            .tileProvider(new CacheTileProvider(layer, this))
+            .fadeIn(false)
+            .visible(true)
+            .zIndex(z));
     }
 
     /**
@@ -356,7 +387,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
      * @return String end be used as a key for the byte cache
      */
     private String getCacheKey(Layer layer, int zoom, int y, int x) {
-        return String.format(Locale.US, "%s/%s/%d/%d/%d", layer.getIdentifier(), Utils.parseDate(currentDate), zoom, y, x);
+        return String.format(Locale.US, "%s/%s/%d/%d/%d", layer.getIdentifier(), isRunning ? Utils.parseDate(currAnimCal.getTime()) : Utils.parseDate(currentDate), zoom, y, x);
     }
 
     /**
@@ -410,56 +441,101 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
 
         currAnimCal = Calendar.getInstance();
         currAnimCal.setTimeZone(TimeZone.getTimeZone("UTC"));
+        initAnimCache();
+    }
+
+    /**
+     * Populate the animation tile overlays by adding all overlays for a specific date,
+     * putting it into the hash table, incrementing the calendar by the interval, and
+     * repeating for all frames
+     */
+    private void initAnimCache() {
+        animCache.clear();
+        gMaps.clear();
+        currAnimCal.setTime(start);
+        float index = 0;
+
+        for(int i = 0; i < maxFrames; i++) {
+            String date = Utils.parseDate(currAnimCal.getTime());
+            ArrayList<TileOverlay> temp = new ArrayList<>();
+
+            for(Layer l: layer_stack)
+                temp.add(addAnimOverlay(l, index));
+            animCache.put(date, temp);
+
+            index--;
+            incrementCal(currAnimCal);
+        }
     }
 
     private void startAnim() {
         currFrame = 0;
         currAnimCal.setTime(start);
 
-        //Create a timer task end execute but not when already looping
+        //Create an observable to execute a method every second on the main thread
         if(!isRunning) {
             Log.d(TAG, "Starting animation");
             isRunning = true;
-            timer = new Timer();
-            timer.scheduleAtFixedRate(getAnimTask(), 0, delay);
-        } else
+            animSub = Observable.interval(delay, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Long>() {
+                    @Override
+                    public void onCompleted() {}
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.w(getClass().getSimpleName(), e);
+                    }
+
+                    @Override
+                    public void onNext(Long aLong) {
+                        //increment frame count
+                        if (currFrame++ == maxFrames)
+                            stopOrRepeat();
+                        else {
+                            //Hide the current layers, increment calendar and show current layers in RxJava
+                            for (TileOverlay t : animCache.get(Utils.parseDate(currAnimCal.getTime())))
+                                t.setVisible(false);
+
+                            incrementCal(currAnimCal);
+                            Log.d(TAG, String.format(Locale.US, "Date: %s", Utils.parseDate(currAnimCal.getTime())));
+                        }
+                    }
+                });
+        } else { //Restore tiles
             Log.d(TAG, "Looping");
+            for(ArrayList<TileOverlay> list : animCache.values())
+                for(TileOverlay t : list)
+                    t.setVisible(true);
+        }
     }
 
+    /**
+     * Stop the animation, cancel the timer and delete the timer task, which must be remade again.
+     */
     private void stopAnimTimer() {
         Log.d(TAG, "Stopping animation");
-        timer.cancel();
-        timer.purge();
-        isRunning = false;
+        animSub.unsubscribe();
     }
 
-    private TimerTask getAnimTask() {
-        return new TimerTask() {
-            @Override
-            public void run() {
-                //Increment calendar depending on interval
-                switch (interval) {
-                    case DAY:
-                        currAnimCal.set(Calendar.DAY_OF_MONTH, currAnimCal.get(Calendar.DAY_OF_MONTH) + 1);
-                        break;
+    private void restoreCurrentLayers() {
+        gMaps.clear();
+        setLayersAndUpdateMap(layer_stack);
+    }
 
-                    case MONTH:
-                        currAnimCal.set(Calendar.MONTH, currAnimCal.get(Calendar.MONTH) + 1);
-                        break;
+    //Increment calendar depending on interval
+    private void incrementCal(Calendar currAnimCal) {
+        switch (interval) {
+            case DAY:
+                currAnimCal.set(Calendar.DAY_OF_MONTH, currAnimCal.get(Calendar.DAY_OF_MONTH) + 1);
+                break;
 
-                    default: //year
-                        currAnimCal.set(Calendar.YEAR, currAnimCal.get(Calendar.YEAR) + 1);
-                }
-                Log.d(TAG, String.format(Locale.US, "Date: %d", currAnimCal.getTimeInMillis()));
+            case MONTH:
+                currAnimCal.set(Calendar.MONTH, currAnimCal.get(Calendar.MONTH) + 1);
+                break;
 
-                //Hide previous layers and show current layers
-                //TODO: Keep a hashtable of date strings and the array of tile overlays
-                //String date = Utils.parseDate(currAnimCal.getTime());
-
-                //Increment frame count
-                if (++currFrame == maxFrames)
-                    stop();
-            }
-        };
+            default: //year
+                currAnimCal.set(Calendar.YEAR, currAnimCal.get(Calendar.YEAR) + 1);
+        }
     }
 }
