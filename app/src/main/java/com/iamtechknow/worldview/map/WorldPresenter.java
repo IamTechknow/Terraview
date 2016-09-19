@@ -21,7 +21,6 @@ import com.iamtechknow.worldview.util.Utils;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -45,6 +44,7 @@ import static com.iamtechknow.worldview.anim.AnimDialogActivity.*;
 
 public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresenter, DataSource.LoadCallback {
     private static final String BASE_URL = "http://gibs.earthdata.nasa.gov", TAG = "WorldPresenter";
+    private static final String URL_FORMAT = "http://gibs.earthdata.nasa.gov/wmts/epsg3857/best/%s/default/%s/%s/%d/%d/%d.jpeg";
     private static final float Z_OFFSET = 5.0f, BASE_Z_OFFSET = -50.0f, MAX_ZOOM = 9.0f; //base layers cannot cover overlays
     private static final int DAY_IN_MILLS = 24*60*60*1000, DAYS_IN_MONTH = 30, DAYS_IN_YEAR = 365, MIN_FRAMES = 1;
 
@@ -65,16 +65,12 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
 
     //Animation data
     private Subscription animSub;
-    private SimpleDateFormat format;
     private int interval, speed;
     private boolean loop, saveGif, isRunning;
     private String startDate, endDate;
     private Date start, end;
     private Calendar currAnimCal;
-
     private int maxFrames, currFrame, delay;
-
-    //Date string and overlay mapping for quick access
     private ArrayList<ArrayList<TileOverlay>> animCache;
 
     public WorldPresenter(MapView view) {
@@ -92,7 +88,6 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
             }
         };
 
-        format = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         currentDate = new Date();
         Calendar c = Calendar.getInstance();
         c.setTime(currentDate);
@@ -103,11 +98,6 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
         mapView.setDateDialog(c.getTimeInMillis());
 
         speed = DEFAULT_SPEED;
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        //TODO: move all state restoration here
     }
 
     //Just restore model here
@@ -266,7 +256,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
         byte[] data = byteCache.get(key);
 
         if(data == null) {
-            data = fetchImage(l, isRunning ? Utils.parseDate(currAnimCal.getTime()) : Utils.parseDate(currentDate), zoom, y, x);
+            data = fetchImage(l, Utils.parseDate(currentDate), zoom, y, x);
             byteCache.put(key, data);
         }
 
@@ -317,7 +307,11 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
         if(isRunning) {
             isRunning = false;
             stopAnimTimer();
+
             setLayersAndUpdateMap(layer_stack); //restore layers
+            for(ArrayList<TileOverlay> list : animCache)
+                for(TileOverlay t : list)
+                    t.remove();
         }
     }
 
@@ -384,7 +378,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
      * @return String to be used as a key for the byte cache
      */
     private String getCacheKey(Layer layer, int zoom, int y, int x) {
-        return String.format(Locale.US, "%s/%s/%d/%d/%d", layer.getIdentifier(), isRunning ? Utils.parseDate(currAnimCal.getTime()) : Utils.parseDate(currentDate), zoom, y, x);
+        return String.format(Locale.US, "%s/%s/%d/%d/%d", layer.getIdentifier(), Utils.parseDate(currentDate), zoom, y, x);
     }
 
     /**
@@ -454,7 +448,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
             ArrayList<TileOverlay> temp = new ArrayList<>();
 
             for(Layer l: layer_stack)
-                temp.add(gMaps.addTileOverlay(new TileOverlayOptions().tileProvider(getTile(l, format.format(currAnimCal.getTime()))).fadeIn(false).zIndex(i)));
+                temp.add(gMaps.addTileOverlay(new TileOverlayOptions().tileProvider(getTile(l, Utils.parseDate(currAnimCal.getTime()))).fadeIn(false).zIndex(i)));
             animCache.add(temp);
 
             incrementCal(currAnimCal);
@@ -517,14 +511,20 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
         }
     }
 
+    /**
+     * Used to provide instances of a TileProvider suitable for animation.
+     * @param l The layer with the data to fill the URL
+     * @param date The date for the tile
+     * @return tile provider for an animation
+     */
     private UrlTileProvider getTile(Layer l, String date) {
         return new UrlTileProvider(256, 256) {
             @Override
             public URL getTileUrl(int x, int y, int z) {
                 try {
-                    return new URL(String.format(Locale.US, "http://gibs.earthdata.nasa.gov/wmts/epsg3857/best/%s/default/%s/%s/%d/%d/%d.jpeg", l.getIdentifier(), date, l.getTileMatrixSet(), z, y, x));
+                    return new URL(String.format(Locale.US, URL_FORMAT, l.getIdentifier(), date, l.getTileMatrixSet(), z, y, x));
                 } catch (MalformedURLException e) {
-                    e.printStackTrace();
+                    Log.w(getClass().getSimpleName(), e);
                     return null;
                 }
             }

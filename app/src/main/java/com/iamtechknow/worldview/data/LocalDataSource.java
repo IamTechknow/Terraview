@@ -8,7 +8,6 @@ import android.support.v4.content.Loader;
 
 import com.iamtechknow.worldview.model.DataWrapper;
 import com.iamtechknow.worldview.model.Layer;
-import com.iamtechknow.worldview.model.LayerLoader;
 
 import java.util.ArrayList;
 import java.util.TreeMap;
