@@ -9,6 +9,7 @@ import android.util.Log;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
+import com.google.android.gms.maps.model.UrlTileProvider;
 import com.iamtechknow.worldview.anim.AnimPresenter;
 import com.iamtechknow.worldview.api.ImageAPI;
 import com.iamtechknow.worldview.data.DataSource;
@@ -18,11 +19,13 @@ import com.iamtechknow.worldview.model.Layer;
 import com.iamtechknow.worldview.util.Utils;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
@@ -33,9 +36,9 @@ import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import rx.Observable;
-import rx.Observer;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 
 import static com.iamtechknow.worldview.map.WorldActivity.*;
 import static com.iamtechknow.worldview.anim.AnimDialogActivity.*;
@@ -62,6 +65,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
 
     //Animation data
     private Subscription animSub;
+    private SimpleDateFormat format;
     private int interval, speed;
     private boolean loop, saveGif, isRunning;
     private String startDate, endDate;
@@ -71,13 +75,13 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     private int maxFrames, currFrame, delay;
 
     //Date string and overlay mapping for quick access
-    private Hashtable<String, ArrayList<TileOverlay>> animCache;
+    private ArrayList<ArrayList<TileOverlay>> animCache;
 
     public WorldPresenter(MapView view) {
         mapView = view;
         mCurrLayers = new ArrayList<>();
         layer_stack = new ArrayList<>();
-        animCache = new Hashtable<>();
+        animCache = new ArrayList<>();
 
         //Set a overall size limit of the cache to 1/8 of memory available, defining cache size by the array length.
         byteCache = new LruCache<String, byte[]>((int) (Runtime.getRuntime().maxMemory() / 1024 / 8)) {
@@ -88,6 +92,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
             }
         };
 
+        format = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         currentDate = new Date();
         Calendar c = Calendar.getInstance();
         c.setTime(currentDate);
@@ -312,7 +317,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
         if(isRunning) {
             isRunning = false;
             stopAnimTimer();
-            restoreCurrentLayers();
+            setLayersAndUpdateMap(layer_stack); //restore layers
         }
     }
 
@@ -350,14 +355,6 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
         CacheTileProvider provider = new CacheTileProvider(layer, this);
 
         mCurrLayers.add(gMaps.addTileOverlay(new TileOverlayOptions().tileProvider(provider).fadeIn(false)));
-    }
-
-    private TileOverlay addAnimOverlay(final Layer layer, float z) {
-        return gMaps.addTileOverlay(new TileOverlayOptions()
-            .tileProvider(new CacheTileProvider(layer, this))
-            .fadeIn(false)
-            .visible(true)
-            .zIndex(z));
     }
 
     /**
@@ -436,7 +433,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
                 maxFrames = (int) delta_in_days / DAYS_IN_YEAR;
         }
 
-        if(++maxFrames == MIN_FRAMES) //No looping if 1 frame, always at least 1
+        if(maxFrames == MIN_FRAMES)
             loop = false;
 
         currAnimCal = Calendar.getInstance();
@@ -446,24 +443,20 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
 
     /**
      * Populate the animation tile overlays by adding all overlays for a specific date,
-     * putting it into the hash table, incrementing the calendar by the interval, and
+     * putting it into the list, incrementing the calendar by the interval, and
      * repeating for all frames
      */
     private void initAnimCache() {
         animCache.clear();
-        gMaps.clear();
         currAnimCal.setTime(start);
-        float index = 0;
 
-        for(int i = 0; i < maxFrames; i++) {
-            String date = Utils.parseDate(currAnimCal.getTime());
+        for(int i = 0; i > -maxFrames - 1; i--) {
             ArrayList<TileOverlay> temp = new ArrayList<>();
 
             for(Layer l: layer_stack)
-                temp.add(addAnimOverlay(l, index));
-            animCache.put(date, temp);
+                temp.add(gMaps.addTileOverlay(new TileOverlayOptions().tileProvider(getTile(l, format.format(currAnimCal.getTime()))).fadeIn(false).zIndex(i)));
+            animCache.add(temp);
 
-            index--;
             incrementCal(currAnimCal);
         }
     }
@@ -472,39 +465,29 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
         currFrame = 0;
         currAnimCal.setTime(start);
 
-        //Create an observable to execute a method every second on the main thread
+        //Create an observable to wait for the tiles to load, then process each animation frame
         if(!isRunning) {
             Log.d(TAG, "Starting animation");
             isRunning = true;
-            animSub = Observable.interval(delay, TimeUnit.MILLISECONDS)
+            animSub = Observable.interval(maxFrames * 500, delay, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Long>() {
+                .subscribe(new Action1<Long>() {
                     @Override
-                    public void onCompleted() {}
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.w(getClass().getSimpleName(), e);
-                    }
-
-                    @Override
-                    public void onNext(Long aLong) {
-                        //increment frame count
-                        if (currFrame++ == maxFrames)
+                    public void call(Long aLong) {
+                        //Here we don't need the date, just an index since they are in order
+                        if (currFrame == maxFrames)
                             stopOrRepeat();
                         else {
-                            //Hide the current layers, increment calendar and show current layers in RxJava
-                            for (TileOverlay t : animCache.get(Utils.parseDate(currAnimCal.getTime())))
+                            for (TileOverlay t : animCache.get(currFrame))
                                 t.setVisible(false);
 
-                            incrementCal(currAnimCal);
-                            Log.d(TAG, String.format(Locale.US, "Date: %s", Utils.parseDate(currAnimCal.getTime())));
+                            currFrame++;
                         }
                     }
                 });
         } else { //Restore tiles
             Log.d(TAG, "Looping");
-            for(ArrayList<TileOverlay> list : animCache.values())
+            for(ArrayList<TileOverlay> list : animCache)
                 for(TileOverlay t : list)
                     t.setVisible(true);
         }
@@ -516,11 +499,6 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     private void stopAnimTimer() {
         Log.d(TAG, "Stopping animation");
         animSub.unsubscribe();
-    }
-
-    private void restoreCurrentLayers() {
-        gMaps.clear();
-        setLayersAndUpdateMap(layer_stack);
     }
 
     //Increment calendar depending on interval
@@ -537,5 +515,19 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
             default: //year
                 currAnimCal.set(Calendar.YEAR, currAnimCal.get(Calendar.YEAR) + 1);
         }
+    }
+
+    private UrlTileProvider getTile(Layer l, String date) {
+        return new UrlTileProvider(256, 256) {
+            @Override
+            public URL getTileUrl(int x, int y, int z) {
+                try {
+                    return new URL(String.format(Locale.US, "http://gibs.earthdata.nasa.gov/wmts/epsg3857/best/%s/default/%s/%s/%d/%d/%d.jpeg", l.getIdentifier(), date, l.getTileMatrixSet(), z, y, x));
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+        };
     }
 }
