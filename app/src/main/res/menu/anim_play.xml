@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Need both showAsAction attributes -->
+    <item
+        android:id="@+id/anim_play"
+        android:title="@string/animate"
+        android:icon="@drawable/ic_play_arrow_white_24px"
+        android:visible="false"
+        app:showAsAction="ifRoom"
+        android:showAsAction="ifRoom" />
+</menu>

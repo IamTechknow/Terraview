@@ -11,6 +11,7 @@ import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.UrlTileProvider;
 import com.iamtechknow.worldview.anim.AnimPresenter;
+import com.iamtechknow.worldview.anim.AnimView;
 import com.iamtechknow.worldview.api.ImageAPI;
 import com.iamtechknow.worldview.data.DataSource;
 import com.iamtechknow.worldview.data.LocalDataSource;
@@ -49,6 +50,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     private static final int DAY_IN_MILLS = 24*60*60*1000, DAYS_IN_MONTH = 30, DAYS_IN_YEAR = 365, MIN_FRAMES = 1;
 
     private MapView mapView;
+    private AnimView animView;
     private DataSource dataSource;
 
     //Used to let presenter know to restore state after map loads
@@ -66,7 +68,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     //Animation data
     private Subscription animSub;
     private int interval, speed;
-    private boolean loop, saveGif, isRunning;
+    private boolean loop, saveGif, animRunning, animInSession;
     private String startDate, endDate;
     private Date start, end;
     private Calendar currAnimCal;
@@ -75,6 +77,8 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
 
     public WorldPresenter(MapView view) {
         mapView = view;
+        animView = (AnimView) view;
+
         mCurrLayers = new ArrayList<>();
         layer_stack = new ArrayList<>();
         animCache = new ArrayList<>();
@@ -272,6 +276,8 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
         this.loop = loop;
 
         initAnim();
+        animInSession = true;
+        animView.setAnimButton(true);
     }
 
     @Override
@@ -290,25 +296,30 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
 
     @Override
     public void run() {
-        if(!isRunning)
+        if(!animRunning)
             startAnim();
     }
 
     @Override
     public boolean isRunning() {
-        return isRunning;
+        return animInSession;
     }
 
     /**
-     * Called by the view to stop the animation.
+     * Called by the view or an animation end to stop with or without the possibility to restore.
+     * If terminated, the layer stack is restored, otherwise the play button may be pressed again.
      */
     @Override
-    public void stop() {
-        if(isRunning) {
-            isRunning = false;
+    public void stop(boolean terminate) {
+        if(animRunning) {
+            animRunning = false;
             stopAnimTimer();
+        }
 
-            setLayersAndUpdateMap(layer_stack); //restore layers
+        if(terminate && animInSession) {
+            animInSession = false;
+            animView.setAnimButton(false);
+            setLayersAndUpdateMap(layer_stack); //restore layers FIXME: takes longer with long animations
             for(ArrayList<TileOverlay> list : animCache)
                 for(TileOverlay t : list)
                     t.remove();
@@ -316,13 +327,15 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     }
 
     /**
-     * Called when an animation ends. If there is a loop then the animation restarts.
+     * Called when an animation ends but can be restored by pressing the play button or a loop.
      */
     private void stopOrRepeat() {
         if(loop)
             startAnim();
-        else
-            stop();
+        else {
+            stop(false);
+            restoreAnimTiles();
+        }
     }
 
     /**
@@ -460,10 +473,10 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
         currAnimCal.setTime(start);
 
         //Create an observable to wait for the tiles to load, then process each animation frame
-        if(!isRunning) {
+        if(!animRunning) {
             Log.d(TAG, "Starting animation");
-            isRunning = true;
-            animSub = Observable.interval(maxFrames * 500, delay, TimeUnit.MILLISECONDS)
+            animRunning = true;
+            animSub = Observable.interval(delay, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Long>() {
                     @Override
@@ -481,9 +494,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
                 });
         } else { //Restore tiles
             Log.d(TAG, "Looping");
-            for(ArrayList<TileOverlay> list : animCache)
-                for(TileOverlay t : list)
-                    t.setVisible(true);
+            restoreAnimTiles();
         }
     }
 
@@ -493,6 +504,12 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     private void stopAnimTimer() {
         Log.d(TAG, "Stopping animation");
         animSub.unsubscribe();
+    }
+
+    private void restoreAnimTiles() {
+        for(ArrayList<TileOverlay> list : animCache)
+            for(TileOverlay t : list)
+                t.setVisible(true);
     }
 
     //Increment calendar depending on interval

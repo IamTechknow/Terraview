@@ -11,5 +11,5 @@ public interface AnimPresenter {
 
     boolean isRunning();
 
-    void stop();
+    void stop(boolean terminate);
 }

@@ -31,6 +31,7 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.iamtechknow.worldview.anim.AnimDialogActivity;
 import com.iamtechknow.worldview.anim.AnimPresenter;
+import com.iamtechknow.worldview.anim.AnimView;
 import com.iamtechknow.worldview.colormaps.ColorMapFragment;
 import com.iamtechknow.worldview.picker.LayerActivity;
 import com.iamtechknow.worldview.R;
@@ -45,7 +46,7 @@ import java.util.Calendar;
 
 import static com.iamtechknow.worldview.anim.AnimDialogActivity.*;
 
-public class WorldActivity extends AppCompatActivity implements MapView, OnMapReadyCallback,
+public class WorldActivity extends AppCompatActivity implements MapView, AnimView, OnMapReadyCallback,
         NavigationView.OnNavigationItemSelectedListener, DragAndHideListener, DrawerLayout.DrawerListener {
     public static final String RESULT_LIST = "list", PREFS_FILE = "settings", PREFS_DB_KEY = "have_db";
     public static final String TIME_EXTRA = "time", LAYER_EXTRA = "layer";
@@ -59,6 +60,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     private RecyclerView mCurrList;
     private CurrLayerAdapter mItemAdapter;
     private ItemTouchHelper mDragHelper;
+    private boolean playButtonVisible;
 
     //Presenters
     private MapPresenter mapPresenter;
@@ -82,6 +84,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         mCurrList = (RecyclerView) findViewById(R.id.layer_list);
         Toolbar mToolbar = (Toolbar) findViewById(R.id.tool_bar);
         setSupportActionBar(mToolbar);
+        mDrawerLayout.addDrawerListener(this);
         mNavLeft.setNavigationItemSelectedListener(this);
 
         // Adding menu icon to Toolbar
@@ -107,7 +110,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        animPresenter.stop();
+        animPresenter.stop(true);
 
         //Save current date and layers
         outState.putParcelableArrayList(LAYER_EXTRA, mapPresenter.getCurrLayerStack());
@@ -123,6 +126,8 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.anim_play, menu);
+        menu.findItem(R.id.anim_play).setVisible(playButtonVisible);
         return true;
     }
 
@@ -132,6 +137,9 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         switch (item.getItemId()) {
             case android.R.id.home:
                 mDrawerLayout.openDrawer(GravityCompat.START);
+                return true;
+            case R.id.anim_play:
+                animPresenter.run();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -206,7 +214,6 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
                             gif = data.getBooleanExtra(SAVE_EXTRA, false);
 
                     animPresenter.setAnimation(start, end, interval, speed, loop);
-                    animPresenter.run();
                 }
                 break;
             default:
@@ -218,14 +225,14 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     @Override
     public void onBackPressed() {
         if(animPresenter.isRunning())
-            animPresenter.stop();
+            animPresenter.stop(true);
         else
             super.onBackPressed();
     }
 
     @Override
     public void onDrawerOpened(View drawerView) {
-        animPresenter.stop();
+        animPresenter.stop(true);
     }
 
     @Override
@@ -305,5 +312,11 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     @Override
     public void setLayerList(ArrayList<Layer> stack) {
         mItemAdapter.insertList(stack);
+    }
+
+    @Override
+    public void setAnimButton(boolean enable) {
+        playButtonVisible = enable;
+        invalidateOptionsMenu(); //calls onCreateOptionsMenu(), set button there
     }
 }
