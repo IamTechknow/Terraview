@@ -41,6 +41,11 @@
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value=".map.WorldActivity" />
         </activity>
+
+        <activity
+            android:name=".anim.AnimDialogActivity"
+            android:label="@string/make_animation"
+            android:launchMode="singleTop" />
     </application>
 
 </manifest>

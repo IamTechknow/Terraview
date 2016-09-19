@@ -12,18 +12,22 @@ import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.webkit.WebView;
 
 import com.iamtechknow.worldview.R;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
 public class Utils {
-    private static final String HTML_EXTRA = "html", ABOUT_TAG = "dialog_about";
+    private static final String HTML_EXTRA = "html", ABOUT_TAG = "dialog_about", ISO_FMT = "yyyy-MM-dd", DIALOG_FMT = "EEE, MMM dd, yyyy";
+    private static final String TAG = "Utils";
+
+    private static final SimpleDateFormat ISO = new SimpleDateFormat(ISO_FMT, Locale.US);
+    private static final SimpleDateFormat DIALOG = new SimpleDateFormat(DIALOG_FMT, Locale.US);
 
     /**
      * Helper method to determine whether or not there is internet access
@@ -37,11 +41,48 @@ public class Utils {
     }
 
     /**
-     * Helper method to parse a Date object into a ISO 8601 date String
-     * @return the date String in
+     * Helper method to parse a Date object into a ISO 8601 date String for REST transactions
+     * @return the date in a String format
      */
     public static String parseDate(Date d) {
-        return new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(d);
+        return ISO.format(d);
+    }
+
+    /**
+     * Helper method to parse a Date object into the String format EEE, MMM dd, yyyy for the dialog
+     * @return the date in a String format
+     */
+    public static String parseDateForDialog(Date d) {
+        return DIALOG.format(d);
+    }
+
+    /**
+     * Given a formatted standard ISO 8601 string, get the corresponding date object.
+     * @param date The ISO 8601 string
+     * @return Returns the date object assuming correct input
+     */
+    public static Date parseISODate(String date) {
+        Date result = null;
+
+        try {
+            result = ISO.parse(date);
+        } catch (ParseException e) {
+            Log.w(TAG, e);
+        }
+
+        return result;
+    }
+
+    public static Date parseDialogDate(String date) {
+        Date result = null;
+
+        try {
+            result = DIALOG.parse(date);
+        } catch (ParseException e) {
+            Log.w(TAG, e);
+        }
+
+        return result;
     }
 
     /**

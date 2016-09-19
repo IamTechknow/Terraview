@@ -1,8 +1,9 @@
-package com.iamtechknow.worldview.model;
+package com.iamtechknow.worldview.data;
 
 import android.util.Log;
 
 import com.google.gson.*;
+import com.iamtechknow.worldview.model.Layer;
 
 import java.io.BufferedReader;
 import java.io.IOException;

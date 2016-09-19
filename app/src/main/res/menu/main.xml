@@ -20,6 +20,10 @@
             android:id="@+id/action_date"
             android:title="@string/date"
             android:icon="@android:drawable/ic_menu_my_calendar" />
+        <item
+            android:id="@+id/action_anim"
+            android:title="@string/make_animation"
+            android:icon="@drawable/ic_movie_creation_white_24px" />
     </group>
 
     <group android:checkableBehavior="single" android:id="@+id/helpGroup">

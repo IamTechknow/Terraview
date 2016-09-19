@@ -1,4 +1,6 @@
-package com.iamtechknow.worldview.model;
+package com.iamtechknow.worldview.data;
+
+import com.iamtechknow.worldview.model.Layer;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;

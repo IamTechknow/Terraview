@@ -42,7 +42,7 @@ public class LayerTest {
 
     @Test
     public void testURLofCurrentLayer() {
-        Layer viirs = new Layer("VIIRS_SNPP_CorrectedReflectance_TrueColor", "GoogleMapsCompatible_Level9", "jpg", "Corrected Reflectance (True Color)", "Suomi NPP / VIIRS", null, "2015-11-24", null, true);
+        Layer viirs = new Layer("VIIRS_SNPP_CorrectedReflectance_TrueColor", "GoogleMapsCompatible_Level9", "jpg", "Corrected Reflectance (True Color)", "Suomi NPP / VIIRS", null, "2015-11-24", null, null, true);
         String expected = String.format("http://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_SNPP_CorrectedReflectance_TrueColor/default/%s/GoogleMapsCompatible_Level9/", dateFormat.format(now)) + "%d/%d/%d.jpg";
 
         assertTrue(viirs.generateURL(now).equals(expected));
@@ -51,7 +51,7 @@ public class LayerTest {
 
     @Test
     public void testURLofPastLayer() {
-        Layer amsr = new Layer("AMSRE_Brightness_Temp_89H_Night", "GoogleMapsCompatible_Level6", "png", "Brightness Temperature (89H Ghz B Scan, Night, AMSR-E, Aqua)", "Aqua / AMSR-E", "2011-10-04", "2002-06-01", null, false);
+        Layer amsr = new Layer("AMSRE_Brightness_Temp_89H_Night", "GoogleMapsCompatible_Level6", "png", "Brightness Temperature (89H Ghz B Scan, Night, AMSR-E, Aqua)", "Aqua / AMSR-E", "2011-10-04", "2002-06-01", null, null, false);
         String result = amsr.generateURL(past);
 
         assertTrue(result.equals("http://gibs.earthdata.nasa.gov/wmts/epsg3857/best/AMSRE_Brightness_Temp_89H_Night/default/2010-06-15/GoogleMapsCompatible_Level6/%d/%d/%d.png"));

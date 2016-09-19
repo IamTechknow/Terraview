@@ -5,9 +5,6 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.iamtechknow.worldview.model.Layer;
-import com.iamtechknow.worldview.model.LayerDatabase;
-import com.iamtechknow.worldview.model.WMTSReader;
-import com.iamtechknow.worldview.model.WVJsonParser;
 
 import org.xml.sax.SAXException;
 

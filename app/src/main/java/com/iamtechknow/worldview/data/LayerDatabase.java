@@ -1,10 +1,12 @@
-package com.iamtechknow.worldview.model;
+package com.iamtechknow.worldview.data;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+
+import com.iamtechknow.worldview.model.Layer;
 
 import java.util.ArrayList;
 import java.util.Collections;

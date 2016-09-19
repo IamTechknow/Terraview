@@ -1,7 +1,10 @@
-package com.iamtechknow.worldview.model;
+package com.iamtechknow.worldview.data;
 
 import android.support.v4.content.AsyncTaskLoader;
 import android.content.Context;
+
+import com.iamtechknow.worldview.model.DataWrapper;
+import com.iamtechknow.worldview.model.Layer;
 
 import java.util.ArrayList;
 import java.util.TreeMap;
