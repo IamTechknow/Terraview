@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialogFragment;
@@ -159,6 +160,12 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
                 break;
             case R.id.action_about:
                 Utils.showAbout(WorldActivity.this);
+                break;
+            case R.id.feedback:
+                //Send an intent to start Gmail, by using the appropriate intent action and extras.
+                Intent feedback = new Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", getString(R.string.email), null))
+                    .putExtra(Intent.EXTRA_EMAIL, new String[] {getString(R.string.email)}).putExtra(Intent.EXTRA_SUBJECT, getString(R.string.email_subject));
+                startActivity(feedback);
                 break;
             case R.id.action_date:
                 mDateDialog.show();

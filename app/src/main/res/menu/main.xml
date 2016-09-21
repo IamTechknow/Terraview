@@ -28,6 +28,10 @@
 
     <group android:checkableBehavior="single" android:id="@+id/helpGroup">
         <item
+            android:id="@+id/feedback"
+            android:title="@string/feedback"
+            android:icon="@drawable/ic_email_white_24px" />
+        <item
             android:id="@+id/action_about"
             android:title="@string/about"
             android:icon="@drawable/ic_info_outline_white_24dp" />

@@ -6,4 +6,5 @@
 .DS_Store
 /build
 /captures
-/app/src/debug
+/app/src/debug/res/values
+/app/src/release/res/values
