@@ -5,9 +5,9 @@ import android.support.v4.app.LoaderManager;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 
+import com.iamtechknow.worldview.Injection;
 import com.iamtechknow.worldview.api.MetadataAPI;
 import com.iamtechknow.worldview.data.DataSource;
-import com.iamtechknow.worldview.data.LocalDataSource;
 import com.iamtechknow.worldview.model.Layer;
 
 import java.io.IOException;
@@ -145,7 +145,7 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
 
     @Override
     public void getData(LoaderManager manager, Context c) {
-        dataSource = new LocalDataSource(manager, c);
+        dataSource = Injection.provideLocalSource(manager, c);
         dataSource.loadData(this);
     }
 

@@ -10,12 +10,12 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.UrlTileProvider;
+import com.iamtechknow.worldview.Injection;
 import com.iamtechknow.worldview.anim.AnimPresenter;
 import com.iamtechknow.worldview.anim.AnimView;
 import com.iamtechknow.worldview.api.ImageAPI;
 import com.iamtechknow.worldview.data.DataSource;
 import com.iamtechknow.worldview.data.LocalDataSource;
-import com.iamtechknow.worldview.data.RemoteDataSource;
 import com.iamtechknow.worldview.model.Layer;
 import com.iamtechknow.worldview.util.Utils;
 
@@ -152,7 +152,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
 
     @Override
     public void getRemoteData(Context c) {
-        dataSource = new RemoteDataSource(c);
+        dataSource = Injection.provideRemoteSource(c);
         dataSource.loadData(this);
     }
 

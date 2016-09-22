@@ -3,8 +3,8 @@ package com.iamtechknow.worldview.picker;
 import android.content.Context;
 import android.support.v4.app.LoaderManager;
 
+import com.iamtechknow.worldview.Injection;
 import com.iamtechknow.worldview.data.DataSource;
-import com.iamtechknow.worldview.data.LocalDataSource;
 
 import java.util.ArrayList;
 import java.util.TreeMap;
@@ -39,7 +39,7 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
 
     @Override
     public void getData(LoaderManager manager, Context c) {
-        dataSource = new LocalDataSource(manager, c);
+        dataSource = Injection.provideLocalSource(manager, c);
         dataSource.loadData(this);
     }
 

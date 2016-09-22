@@ -6,7 +6,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -87,10 +86,8 @@ public class LayerActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home: //back button pressed
-                if (NavUtils.getParentActivityName(this) != null) {
-                    setResult();
-                    NavUtils.navigateUpFromSameTask(this);
-                }
+                setResult();
+                finish();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
