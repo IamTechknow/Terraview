@@ -72,5 +72,5 @@
     <string name="end_hint">Set end date</string>
     <string name="feedback">Send Feedback</string>
     <string name="email" translatable="false">edmondlee.dev@gmail.com</string>
-    <string name="email_subject">Feedback</string>
+    <string name="email_subject">Terraview - Feedback</string>
 </resources>
