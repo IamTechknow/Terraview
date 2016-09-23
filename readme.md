@@ -1,5 +1,5 @@
-# Worldview Mobile
-Worldview Mobile is a REST client for NASA's [Global Imagery Browse Services](https://earthdata.nasa.gov/gibs) (GIBS).
+# Terraview
+Terraview is a REST client for NASA's [Global Imagery Browse Services](https://earthdata.nasa.gov/gibs) (GIBS).
 GIBS is a public API providing access to satellite data and imagery from the EOS (Earth Observing System) and A-Train satellites.
 While this application is not directly related to NASA's [Worldview](https://worldview.earthdata.nasa.gov),
 I worked on improvements on the project in an internship in NASA's Goddard Space Flight Center and created this based on the idea a better interface could be made for mobile devices.
@@ -12,7 +12,7 @@ I worked on improvements on the project in an internship in NASA's Goddard Space
 	I started this application by implementing core features within the Activities and Fragments. There are still features to be implemented which will lead to code bloat. Recently I underwent the process of converting to MVP to seperate business logic from the view to simplify the logic needed in the Activities and Fragments. In the layer picker feature, the event bus has been greatly simplified as a result to minimize coupling. There are a few instructmentation and unit tests, more will be added.
 
 * RxJava is used to create an event bus and to perform networking tasks
-	Currently the ViewPager which accepts fragments to "page" through them in tabs does not allow communication through each of these fragments. I am using a tabbed interface to allow the user to select Worldview layers and their categories displayed in a RecyclerView to display a stack of layers on the map. 
+	Currently the ViewPager which accepts fragments to "page" through them in tabs does not allow communication through each of these fragments. I am using a tabbed interface to allow the user to select layers and their categories displayed in a RecyclerView to display a stack of layers on the map. 
 	The app needs a way to determine what category is selected to display the corresponding measurements in the next tab, and finally the revelant layers in the final tab. This is handled by creating an event bus in RxJava allowing the activities and fragments to have their own reference to the same event bus instance to post and consume events.
 	Observables and subscribers are also used to pass Retrofit calls to bakground threads, and the response bodies may be subscribed upon back in the main thread.
 

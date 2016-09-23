@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.iamtechknow.worldview">
+    package="com.iamtechknow.terraview">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -27,7 +27,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".map.WorldActivity"
+            android:name="com.iamtechknow.terraview.map.WorldActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop">
             <intent-filter>
@@ -37,16 +37,16 @@
         </activity>
 
         <activity
-            android:name=".picker.LayerActivity"
+            android:name="com.iamtechknow.terraview.picker.LayerActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.Tabs"
             android:launchMode="singleTop">
             <meta-data android:name="android.support.PARENT_ACTIVITY"
-                android:value=".map.WorldActivity" />
+                android:value="com.iamtechknow.terraview.map.WorldActivity" />
         </activity>
 
         <activity
-            android:name=".anim.AnimDialogActivity"
+            android:name="com.iamtechknow.terraview.anim.AnimDialogActivity"
             android:label="@string/make_animation"
             android:launchMode="singleTop" />
     </application>

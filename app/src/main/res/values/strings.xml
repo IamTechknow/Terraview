@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Worldview</string>
+    <string name="app_name">Terraview</string>
     <string name="layers">Choose Layers</string>
     <string name="layers_nav">Layers - Swipe to left to delete</string>
     <string name="layer_info">Layer Info</string>
@@ -14,8 +14,8 @@
                 <style> body { font-family: sans-serif; } pre { background-color: #eeeeee; padding: 1em; white-space: pre-wrap; } </style>
             </head>
             <body>
-                <h3>Worldview Mobile</h3>
-                <pre>Worldview Mobile is a REST client for NASA\'s <a href=\"https://earthdata.nasa.gov/gibs\">Global Imagery Browse Services</a> (GIBS).
+                <h3>Terraview</h3>
+                <pre>Terraview is a REST client for NASA\'s <a href=\"https://earthdata.nasa.gov/gibs\">Global Imagery Browse Services</a> (GIBS).
                 GIBS is a public API providing access to satellite data and imagery from the EOS and A-Train satellites.
                 While this application is not directly related to NASA\'s <a href=\"https://worldview.earthdata.nasa.gov/\">Worldview</a>,
                 I worked on improvements on the project in an internship in NASA\'s Goddard Space Flight Center and created this based on the idea a better interface could be made for mobile devices.

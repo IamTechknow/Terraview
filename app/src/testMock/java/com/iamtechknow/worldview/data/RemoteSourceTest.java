@@ -1,6 +1,6 @@
-package com.iamtechknow.worldview.data;
+package com.iamtechknow.terraview.data;
 
-import com.iamtechknow.worldview.Injection;
+import com.iamtechknow.terraview.Injection;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -29,7 +29,7 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <!-- Used when color map is available -->
-    <com.iamtechknow.worldview.colormaps.ColorMapViewImpl
+    <com.iamtechknow.terraview.colormaps.ColorMapViewImpl
         android:id="@+id/color_map_palette"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/md_keylines"

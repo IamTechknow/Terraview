@@ -1,8 +1,8 @@
-package com.iamtechknow.worldview.data;
+package com.iamtechknow.terraview.data;
 
 import android.support.annotation.NonNull;
 
-import com.iamtechknow.worldview.model.Layer;
+import com.iamtechknow.terraview.model.Layer;
 
 import java.util.ArrayList;
 import java.util.TreeMap;
