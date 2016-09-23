@@ -1,9 +1,5 @@
 package com.iamtechknow.worldview.picker;
 
-import android.content.Context;
-import android.support.v4.app.LoaderManager;
-
-import com.iamtechknow.worldview.Injection;
 import com.iamtechknow.worldview.data.DataSource;
 
 import java.util.ArrayList;
@@ -16,13 +12,9 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
     //Used for state restoration in config change
     private String category;
 
-    public NonLayerPresenterImpl(NonLayerView _view) {
+    public NonLayerPresenterImpl(NonLayerView _view, DataSource source) {
         view = _view;
-    }
-
-    @Override
-    public void onStart() {
-
+        dataSource = source;
     }
 
     @Override
@@ -38,8 +30,7 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
     }
 
     @Override
-    public void getData(LoaderManager manager, Context c) {
-        dataSource = Injection.provideLocalSource(manager, c);
+    public void getData() {
         dataSource.loadData(this);
     }
 

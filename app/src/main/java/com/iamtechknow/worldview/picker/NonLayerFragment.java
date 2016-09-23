@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.iamtechknow.worldview.Injection;
 import com.iamtechknow.worldview.R;
 import com.iamtechknow.worldview.adapter.NonLayerDataAdapter;
 import com.iamtechknow.worldview.model.TapEvent;
@@ -34,7 +35,7 @@ public class NonLayerFragment extends Fragment implements NonLayerView {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(false);
 
-        presenter = new NonLayerPresenterImpl(this); //Should work, b/c seperate instance for frags
+        presenter = new NonLayerPresenterImpl(this, Injection.provideLocalSource(getLoaderManager(), getActivity()));
         _rxBus = RxBus.getInstance();
         isCategoryTab = getArguments().getBoolean(EXTRA_ARG);
 
@@ -56,7 +57,7 @@ public class NonLayerFragment extends Fragment implements NonLayerView {
     @Override
     public void onStart() {
         super.onStart();
-        presenter.getData(getLoaderManager(), getActivity());
+        presenter.getData();
 
         if(!isCategoryTab)
             _rxBus.toObserverable()

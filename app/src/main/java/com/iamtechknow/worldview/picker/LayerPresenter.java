@@ -1,8 +1,5 @@
 package com.iamtechknow.worldview.picker;
 
-import android.content.Context;
-import android.support.v4.app.LoaderManager;
-
 import com.iamtechknow.worldview.model.Layer;
 
 import java.util.ArrayList;
@@ -25,7 +22,7 @@ public interface LayerPresenter {
 
     Layer searchLayerByTitle(String title);
 
-    void getData(LoaderManager manager, Context c);
+    void getData();
 
     void changeStack(Layer l, boolean queue);
 

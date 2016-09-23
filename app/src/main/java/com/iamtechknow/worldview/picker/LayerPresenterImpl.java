@@ -1,11 +1,8 @@
 package com.iamtechknow.worldview.picker;
 
-import android.content.Context;
-import android.support.v4.app.LoaderManager;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 
-import com.iamtechknow.worldview.Injection;
 import com.iamtechknow.worldview.api.MetadataAPI;
 import com.iamtechknow.worldview.data.DataSource;
 import com.iamtechknow.worldview.model.Layer;
@@ -45,8 +42,9 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     //Used for state restoration in config change
     private String measurement;
 
-    public LayerPresenterImpl(LayerView _view, ArrayList<Layer> list) {
+    public LayerPresenterImpl(LayerView _view, ArrayList<Layer> list, DataSource source) {
         view = _view;
+        dataSource = source;
         stack = list;
         retrofit = new Retrofit.Builder().baseUrl(BASE_URL).build();
         mSelectedPositions = new SparseBooleanArray();
@@ -144,8 +142,7 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     }
 
     @Override
-    public void getData(LoaderManager manager, Context c) {
-        dataSource = Injection.provideLocalSource(manager, c);
+    public void getData() {
         dataSource.loadData(this);
     }
 

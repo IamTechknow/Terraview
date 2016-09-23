@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.iamtechknow.worldview.Injection;
 import com.iamtechknow.worldview.R;
 import com.iamtechknow.worldview.adapter.LayerDataAdapter;
 import com.iamtechknow.worldview.model.Layer;
@@ -34,7 +35,7 @@ public class LayerFragment extends Fragment implements LayerView {
         setHasOptionsMenu(false);
 
         ArrayList<Layer> stack = getArguments().getParcelableArrayList(LayerActivity.RESULT_STACK);
-        presenter = new LayerPresenterImpl(this, stack);
+        presenter = new LayerPresenterImpl(this, stack, Injection.provideLocalSource(getLoaderManager(), getActivity()));
         _rxBus = RxBus.getInstance();
 
         if(savedInstanceState != null)
@@ -55,7 +56,7 @@ public class LayerFragment extends Fragment implements LayerView {
     @Override
     public void onStart() {
         super.onStart();
-        presenter.getData(getLoaderManager(), getActivity());
+        presenter.getData();
         _rxBus.toObserverable()
             .subscribe(new Action1<Object>() {
                 @Override
