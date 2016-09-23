@@ -1,6 +1,4 @@
-package com.iamtechknow.worldview;
-
-import com.iamtechknow.worldview.model.Layer;
+package com.iamtechknow.worldview.model;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +18,7 @@ public class LayerTest {
     private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
     @Before
-    public void setupDates() {
+    public void setup() {
         now = new Date();
         Calendar c = Calendar.getInstance();
         c.setTime(now);
@@ -51,9 +49,19 @@ public class LayerTest {
 
     @Test
     public void testURLofPastLayer() {
-        Layer amsr = new Layer("AMSRE_Brightness_Temp_89H_Night", "GoogleMapsCompatible_Level6", "png", "Brightness Temperature (89H Ghz B Scan, Night, AMSR-E, Aqua)", "Aqua / AMSR-E", "2011-10-04", "2002-06-01", null, null, false);
-        String result = amsr.generateURL(past);
+        Layer amsr = new Layer();
+        amsr.setIdentifier("AMSRE_Brightness_Temp_89H_Night");
+        amsr.setTileMatrixSet("GoogleMapsCompatible_Level6");
+        amsr.setFormat("png");
+        amsr.setTitle("Brightness Temperature (89H Ghz B Scan, Night, AMSR-E, Aqua)");
+        amsr.setSubtitle("Aqua / AMSR-E");
+        amsr.setEndDate("2011-10-04");
+        amsr.setStartDate("2002-06-01");
+        amsr.setPalette("AMSRE_Brightness_Temp_89H_Night");
+        amsr.setBaseLayer(false);
 
+        String result = amsr.generateURL(past);
+        assertTrue(amsr.hasColorMap());
         assertTrue(result.equals("http://gibs.earthdata.nasa.gov/wmts/epsg3857/best/AMSRE_Brightness_Temp_89H_Night/default/2010-06-15/GoogleMapsCompatible_Level6/%d/%d/%d.png"));
     }
 }
