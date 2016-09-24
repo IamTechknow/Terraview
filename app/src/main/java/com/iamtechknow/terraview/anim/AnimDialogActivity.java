@@ -24,14 +24,14 @@ import java.util.Calendar;
 public class AnimDialogActivity extends AppCompatActivity implements View.OnClickListener, DatePickerDialog.OnDateSetListener {
     public static final String ANIM_ARG = "anim", START_EXTRA = "start", END_EXTRA = "end", INTERVAL_EXTRA = "year",
                                LOOP_EXTRA = "loop", SAVE_EXTRA = "save", SPEED_EXTRA = "speed";
-    public static final int DAY = 0, MONTH = 1, YEAR = 2, SPEED_OFFSET = 1, DEFAULT_SPEED = 30;
+    public static final int DAY = 0, MONTH = 1, YEAR = 2, WEEK = 3, SPEED_OFFSET = 1, DEFAULT_SPEED = 30;
 
     private enum DateState {
         NONE, START, END
     }
 
     private TextView start, end;
-    private RadioButton day, month, year;
+    private RadioButton day, month, year, week;
     private CheckBox loop, saveGIF;
     private DatePickerDialog mDateDialog;
     private SeekBar seekBar;
@@ -56,6 +56,7 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
         day = (RadioButton) findViewById(R.id.day_button);
         month = (RadioButton) findViewById(R.id.month_button);
         year = (RadioButton) findViewById(R.id.year_button);
+        week = (RadioButton) findViewById(R.id.week_button);
 
         loop = (CheckBox) findViewById(R.id.loop_checkbox);
         saveGIF = (CheckBox) findViewById(R.id.save_checkbox);
@@ -137,6 +138,10 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
 
                 case MONTH:
                     month.setChecked(true);
+                    break;
+
+                case WEEK:
+                    week.setChecked(true);
                     break;
 
                 default:

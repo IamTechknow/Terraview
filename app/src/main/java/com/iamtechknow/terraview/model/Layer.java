@@ -158,6 +158,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
     /**
      * Formats a string with layer data and specified date to be used for a tile provider
      * A date is needed even when a layer does not have a time interval, in which it is unused
+     * TODO: not used at the moment, change or delete
      * @param d A date string to be formatted in ISO 8601
      * @return A URL String that may be used for UrlTileProvider.getTileURL()
      */

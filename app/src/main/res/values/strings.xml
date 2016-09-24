@@ -61,6 +61,7 @@
     <string name="speed">Speed</string>
     <string name="interval">Interval</string>
     <string name="day">Day</string>
+    <string name="week">Week</string>
     <string name="month">Month</string>
     <string name="year">Year</string>
     <string name="options">Options</string>

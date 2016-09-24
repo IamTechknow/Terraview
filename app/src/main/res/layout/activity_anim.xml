@@ -79,6 +79,13 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Menu"
                 android:checked="true" />
             <RadioButton
+                android:id="@+id/week_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/md_keylines"
+                android:text="@string/week"
+                android:textAppearance="@style/TextAppearance.AppCompat.Menu" />
+            <RadioButton
                 android:id="@+id/month_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

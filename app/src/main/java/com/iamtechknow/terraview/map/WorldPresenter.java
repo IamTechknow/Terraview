@@ -45,9 +45,9 @@ import static com.iamtechknow.terraview.anim.AnimDialogActivity.*;
 
 public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresenter, DataSource.LoadCallback {
     private static final String BASE_URL = "http://gibs.earthdata.nasa.gov", TAG = "WorldPresenter";
-    private static final String URL_FORMAT = "http://gibs.earthdata.nasa.gov/wmts/epsg3857/best/%s/default/%s/%s/%d/%d/%d.jpeg";
+    private static final String URL_FORMAT = "http://gibs.earthdata.nasa.gov/wmts/epsg3857/best/%s/default/%s/%s/%d/%d/%d.%s";
     private static final float Z_OFFSET = 5.0f, BASE_Z_OFFSET = -50.0f, MAX_ZOOM = 9.0f; //base layers cannot cover overlays
-    private static final int DAY_IN_MILLS = 24*60*60*1000, DAYS_IN_MONTH = 30, DAYS_IN_YEAR = 365, MIN_FRAMES = 1;
+    private static final int DAY_IN_MILLS = 24*60*60*1000, DAYS_IN_WEEK = 7, DAYS_IN_MONTH = 30, DAYS_IN_YEAR = 365, MIN_FRAMES = 1;
 
     private MapView mapView;
     private AnimView animView;
@@ -432,6 +432,9 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
                 maxFrames = (int) delta_in_days;
                 break;
 
+            case WEEK:
+                maxFrames = (int) delta_in_days / DAYS_IN_WEEK;
+
             case MONTH:
                 maxFrames = (int) delta_in_days / DAYS_IN_MONTH;
                 break;
@@ -516,6 +519,10 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
                 currAnimCal.set(Calendar.DAY_OF_MONTH, currAnimCal.get(Calendar.DAY_OF_MONTH) + 1);
                 break;
 
+            case WEEK:
+                currAnimCal.set(Calendar.WEEK_OF_MONTH, currAnimCal.get(Calendar.WEEK_OF_MONTH) + 1);
+                break;
+
             case MONTH:
                 currAnimCal.set(Calendar.MONTH, currAnimCal.get(Calendar.MONTH) + 1);
                 break;
@@ -536,7 +543,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
             @Override
             public URL getTileUrl(int x, int y, int z) {
                 try {
-                    return new URL(String.format(Locale.US, URL_FORMAT, l.getIdentifier(), date, l.getTileMatrixSet(), z, y, x));
+                    return new URL(String.format(Locale.US, URL_FORMAT, l.getIdentifier(), date, l.getTileMatrixSet(), z, y, x, l.getFormat()));
                 } catch (MalformedURLException e) {
                     Log.w(getClass().getSimpleName(), e);
                     return null;
