@@ -142,7 +142,7 @@ public class WVJsonParser {
                 if(desc_map.containsKey(layer.getIdentifier()))
                     layer.setDescription(desc_map.get(layer.getIdentifier()));
             } else {
-                Log.i(getClass().getSimpleName(), layer.getIdentifier() + " not found, deleting");
+                //Log.i(getClass().getSimpleName(), layer.getIdentifier() + " not found, deleting");
                 toDelete.add(layer);
             }
         }

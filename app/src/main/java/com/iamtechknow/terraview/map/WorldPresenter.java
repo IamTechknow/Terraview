@@ -474,7 +474,6 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
 
         //Create an observable to wait for the tiles to load, then process each animation frame
         if(!animRunning) {
-            Log.d(TAG, "Starting animation");
             animRunning = true;
             animSub = Observable.interval(delay, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
@@ -493,7 +492,6 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
                     }
                 });
         } else { //Restore tiles
-            Log.d(TAG, "Looping");
             restoreAnimTiles();
         }
     }
@@ -502,7 +500,6 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
      * Stop the animation, cancel the timer and delete the timer task, which must be remade again.
      */
     private void stopAnimTimer() {
-        Log.d(TAG, "Stopping animation");
         animSub.unsubscribe();
     }
 
