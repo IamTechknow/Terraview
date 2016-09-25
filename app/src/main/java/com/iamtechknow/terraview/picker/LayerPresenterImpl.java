@@ -8,6 +8,7 @@ import com.iamtechknow.terraview.data.DataSource;
 import com.iamtechknow.terraview.model.Layer;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.TreeMap;
@@ -25,7 +26,7 @@ import rx.schedulers.Schedulers;
 public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallback {
     private static final String BASE_URL = "https://worldview.earthdata.nasa.gov/";
 
-    private LayerView view;
+    private WeakReference<LayerView> viewRef;
     private Retrofit retrofit;
 
     private DataSource dataSource;
@@ -42,13 +43,25 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     //Used for state restoration in config change
     private String measurement;
 
-    public LayerPresenterImpl(LayerView _view, ArrayList<Layer> list, DataSource source) {
-        view = _view;
+    public LayerPresenterImpl(ArrayList<Layer> list, DataSource source) {
         dataSource = source;
         stack = list;
         retrofit = new Retrofit.Builder().baseUrl(BASE_URL).build();
         mSelectedPositions = new SparseBooleanArray();
         titleSet = new HashSet<>();
+    }
+
+    @Override
+    public void attachView(LayerView v) {
+        viewRef = new WeakReference<>(v);
+    }
+
+    @Override
+    public void detachView() {
+        if(viewRef != null) {
+            viewRef.clear();
+            viewRef = null;
+        }
     }
 
     @Override
@@ -93,7 +106,8 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
                 @Override
                 public void onNext(Response<ResponseBody> r) {
                     try {
-                        view.showInfo(r.body().string());
+                        if(getView() != null)
+                            getView().showInfo(r.body().string());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -195,15 +209,21 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
      */
     @Override
     public void onDataLoaded() {
-        if(measurement != null)
-            view.onNewMeasurement(measurement);
-        else
-            view.populateList(dataSource.getLayers());
+        if(getView() != null) {
+            if (measurement != null)
+                getView().onNewMeasurement(measurement);
+            else
+                getView().populateList(dataSource.getLayers());
+        }
     }
 
     @Override
     public void onDataNotAvailable() {
 
+    }
+
+    private LayerView getView() {
+        return viewRef == null ? null : viewRef.get();
     }
 
     /**

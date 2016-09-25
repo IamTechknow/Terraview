@@ -2,19 +2,32 @@ package com.iamtechknow.terraview.picker;
 
 import com.iamtechknow.terraview.data.DataSource;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
 public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.LoadCallback {
-    private NonLayerView view;
+    private WeakReference<NonLayerView> viewRef;
     private DataSource dataSource;
 
     //Used for state restoration in config change
     private String category;
 
-    public NonLayerPresenterImpl(NonLayerView _view, DataSource source) {
-        view = _view;
+    public NonLayerPresenterImpl(DataSource source) {
         dataSource = source;
+    }
+
+    @Override
+    public void attachView(NonLayerView v) {
+        viewRef = new WeakReference<>(v);
+    }
+
+    @Override
+    public void detachView() {
+        if(viewRef != null) {
+            viewRef.clear();
+            viewRef = null;
+        }
     }
 
     @Override
@@ -46,7 +59,8 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
 
     @Override
     public void onDataLoaded() {
-        view.insertList();
+        if(viewRef != null)
+            viewRef.get().insertList();
     }
 
     @Override

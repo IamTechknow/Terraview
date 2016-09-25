@@ -7,6 +7,7 @@ import com.iamtechknow.terraview.model.ColorMap;
 import com.iamtechknow.terraview.model.ColorMapEntry;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.HashSet;
 
 import retrofit2.Call;
@@ -22,10 +23,19 @@ import rx.schedulers.Schedulers;
 public class ColorMapPresenterImpl implements ColorMapPresenter {
     private static final String BASE_URL = "http://gibs.earthdata.nasa.gov";
 
-    private ColorMapView view;
+    private WeakReference<ColorMapView> viewRef;
 
-    public ColorMapPresenterImpl(ColorMapView _view) {
-        view = _view;
+    @Override
+    public void attachView(ColorMapView v) {
+        viewRef = new WeakReference<>(v);
+    }
+
+    @Override
+    public void detachView() {
+        if(viewRef != null) {
+            viewRef.clear();
+            viewRef = null;
+        }
     }
 
     /**
@@ -67,8 +77,10 @@ public class ColorMapPresenterImpl implements ColorMapPresenter {
 
                 @Override
                 public void onNext(Response<ColorMap> r) {
-                    cleanColorMap(r.body());
-                    view.setColorMapData(r.body());
+                    if(viewRef.get() != null) {
+                        cleanColorMap(r.body());
+                        viewRef.get().setColorMapData(r.body());
+                    }
                 }
             });
     }

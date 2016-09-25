@@ -10,6 +10,11 @@ import java.util.ArrayList;
  * but when necessary allows views to request data to update the UI
  */
 public interface LayerPresenter {
+
+    void attachView(LayerView v);
+
+    void detachView();
+
     ArrayList<Layer> getCurrStack();
 
     void useRetrofit(String description);

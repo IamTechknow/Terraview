@@ -15,6 +15,10 @@ import java.util.Date;
  */
 public interface MapPresenter {
 
+    void attachView(MapView v);
+
+    void detachView();
+
     void onRestoreInstanceState(Bundle savedInstanceState);
 
     void onMapReady(GoogleMap gmaps);

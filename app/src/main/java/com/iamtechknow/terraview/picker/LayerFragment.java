@@ -35,7 +35,8 @@ public class LayerFragment extends Fragment implements LayerView {
         setHasOptionsMenu(false);
 
         ArrayList<Layer> stack = getArguments().getParcelableArrayList(LayerActivity.RESULT_STACK);
-        presenter = new LayerPresenterImpl(this, stack, Injection.provideLocalSource(getLoaderManager(), getActivity()));
+        presenter = new LayerPresenterImpl(stack, Injection.provideLocalSource(getLoaderManager(), getActivity()));
+        presenter.attachView(this);
         _rxBus = RxBus.getInstance();
 
         if(savedInstanceState != null)
@@ -65,6 +66,12 @@ public class LayerFragment extends Fragment implements LayerView {
                         onNewMeasurement(((TapEvent) event).getMeasurement());
                 }
             });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        presenter.detachView();
     }
 
     //Inflate the fragment view and setup the RecyclerView

@@ -72,9 +72,11 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        WorldPresenter presenter = new WorldPresenter(this);
+        WorldPresenter presenter = new WorldPresenter();
         mapPresenter = presenter;
+        mapPresenter.attachView(this);
         animPresenter = presenter;
+        animPresenter.attachView(this);
 
         //Setup UI
         mItemAdapter = new CurrLayerAdapter(this);

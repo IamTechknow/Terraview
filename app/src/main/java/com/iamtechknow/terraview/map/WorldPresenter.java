@@ -20,6 +20,7 @@ import com.iamtechknow.terraview.model.Layer;
 import com.iamtechknow.terraview.util.Utils;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -49,8 +50,8 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     private static final float Z_OFFSET = 5.0f, BASE_Z_OFFSET = -50.0f, MAX_ZOOM = 9.0f; //base layers cannot cover overlays
     private static final int DAY_IN_MILLS = 24*60*60*1000, DAYS_IN_WEEK = 7, DAYS_IN_MONTH = 30, DAYS_IN_YEAR = 365, MIN_FRAMES = 1;
 
-    private MapView mapView;
-    private AnimView animView;
+    private WeakReference<MapView> mapViewRef;
+    private WeakReference<AnimView> animViewRef;
     private DataSource dataSource;
 
     //Used to let presenter know to restore state after map loads
@@ -75,10 +76,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     private int maxFrames, currFrame, delay;
     private ArrayList<ArrayList<TileOverlay>> animCache;
 
-    public WorldPresenter(MapView view) {
-        mapView = view;
-        animView = (AnimView) view;
-
+    public WorldPresenter() {
         mCurrLayers = new ArrayList<>();
         layer_stack = new ArrayList<>();
         animCache = new ArrayList<>();
@@ -99,9 +97,33 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
         c.set(Calendar.MINUTE, 0);
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
-        mapView.setDateDialog(c.getTimeInMillis());
+        currentDate = c.getTime();
 
         speed = DEFAULT_SPEED;
+    }
+
+    @Override
+    public void attachView(MapView v) {
+        mapViewRef = new WeakReference<>(v);
+        mapViewRef.get().setDateDialog(currentDate.getTime());
+    }
+
+    @Override
+    public void attachView(AnimView v) {
+        animViewRef = new WeakReference<>(v);
+    }
+
+    @Override
+    public void detachView() {
+        if(mapViewRef != null) {
+            mapViewRef.clear();
+            mapViewRef = null;
+        }
+
+        if(animViewRef != null) {
+            animViewRef.clear();
+            animViewRef = null;
+        }
     }
 
     //Just restore model here
@@ -112,7 +134,9 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
         layer_stack = savedInstanceState.getParcelableArrayList(LAYER_EXTRA);
         Long l = savedInstanceState.getLong(TIME_EXTRA);
         currentDate = new Date(l);
-        mapView.updateDateDialog(l);
+
+        if(getMapView() != null)
+            getMapView().updateDateDialog(l);
     }
 
     //If needed, restore map tiles or set default
@@ -179,7 +203,8 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
             return;
 
         layer_stack = stack;
-        mapView.setLayerList(layer_stack);
+        if(getMapView() != null)
+            getMapView().setLayerList(layer_stack);
         removeAllTileOverlays();
         for(Layer l: layer_stack)
             addTileOverlay(l);
@@ -277,7 +302,8 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
 
         initAnim();
         animInSession = true;
-        animView.setAnimButton(true);
+        if(getAnimView() != null)
+            getAnimView().setAnimButton(true);
     }
 
     @Override
@@ -316,14 +342,22 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
             stopAnimTimer();
         }
 
-        if(terminate && animInSession) {
+        if(terminate && animInSession && getAnimView() != null) {
             animInSession = false;
-            animView.setAnimButton(false);
+            getAnimView().setAnimButton(false);
             setLayersAndUpdateMap(layer_stack); //restore layers FIXME: takes longer with long animations
             for(ArrayList<TileOverlay> list : animCache)
                 for(TileOverlay t : list)
                     t.remove();
         }
+    }
+
+    private MapView getMapView() {
+        return mapViewRef == null ? null : mapViewRef.get();
+    }
+
+    private AnimView getAnimView() {
+        return animViewRef == null ? null : animViewRef.get();
     }
 
     /**
@@ -350,7 +384,8 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
         addTileOverlay(coastline);
         addTileOverlay(l);
         initZOffsets();
-        mapView.setLayerList(layer_stack);
+        if(getMapView() != null)
+            getMapView().setLayerList(layer_stack);
     }
 
     /**

@@ -35,7 +35,8 @@ public class NonLayerFragment extends Fragment implements NonLayerView {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(false);
 
-        presenter = new NonLayerPresenterImpl(this, Injection.provideLocalSource(getLoaderManager(), getActivity()));
+        presenter = new NonLayerPresenterImpl(Injection.provideLocalSource(getLoaderManager(), getActivity()));
+        presenter.attachView(this);
         _rxBus = RxBus.getInstance();
         isCategoryTab = getArguments().getBoolean(EXTRA_ARG);
 
@@ -68,6 +69,12 @@ public class NonLayerFragment extends Fragment implements NonLayerView {
                             insertMeasurements(((TapEvent) event).getCategory());
                     }
                 });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        presenter.detachView();
     }
 
     //Inflate the fragment view and setup the RecyclerView

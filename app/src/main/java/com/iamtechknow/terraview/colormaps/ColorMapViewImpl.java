@@ -38,8 +38,15 @@ public class ColorMapViewImpl extends View implements ColorMapView {
     }
 
     @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        presenter.detachView();
+    }
+
+    @Override
     public void setLayerId(String id) {
-        presenter = new ColorMapPresenterImpl(this);
+        presenter = new ColorMapPresenterImpl();
+        presenter.attachView(this);
         presenter.parseColorMap(id);
     }
 
