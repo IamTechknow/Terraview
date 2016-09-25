@@ -34,7 +34,8 @@ public class MapPresenterTest {
     @Before
     public void setup() {
         stack = new ArrayList<>();
-        presenter = new WorldPresenter(view);
+        presenter = new WorldPresenter();
+        presenter.attachView((MapView) view);
     }
 
     //Test presenter initialization
@@ -48,6 +49,7 @@ public class MapPresenterTest {
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
         verify(view).setDateDialog(c.getTimeInMillis());
+        presenter.detachView();
     }
 
     @Test
@@ -58,5 +60,6 @@ public class MapPresenterTest {
 
         //Empty list is sent to layer list adapter
         verify(view).setLayerList(stack);
+        presenter.detachView();
     }
 }

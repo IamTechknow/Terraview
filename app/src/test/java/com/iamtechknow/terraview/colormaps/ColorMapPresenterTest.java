@@ -28,7 +28,8 @@ public class ColorMapPresenterTest {
 
     @Before
     public void setup() {
-        presenter = new ColorMapPresenterImpl(view);
+        presenter = new ColorMapPresenterImpl();
+        presenter.attachView(view);
     }
 
     @Test
@@ -39,5 +40,6 @@ public class ColorMapPresenterTest {
         //View has received colormap data to draw canvas
         ArgumentCaptor<ColorMap> argument = ArgumentCaptor.forClass(ColorMap.class);
         verify(view).setColorMapData(argument.capture());
+        presenter.detachView();
     }
 }

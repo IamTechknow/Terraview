@@ -26,7 +26,8 @@ public class NonLayerPresenterTest {
 
     @Before
     public void setupPresenter() {
-        presenter = new NonLayerPresenterImpl(view, data);
+        presenter = new NonLayerPresenterImpl(data);
+        presenter.attachView(view);
     }
 
     @Test
@@ -38,5 +39,6 @@ public class NonLayerPresenterTest {
         //When data has been loaded, the first two tabs display the data
         presenter.onDataLoaded();
         verify(view).insertList();
+        presenter.detachView();
     }
 }

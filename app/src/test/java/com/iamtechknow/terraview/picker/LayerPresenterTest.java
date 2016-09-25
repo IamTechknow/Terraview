@@ -40,7 +40,8 @@ public class LayerPresenterTest {
 
     @Before
     public void setupPresenter() {
-        presenter = new LayerPresenterImpl(view, list, data);
+        presenter = new LayerPresenterImpl(list, data);
+        presenter.attachView(view);
     }
 
     @Test
@@ -54,6 +55,7 @@ public class LayerPresenterTest {
         //Verify view has switched to layer tab
         verify(view).onNewMeasurement("Blue Marble");
         verify(view, times(0)).populateList(data.getLayers());
+        presenter.detachView();
     }
 
     @Test
@@ -66,6 +68,7 @@ public class LayerPresenterTest {
         //Verify view has switched to layer tab and displays all layers
         verify(view, times(0)).onNewMeasurement(null);
         verify(view).populateList(data.getLayers());
+        presenter.detachView();
     }
 
     @Test
@@ -78,5 +81,6 @@ public class LayerPresenterTest {
                 "<p>The MODIS Areas of No Data (Terra/Aqua) layer shows the areas on the earth in which the Terra or Aqua satellites have not covered on that particular day.</p>\n" +
                 "\n";
         verify(view).showInfo(expectedHTML); //Verify expected HTML response
+        presenter.detachView();
     }
 }
