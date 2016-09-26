@@ -18,8 +18,6 @@ import com.iamtechknow.terraview.model.TapEvent;
 
 import java.util.ArrayList;
 
-import rx.functions.Action1;
-
 public class LayerActivity extends AppCompatActivity {
     //Constants for RxBus events and Intent
     public static final int SELECT_MEASURE_TAB = 1, SELECT_LAYER_TAB = 2;

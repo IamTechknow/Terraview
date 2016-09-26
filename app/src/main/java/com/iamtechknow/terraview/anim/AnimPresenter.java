@@ -7,6 +7,8 @@ public interface AnimPresenter {
 
     void detachView();
 
+    void newAnimation();
+
     void setAnimation(String start, String end, int interval, int speed, boolean loop);
 
     Bundle getAnimationSettings();

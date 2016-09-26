@@ -8,7 +8,6 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -19,6 +18,7 @@ import com.iamtechknow.terraview.R;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -83,6 +83,17 @@ public class Utils {
         }
 
         return result;
+    }
+
+    /**
+     * Set the calendar time to midnight
+     * @param c The calendar object to use
+     */
+    public static void getCalendarMidnightTime(Calendar c) {
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
     }
 
     /**

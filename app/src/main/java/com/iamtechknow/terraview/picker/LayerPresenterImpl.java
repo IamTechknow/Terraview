@@ -22,8 +22,6 @@ import rx.Observable;
 import rx.Observer;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 import static com.iamtechknow.terraview.picker.LayerActivity.SELECT_LAYER_TAB;

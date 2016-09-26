@@ -56,9 +56,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
     //UI fields
     private DrawerLayout mDrawerLayout;
     private CoordinatorLayout mCoordinatorLayout;
-    private NavigationView mNavLeft, mNavLayers;
     private DatePickerDialog mDateDialog;
-    private RecyclerView mCurrList;
     private CurrLayerAdapter mItemAdapter;
     private ItemTouchHelper mDragHelper;
     private boolean playButtonVisible;
@@ -82,12 +80,10 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
         mItemAdapter = new CurrLayerAdapter(this);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.thelayout);
-        mNavLeft = (NavigationView) findViewById(R.id.nav_menu);
-        mNavLayers = (NavigationView) findViewById(R.id.nav_layers);
-        mCurrList = (RecyclerView) findViewById(R.id.layer_list);
         Toolbar mToolbar = (Toolbar) findViewById(R.id.tool_bar);
         setSupportActionBar(mToolbar);
         mDrawerLayout.addDrawerListener(this);
+        NavigationView mNavLeft = (NavigationView) findViewById(R.id.nav_menu);
         mNavLeft.setNavigationItemSelectedListener(this);
 
         // Adding menu icon to Toolbar
@@ -98,6 +94,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
         }
 
         //Setup the layer list - initally empty list
+        RecyclerView mCurrList = (RecyclerView) findViewById(R.id.layer_list);
         mCurrList.setItemAnimator(new DefaultItemAnimator());
         mCurrList.setLayoutManager(new LinearLayoutManager(this));
         mCurrList.setAdapter(mItemAdapter);
@@ -108,6 +105,13 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
         //Request the map - control flow goes to onMapReady()
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mapPresenter.detachView();
+        animPresenter.detachView();
     }
 
     @Override
@@ -153,33 +157,22 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_layerinfo:
-                BottomSheetDialogFragment frag = new ColorMapFragment();
-                Bundle args = new Bundle();
-                args.putParcelableArrayList(ColorMapFragment.COLORMAP_ARG, mapPresenter.getCurrLayerStack());
-
-                frag.setArguments(args);
-                frag.show(getSupportFragmentManager(), frag.getTag());
+                mapPresenter.presentColorMaps();
                 break;
             case R.id.action_about:
-                Utils.showAbout(WorldActivity.this);
+                mapPresenter.presentAbout();
                 break;
             case R.id.feedback:
-                //Send an intent to start Gmail, by using the appropriate intent action and extras.
-                Intent feedback = new Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", getString(R.string.email), null))
-                    .putExtra(Intent.EXTRA_EMAIL, new String[] {getString(R.string.email)}).putExtra(Intent.EXTRA_SUBJECT, getString(R.string.email_subject));
-                startActivity(feedback);
+                mapPresenter.sendFeedback();
                 break;
             case R.id.action_date:
                 mDateDialog.show();
                 break;
             case R.id.action_anim:
-                Intent anim_i = new Intent(WorldActivity.this, AnimDialogActivity.class).putExtra(AnimDialogActivity.ANIM_ARG, Utils.parseDateForDialog(mapPresenter.getCurrDate()));
-                anim_i.putExtras(animPresenter.getAnimationSettings());
-                startActivityForResult(anim_i, ANIM_CODE);
+                animPresenter.newAnimation();
                 break;
             case R.id.action_layers:
-                Intent i = new Intent(WorldActivity.this, LayerActivity.class).putParcelableArrayListExtra(RESULT_LIST, mapPresenter.getCurrLayerStack());
-                startActivityForResult(i, LAYER_CODE);
+                mapPresenter.chooseLayers();
                 break;
             case R.id.action_layersettings:
                 mDrawerLayout.openDrawer(GravityCompat.END);
@@ -259,10 +252,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
         public void onDateSet(DatePicker view, int year, int month, int day) {
             Calendar c = Calendar.getInstance();
             c.set(year, month, day);
-            c.set(Calendar.HOUR_OF_DAY, 0);
-            c.set(Calendar.MINUTE, 0);
-            c.set(Calendar.SECOND, 0);
-            c.set(Calendar.MILLISECOND, 0);
+            Utils.getCalendarMidnightTime(c);
             mapPresenter.onDateChanged(c.getTime());
         }
     };
@@ -321,6 +311,45 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
     @Override
     public void setLayerList(ArrayList<Layer> stack) {
         mItemAdapter.insertList(stack);
+    }
+
+    @Override
+    public void openEmail() {
+        //Send an intent to start Gmail, by using the appropriate intent action and extras.
+        Intent feedback = new Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", getString(R.string.email), null))
+                .putExtra(Intent.EXTRA_EMAIL, new String[] {getString(R.string.email)})
+                .putExtra(Intent.EXTRA_SUBJECT, getString(R.string.email_subject));
+        startActivity(feedback);
+    }
+
+    @Override
+    public void showColorMaps() {
+        BottomSheetDialogFragment frag = new ColorMapFragment();
+        Bundle args = new Bundle();
+        args.putParcelableArrayList(ColorMapFragment.COLORMAP_ARG, mapPresenter.getCurrLayerStack());
+
+        frag.setArguments(args);
+        frag.show(getSupportFragmentManager(), frag.getTag());
+    }
+
+    @Override
+    public void showAnimDialog() {
+        Intent anim_i = new Intent(WorldActivity.this, AnimDialogActivity.class)
+                .putExtra(AnimDialogActivity.ANIM_ARG, Utils.parseDateForDialog(mapPresenter.getCurrDate()))
+                .putExtras(animPresenter.getAnimationSettings());
+        startActivityForResult(anim_i, ANIM_CODE);
+    }
+
+    @Override
+    public void showPicker() {
+        Intent i = new Intent(WorldActivity.this, LayerActivity.class)
+                .putParcelableArrayListExtra(RESULT_LIST, mapPresenter.getCurrLayerStack());
+        startActivityForResult(i, LAYER_CODE);
+    }
+
+    @Override
+    public void showAbout() {
+        Utils.showAbout(this);
     }
 
     @Override

@@ -39,7 +39,6 @@ import retrofit2.Retrofit;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 
 import static com.iamtechknow.terraview.map.WorldActivity.*;
 import static com.iamtechknow.terraview.anim.AnimDialogActivity.*;
@@ -93,10 +92,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
         currentDate = new Date();
         Calendar c = Calendar.getInstance();
         c.setTime(currentDate);
-        c.set(Calendar.HOUR_OF_DAY, 0);
-        c.set(Calendar.MINUTE, 0);
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.MILLISECOND, 0);
+        Utils.getCalendarMidnightTime(c);
         currentDate = c.getTime();
 
         speed = DEFAULT_SPEED;
@@ -270,6 +266,30 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
         return layer_stack;
     }
 
+    @Override
+    public void sendFeedback() {
+        if(getMapView() != null)
+            getMapView().openEmail();
+    }
+
+    @Override
+    public void presentColorMaps() {
+        if(getMapView() != null)
+            getMapView().showColorMaps();
+    }
+
+    @Override
+    public void chooseLayers() {
+        if(getMapView() != null)
+            getMapView().showPicker();
+    }
+
+    @Override
+    public void presentAbout() {
+        if(getMapView() != null)
+            getMapView().showAbout();
+    }
+
     /**
      * First the cache is checked to ensure tiles exist for the arguments
      * and the layer by generating a key and checking if it is in the cache already.
@@ -290,6 +310,12 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
         }
 
         return data;
+    }
+
+    @Override
+    public void newAnimation() {
+        if(getAnimView() != null)
+            getAnimView().showAnimDialog();
     }
 
     @Override

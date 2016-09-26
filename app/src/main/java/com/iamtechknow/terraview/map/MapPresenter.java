@@ -40,4 +40,12 @@ public interface MapPresenter {
     void onLayerSwiped(int position, Layer l);
 
     ArrayList<Layer> getCurrLayerStack();
+
+    void sendFeedback();
+
+    void presentColorMaps();
+
+    void presentAbout();
+
+    void chooseLayers();
 }

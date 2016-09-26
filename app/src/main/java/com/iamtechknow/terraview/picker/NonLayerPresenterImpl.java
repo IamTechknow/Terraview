@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import rx.Subscription;
-import rx.functions.Action1;
 
 import static com.iamtechknow.terraview.picker.LayerActivity.SELECT_LAYER_TAB;
 import static com.iamtechknow.terraview.picker.LayerActivity.SELECT_MEASURE_TAB;
