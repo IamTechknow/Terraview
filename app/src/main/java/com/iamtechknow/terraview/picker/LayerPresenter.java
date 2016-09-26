@@ -15,6 +15,8 @@ public interface LayerPresenter {
 
     void detachView();
 
+    void handleEvent(Object event);
+
     ArrayList<Layer> getCurrStack();
 
     void useRetrofit(String description);

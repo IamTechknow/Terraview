@@ -40,7 +40,8 @@ public class ColorMapViewImpl extends View implements ColorMapView {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        presenter.detachView();
+        if(presenter != null)
+            presenter.detachView();
     }
 
     @Override

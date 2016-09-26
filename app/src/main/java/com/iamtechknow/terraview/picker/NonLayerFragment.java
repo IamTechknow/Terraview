@@ -12,32 +12,22 @@ import android.view.ViewGroup;
 import com.iamtechknow.terraview.Injection;
 import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.adapter.NonLayerDataAdapter;
-import com.iamtechknow.terraview.model.TapEvent;
 
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.TreeMap;
-
-import rx.functions.Action1;
-
-import static com.iamtechknow.terraview.picker.LayerActivity.SELECT_MEASURE_TAB;
 
 public class NonLayerFragment extends Fragment implements NonLayerView {
     public static final String EXTRA_ARG = "arg", CAT_EXTRA = "category";
     private boolean isCategoryTab;
 
     private NonLayerPresenter presenter;
-    private RxBus _rxBus;
-    private RecyclerView mRecyclerView;
+    private NonLayerDataAdapter adapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(false);
 
-        presenter = new NonLayerPresenterImpl(Injection.provideLocalSource(getLoaderManager(), getActivity()));
+        presenter = new NonLayerPresenterImpl(RxBus.getInstance(), Injection.provideLocalSource(getLoaderManager(), getActivity()));
         presenter.attachView(this);
-        _rxBus = RxBus.getInstance();
         isCategoryTab = getArguments().getBoolean(EXTRA_ARG);
 
         if(savedInstanceState != null && !isCategoryTab)
@@ -51,24 +41,10 @@ public class NonLayerFragment extends Fragment implements NonLayerView {
         outState.putString(CAT_EXTRA, presenter.getCategory());
     }
 
-    /**
-     * Set up the event bus for the measurement tab to response to taps on a category
-     * to load all measurements in the category
-     */
     @Override
     public void onStart() {
         super.onStart();
         presenter.getData();
-
-        if(!isCategoryTab)
-            _rxBus.toObserverable()
-                .subscribe(new Action1<Object>() {
-                    @Override
-                    public void call(Object event) {
-                        if (event instanceof TapEvent && ((TapEvent) event).getTab() == SELECT_MEASURE_TAB) //call from Category tab
-                            insertMeasurements(((TapEvent) event).getCategory());
-                    }
-                });
     }
 
     @Override
@@ -82,33 +58,28 @@ public class NonLayerFragment extends Fragment implements NonLayerView {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_layer, container, false);
 
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
+        RecyclerView mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        NonLayerDataAdapter l = new NonLayerDataAdapter(RxBus.getInstance(), isCategoryTab ? 0 : 1);
-        mRecyclerView.setAdapter(l);
+        adapter = new NonLayerDataAdapter(presenter);
+        mRecyclerView.setAdapter(adapter);
         return rootView;
     }
 
-    //Called when presenter has finished loading data, set up lists
-    //The measurement tab needs to determine whether to display the previous measurement due to config change
     @Override
-    public void insertList() {
-        if(!isCategoryTab && presenter.getCategory() != null)
-            insertMeasurements(presenter.getCategory());
-        else {
-            ArrayList<String> result = new ArrayList<>();
-            TreeMap<String, ArrayList<String>> map = presenter.getMap(isCategoryTab);
-            NonLayerDataAdapter adapter = (NonLayerDataAdapter) (mRecyclerView.getAdapter());
-
-            for (Map.Entry<String, ArrayList<String>> e : map.entrySet())
-                result.add(e.getKey());
-            adapter.insertList(result);
-        }
+    public boolean isCategoryTab() {
+        return isCategoryTab;
     }
 
-    private void insertMeasurements(String cat) {
-        ArrayList<String> measure_list = presenter.getMeasurementList(cat);
-        ((NonLayerDataAdapter) (mRecyclerView.getAdapter())).insertList(measure_list);
+    //Called when presenter has finished loading data, set up lists
+    @Override
+    public void insertList(ArrayList<String> list) {
+        adapter.insertList(list);
+    }
+
+    //Called after config change or when category was tapped, only called by measurement tab presenter
+    @Override
+    public void insertMeasurements(ArrayList<String> list) {
+        adapter.insertList(list);
     }
 }

@@ -101,24 +101,12 @@ public class LayerActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        _rxBus.toObserverable()
-            .subscribe(new Action1<Object>() {
-                @Override
-                public void call(Object event) {
-                    if(event instanceof TapEvent)
-                        //If we have an event due to a button press then go to the tab
-                        //And in the fragment that is also listening load the right data!
-                        switch(((TapEvent) event).getTab()) {
-                            case SELECT_LAYER_TAB:
-                                mTabLayout.getTabAt(SELECT_LAYER_TAB).select();
-                                break;
-
-                            case SELECT_MEASURE_TAB:
-                                mTabLayout.getTabAt(SELECT_MEASURE_TAB).select();
-                                break;
-                        }
-                }
-            });
+        _rxBus.toObserverable().subscribe(new Action1<Object>() {
+            @Override
+            public void call(Object event) {
+                handleEvent(event);
+            }
+        });
     }
 
     @Override
@@ -137,6 +125,24 @@ public class LayerActivity extends AppCompatActivity {
         Intent i = new Intent().putExtras(b);
 
         setResult(RESULT_OK, i);
+    }
+
+    /**
+     * If we have an event due to a button press then go to the tab
+     * and in the fragment that is also listening load the right data.
+     * @param event Object from the RxBus
+     */
+    private void handleEvent(Object event) {
+        if(event instanceof TapEvent)
+            switch(((TapEvent) event).getTab()) {
+                case SELECT_LAYER_TAB:
+                    mTabLayout.getTabAt(SELECT_LAYER_TAB).select();
+                    break;
+
+                case SELECT_MEASURE_TAB:
+                    mTabLayout.getTabAt(SELECT_MEASURE_TAB).select();
+                    break;
+            }
     }
 
 	/**

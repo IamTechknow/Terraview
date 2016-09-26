@@ -1,5 +1,7 @@
 package com.iamtechknow.terraview.picker;
 
+import android.util.SparseBooleanArray;
+
 import com.iamtechknow.terraview.data.DataSource;
 import com.iamtechknow.terraview.model.Layer;
 
@@ -7,6 +9,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -31,43 +35,32 @@ public class LayerPresenterTest {
     private LayerView view;
 
     @Mock
-    private ArrayList<Layer> list;
+    private DataSource data;
 
     @Mock
-    private DataSource data;
+    private SparseBooleanArray array;
+
+    @Captor
+    ArgumentCaptor<ArrayList<String>> captor;
 
     private LayerPresenterImpl presenter;
 
     @Before
     public void setupPresenter() {
-        presenter = new LayerPresenterImpl(list, data);
+        presenter = new LayerPresenterImpl(RxBus.getInstance(), new ArrayList<>(), data, array);
         presenter.attachView(view);
     }
 
     @Test
-    public void testMeasurementTapped() {
-        //When an item in measurement tab is tapped
-        presenter.setMeasurement("Blue Marble");
-        presenter.getData();
-        verify(data).loadData(presenter);
-        presenter.onDataLoaded();
-
-        //Verify view has switched to layer tab
-        verify(view).onNewMeasurement("Blue Marble");
-        verify(view, times(0)).populateList(data.getLayers());
-        presenter.detachView();
-    }
-
-    @Test
     public void testLayerTabTapped() {
-        //When layer tab is tapped
+        //When layer tab is tapped //no measurements selected
         presenter.getData();
         verify(data).loadData(presenter);
         presenter.onDataLoaded();
 
         //Verify view has switched to layer tab and displays all layers
-        verify(view, times(0)).onNewMeasurement(null);
-        verify(view).populateList(data.getLayers());
+        verify(view, times(0)).updateLayerList(null);
+        verify(view).populateList(captor.capture());
         presenter.detachView();
     }
 

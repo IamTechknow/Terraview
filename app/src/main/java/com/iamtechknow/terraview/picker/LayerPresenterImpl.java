@@ -6,6 +6,7 @@ import android.util.SparseBooleanArray;
 import com.iamtechknow.terraview.api.MetadataAPI;
 import com.iamtechknow.terraview.data.DataSource;
 import com.iamtechknow.terraview.model.Layer;
+import com.iamtechknow.terraview.model.TapEvent;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -19,15 +20,21 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import rx.Observable;
 import rx.Observer;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
+
+import static com.iamtechknow.terraview.picker.LayerActivity.SELECT_LAYER_TAB;
 
 public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallback {
     private static final String BASE_URL = "https://worldview.earthdata.nasa.gov/";
 
     private WeakReference<LayerView> viewRef;
     private Retrofit retrofit;
+    private RxBus bus;
+    private Subscription busSub;
 
     private DataSource dataSource;
 
@@ -43,17 +50,24 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     //Used for state restoration in config change
     private String measurement;
 
-    public LayerPresenterImpl(ArrayList<Layer> list, DataSource source) {
+    public LayerPresenterImpl(RxBus _bus, ArrayList<Layer> list, DataSource source, SparseBooleanArray array) {
+        bus = _bus;
         dataSource = source;
         stack = list;
         retrofit = new Retrofit.Builder().baseUrl(BASE_URL).build();
-        mSelectedPositions = new SparseBooleanArray();
+        mSelectedPositions = array;
         titleSet = new HashSet<>();
     }
 
     @Override
     public void attachView(LayerView v) {
         viewRef = new WeakReference<>(v);
+        busSub = bus.toObserverable().subscribe(new Action1<Object>() {
+            @Override
+            public void call(Object event) {
+                handleEvent(event);
+            }
+        });
     }
 
     @Override
@@ -62,11 +76,21 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
             viewRef.clear();
             viewRef = null;
         }
+        busSub.unsubscribe();
     }
 
     @Override
     public ArrayList<Layer> getCurrStack() {
         return stack;
+    }
+
+    @Override
+    public void handleEvent(Object event) {
+        TapEvent tap = (TapEvent) event;
+        if(tap != null && getView() != null && tap.getTab() == SELECT_LAYER_TAB) {
+            ArrayList<String> layerTitles = getLayerTitlesForMeasurement(tap.getMeasurement());
+            getView().updateLayerList(layerTitles);
+        }
     }
 
     /**
@@ -190,6 +214,7 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
             _layerlist.add(temp != null ? temp.getTitle() : id);
         }
 
+        updateSelectedItems(_layerlist);
         return _layerlist;
     }
 
@@ -211,9 +236,14 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     public void onDataLoaded() {
         if(getView() != null) {
             if (measurement != null)
-                getView().onNewMeasurement(measurement);
-            else
-                getView().populateList(dataSource.getLayers());
+                getView().updateLayerList(getLayerTitlesForMeasurement(measurement));
+            else {
+                ArrayList<String> layer_list = new ArrayList<>();
+                for (Layer l: dataSource.getLayers())
+                    layer_list.add(l.getTitle());
+                getView().populateList(layer_list);
+                updateSelectedItems(layer_list);
+            }
         }
     }
 
