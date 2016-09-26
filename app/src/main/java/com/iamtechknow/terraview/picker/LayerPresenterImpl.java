@@ -62,12 +62,7 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     @Override
     public void attachView(LayerView v) {
         viewRef = new WeakReference<>(v);
-        busSub = bus.toObserverable().subscribe(new Action1<Object>() {
-            @Override
-            public void call(Object event) {
-                handleEvent(event);
-            }
-        });
+        busSub = bus.toObserverable().subscribe(this::handleEvent);
     }
 
     @Override
@@ -105,17 +100,14 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
         MetadataAPI api = retrofit.create(MetadataAPI.class);
         String[] temp = description.split("/"); //must split data for URL to work
         Call<ResponseBody> result = api.fetchData(temp[0], temp[1]);
-        Observable.just(result).map(new Func1<Call<ResponseBody>, Response<ResponseBody>>() {
-            @Override
-            public Response<ResponseBody> call(Call<ResponseBody> call) {
-                Response<ResponseBody> r = null;
-                try {
-                    r = call.execute();
-                } catch(IOException e) {
-                    e.printStackTrace();
-                }
-                return r;
+        Observable.just(result).map(call -> {
+            Response<ResponseBody> r = null;
+            try {
+                r = call.execute();
+            } catch(IOException e) {
+                e.printStackTrace();
             }
+            return r;
         }).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Observer<Response<ResponseBody>>() {

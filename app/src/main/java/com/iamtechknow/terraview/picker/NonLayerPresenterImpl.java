@@ -31,12 +31,7 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
     @Override
     public void attachView(NonLayerView v) {
         viewRef = new WeakReference<>(v);
-        busSub = bus.toObserverable().subscribe(new Action1<Object>() {
-            @Override
-            public void call(Object event) {
-                handleEvent(event);
-            }
-        });
+        busSub = bus.toObserverable().subscribe(this::handleEvent);
     }
 
     @Override

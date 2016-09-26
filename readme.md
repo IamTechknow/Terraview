@@ -51,7 +51,7 @@ I worked on improvements on the project in an internship in NASA's Goddard Space
 * Allow generation of GIF animations and pictures of the shown satellite data
 
 ## Requirements
-This project uses API Level 24, Google Play Services for Google Maps, and an API key for Google Maps. Replace the API key value with your own API key. Android N features are not used yet, but some Java 8 features are in use (effectively final variables) and more may be used in the future.
+This project uses API Level 24, Google Play Services for Google Maps, and an API key for Google Maps. Replace the API key value with your own API key. Android N features are not used yet, but some Java 8 features are in use (effectively final variables, lambdas) and more may be used in the future.
 
 ## Acknowledgements
 We acknowledge the use of imagery provided by services from the Global Imagery Browse Services (GIBS), operated by the NASA/GSFC/Earth Science Data and Information System (ESDIS, [https://earthdata.nasa.gov](https://earthdata.nasa.gov)) with funding provided by NASA/HQ.

@@ -53,17 +53,14 @@ public class ColorMapPresenterImpl implements ColorMapPresenter {
         ColorMapAPI api = retrofit.create(ColorMapAPI.class);
         Call<ColorMap> map = api.fetchData(id);
 
-        Observable.just(map).map(new Func1<Call<ColorMap>, Response<ColorMap>>() {
-            @Override
-            public Response<ColorMap> call(Call<ColorMap> map_call) {
-                Response<ColorMap> r = null;
-                try {
-                    r = map_call.execute();
-                } catch(IOException e) {
-                    e.printStackTrace();
-                }
-                return r;
+        Observable.just(map).map(map_call -> {
+            Response<ColorMap> r = null;
+            try {
+                r = map_call.execute();
+            } catch(IOException e) {
+                e.printStackTrace();
             }
+            return r;
         }).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Observer<Response<ColorMap>>() {

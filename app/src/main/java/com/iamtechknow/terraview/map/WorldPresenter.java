@@ -515,18 +515,15 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
             animRunning = true;
             animSub = Observable.interval(delay, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Long>() {
-                    @Override
-                    public void call(Long aLong) {
-                        //Here we don't need the date, just an index since they are in order
-                        if (currFrame == maxFrames)
-                            stopOrRepeat();
-                        else {
-                            for (TileOverlay t : animCache.get(currFrame))
-                                t.setVisible(false);
+                .subscribe(aLong -> {
+                    //Here we don't need the date, just an index since they are in order
+                    if (currFrame == maxFrames)
+                        stopOrRepeat();
+                    else {
+                        for (TileOverlay t : animCache.get(currFrame))
+                            t.setVisible(false);
 
-                            currFrame++;
-                        }
+                        currFrame++;
                     }
                 });
         } else { //Restore tiles

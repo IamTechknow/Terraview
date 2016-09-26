@@ -101,12 +101,7 @@ public class LayerActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        _rxBus.toObserverable().subscribe(new Action1<Object>() {
-            @Override
-            public void call(Object event) {
-                handleEvent(event);
-            }
-        });
+        _rxBus.toObserverable().subscribe(this::handleEvent);
     }
 
     @Override

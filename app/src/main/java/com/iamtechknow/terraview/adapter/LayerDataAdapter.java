@@ -82,12 +82,7 @@ public class LayerDataAdapter extends RecyclerView.Adapter<LayerDataAdapter.View
         Layer l = presenter.searchLayerByTitle(mItems.get(position));
         if(l != null) {
             holder.subtitle.setText(l.getSubtitle());
-            holder.icon.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    presenter.useRetrofit(l.getDescription());
-                }
-            });
+            holder.icon.setOnClickListener(v -> presenter.useRetrofit(l.getDescription()));
         }
 
         holder.itemView.setActivated(presenter.isItemChecked(position));

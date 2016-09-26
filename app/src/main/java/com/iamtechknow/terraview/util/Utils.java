@@ -122,11 +122,7 @@ public class Utils {
             return new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.about)
                 .setView(webView)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        dialog.dismiss();
-                    }
-                }).create();
+                .setPositiveButton(android.R.string.yes, (dialog, whichButton) -> dialog.dismiss()).create();
         }
     }
 }
