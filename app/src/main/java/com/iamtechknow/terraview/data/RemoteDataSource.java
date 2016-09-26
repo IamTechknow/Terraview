@@ -1,6 +1,7 @@
 package com.iamtechknow.terraview.data;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -32,12 +33,14 @@ public class RemoteDataSource implements DataSource {
                                 PREFS_FILE = "settings", PREFS_DB_KEY = "have_db";
 
     //Data
-    private Context context;
+    private LayerDatabase db;
+    private SharedPreferences prefs;
     private ArrayList<Layer> layers;
     private TreeMap<String, ArrayList<String>> categories, measurements;
 
     public RemoteDataSource(Context c) {
-        context = c;
+        db = LayerDatabase.getInstance(c);
+        prefs = c.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE);
     }
 
     /**
@@ -78,7 +81,6 @@ public class RemoteDataSource implements DataSource {
           .subscribe(new Observer<Void>() {
               @Override
               public void onCompleted() {
-                  context = null; //prevent loitering
                   callback.onDataLoaded();
               }
 
@@ -113,11 +115,10 @@ public class RemoteDataSource implements DataSource {
      * @param data The parsed data
      */
     private void saveToDB(ArrayList<Layer> data, TreeMap<String, ArrayList<String>> measures, TreeMap<String, ArrayList<String>> cats) {
-        LayerDatabase db = LayerDatabase.getInstance(context);
         db.insertLayers(data);
         db.insertCategories(cats);
         db.insertMeasurements(measures);
-        context.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE).edit().putBoolean(PREFS_DB_KEY, true).apply();
+        prefs.edit().putBoolean(PREFS_DB_KEY, true).apply();
         db.close();
     }
 }

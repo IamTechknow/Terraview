@@ -15,6 +15,10 @@ import java.util.Date;
  */
 public interface MapPresenter {
 
+    void attachView(MapView v);
+
+    void detachView();
+
     void onRestoreInstanceState(Bundle savedInstanceState);
 
     void onMapReady(GoogleMap gmaps);
@@ -36,4 +40,12 @@ public interface MapPresenter {
     void onLayerSwiped(int position, Layer l);
 
     ArrayList<Layer> getCurrLayerStack();
+
+    void sendFeedback();
+
+    void presentColorMaps();
+
+    void presentAbout();
+
+    void chooseLayers();
 }

@@ -1,5 +1,7 @@
 package com.iamtechknow.terraview.model;
 
+import com.iamtechknow.terraview.util.Utils;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,14 +21,8 @@ public class LayerTest {
 
     @Before
     public void setup() {
-        now = new Date();
         Calendar c = Calendar.getInstance();
-        c.setTime(now);
-        c.set(Calendar.HOUR_OF_DAY, 0);
-        c.set(Calendar.MINUTE, 0);
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.MILLISECOND, 0);
-
+        Utils.getCalendarMidnightTime(c);
         now = c.getTime();
 
         c.set(Calendar.DAY_OF_MONTH, c.get(Calendar.DAY_OF_MONTH) + 1);

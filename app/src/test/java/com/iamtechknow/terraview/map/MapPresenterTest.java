@@ -2,6 +2,7 @@ package com.iamtechknow.terraview.map;
 
 import com.iamtechknow.terraview.data.DataSource;
 import com.iamtechknow.terraview.model.Layer;
+import com.iamtechknow.terraview.util.Utils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +35,8 @@ public class MapPresenterTest {
     @Before
     public void setup() {
         stack = new ArrayList<>();
-        presenter = new WorldPresenter(view);
+        presenter = new WorldPresenter();
+        presenter.attachView((MapView) view);
     }
 
     //Test presenter initialization
@@ -43,11 +45,10 @@ public class MapPresenterTest {
         Date currentDate = new Date();
         Calendar c = Calendar.getInstance();
         c.setTime(currentDate);
-        c.set(Calendar.HOUR_OF_DAY, 0);
-        c.set(Calendar.MINUTE, 0);
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.MILLISECOND, 0);
+        Utils.getCalendarMidnightTime(c);
+
         verify(view).setDateDialog(c.getTimeInMillis());
+        presenter.detachView();
     }
 
     @Test
@@ -58,5 +59,36 @@ public class MapPresenterTest {
 
         //Empty list is sent to layer list adapter
         verify(view).setLayerList(stack);
+        presenter.detachView();
+    }
+
+    @Test
+    public void showColorMapsUI() {
+        //When user chooses show layer info menu option
+        presenter.presentColorMaps();
+
+        //Color maps dialog is displayed
+        verify(view).showColorMaps();
+    }
+
+    @Test
+    public void showPickerUI() {
+        presenter.chooseLayers();
+
+        verify(view).showPicker();
+    }
+
+    @Test
+    public void showFeedbackUI() {
+        presenter.sendFeedback();
+
+        verify(view).openEmail();
+    }
+
+    @Test
+    public void showAboutUI() {
+        presenter.presentAbout();
+
+        verify(view).showAbout();
     }
 }

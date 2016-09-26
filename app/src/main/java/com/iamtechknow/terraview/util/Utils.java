@@ -8,7 +8,6 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -19,6 +18,7 @@ import com.iamtechknow.terraview.R;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -86,6 +86,17 @@ public class Utils {
     }
 
     /**
+     * Set the calendar time to midnight
+     * @param c The calendar object to use
+     */
+    public static void getCalendarMidnightTime(Calendar c) {
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+    }
+
+    /**
      * Create and show the given HTML, essentially a formatted web page
      * @param activity The activity in which to display the fragment in
      */
@@ -122,11 +133,7 @@ public class Utils {
             return new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.about)
                 .setView(webView)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        dialog.dismiss();
-                    }
-                }).create();
+                .setPositiveButton(android.R.string.yes, (dialog, whichButton) -> dialog.dismiss()).create();
         }
     }
 }

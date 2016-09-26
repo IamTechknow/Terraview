@@ -30,11 +30,11 @@ public class LayerDataAdapter extends RecyclerView.Adapter<LayerDataAdapter.View
     /**
      * View holder implementation for each list item
      */
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView text, subtitle;
         ImageView icon;
 
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
 
             itemView.setClickable(true);
@@ -82,12 +82,7 @@ public class LayerDataAdapter extends RecyclerView.Adapter<LayerDataAdapter.View
         Layer l = presenter.searchLayerByTitle(mItems.get(position));
         if(l != null) {
             holder.subtitle.setText(l.getSubtitle());
-            holder.icon.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    presenter.useRetrofit(l.getDescription());
-                }
-            });
+            holder.icon.setOnClickListener(v -> presenter.useRetrofit(l.getDescription()));
         }
 
         holder.itemView.setActivated(presenter.isItemChecked(position));

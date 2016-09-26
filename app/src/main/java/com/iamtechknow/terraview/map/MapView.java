@@ -13,4 +13,12 @@ public interface MapView {
     void updateDateDialog(long currDate);
 
     void setLayerList(ArrayList<Layer> stack);
+
+    void openEmail();
+
+    void showColorMaps();
+
+    void showPicker();
+
+    void showAbout();
 }

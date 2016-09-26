@@ -63,8 +63,6 @@ public class LocalDataSource implements DataSource, LoaderManager.LoaderCallback
     public void onLoadFinished(Loader<DataWrapper> loader, DataWrapper data) {
         allData = data;
 
-        manager = null; //Prevent loitering
-
         loadCallback.onDataLoaded();
     }
 

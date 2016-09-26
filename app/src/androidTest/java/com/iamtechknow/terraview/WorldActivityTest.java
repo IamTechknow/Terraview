@@ -125,13 +125,10 @@ public class WorldActivityTest {
      * @return ViewAction of the above
      */
     private static ViewAction swipeDownEnd() {
-        CoordinatesProvider my_bottom = new CoordinatesProvider() {
-            @Override
-            public float[] calculateCoordinates(View view) {
-                float[] coordinates = GeneralLocation.BOTTOM_RIGHT.calculateCoordinates(view);
-                coordinates[1] *= 2;
-                return coordinates;
-            }
+        CoordinatesProvider my_bottom = view -> {
+            float[] coordinates = GeneralLocation.BOTTOM_RIGHT.calculateCoordinates(view);
+            coordinates[1] *= 2;
+            return coordinates;
         };
 
         return new GeneralSwipeAction(Swipe.FAST, GeneralLocation.CENTER_RIGHT, my_bottom, Press.FINGER);

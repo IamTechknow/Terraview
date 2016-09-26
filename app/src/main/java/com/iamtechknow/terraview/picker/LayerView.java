@@ -5,9 +5,9 @@ import com.iamtechknow.terraview.model.Layer;
 import java.util.ArrayList;
 
 public interface LayerView {
-    void populateList(ArrayList<Layer> layers);
+    void populateList(ArrayList<String> list);
 
-    void onNewMeasurement(String measurement);
+    void updateLayerList(ArrayList<String> list);
 
     void showInfo(String html);
 }

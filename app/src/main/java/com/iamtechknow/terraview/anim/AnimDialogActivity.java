@@ -64,10 +64,7 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
         seekBar = (SeekBar) findViewById(R.id.anim_speed);
 
         Calendar c = Calendar.getInstance();
-        c.set(Calendar.HOUR_OF_DAY, 0);
-        c.set(Calendar.MINUTE, 0);
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.MILLISECOND, 0);
+        Utils.getCalendarMidnightTime(c);
         mDateDialog = new DatePickerDialog(this, this, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
 
         //Restore prior settings, or get date and set text

@@ -7,39 +7,33 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.iamtechknow.terraview.R;
-import com.iamtechknow.terraview.model.TapEvent;
-import com.iamtechknow.terraview.picker.RxBus;
+import com.iamtechknow.terraview.picker.NonLayerPresenter;
 
 import java.util.ArrayList;
 
-import static com.iamtechknow.terraview.picker.LayerActivity.*;
-
 /**
  * Item adapter for the category and measurement tab RecyclerViews
- * Uses an event bus implemented in RxJava to pass events to fragments when item is clicked
  */
 public class NonLayerDataAdapter extends RecyclerView.Adapter<NonLayerDataAdapter.ViewHolder> {
     private ArrayList<String> mItems;
-    private RxBus _rxBus;
-    private final int mode; //Corresponds to its residing fragment
+    private NonLayerPresenter presenter;
 
     /**
      * Set up an empty adapter
      */
-    public NonLayerDataAdapter(RxBus bus, int _mode) {
+    public NonLayerDataAdapter(NonLayerPresenter p) {
         super();
-        mode = _mode;
-        _rxBus = bus;
+        presenter = p;
         mItems = new ArrayList<>();
     }
 
     /**
      * View holder implementation for each list item
      */
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView text;
 
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
 
             itemView.setClickable(true);
@@ -48,21 +42,11 @@ public class NonLayerDataAdapter extends RecyclerView.Adapter<NonLayerDataAdapte
         }
 
         /**
-         * When an item is tapped, its selection state will be toggled.
-         * The selection state determines whether to insert or remove from the queue the layer from the position in the data set.
-         * The underlying data is modified but not the UI, which will happen when notifyDataSetChanged is called.
+         * Tell the presenter to post an event to the event bus, which decides what tab it belongs with to do so.
          */
         @Override
         public void onClick(View v) {
-            //Send event to RxBus based on the current mode (tab) of the fragment the item resides in
-            switch(mode) {
-                case 0: //Call from category tab
-                    _rxBus.send(new TapEvent(SELECT_MEASURE_TAB, null, null, mItems.get(getAdapterPosition())));
-                    break;
-
-                default: //Call from measurement tab
-                    _rxBus.send(new TapEvent(SELECT_LAYER_TAB, null, mItems.get(getAdapterPosition()), null));
-            }
+            presenter.emitEvent(mItems.get(getAdapterPosition()));
         }
     }
 
@@ -82,6 +66,10 @@ public class NonLayerDataAdapter extends RecyclerView.Adapter<NonLayerDataAdapte
         return mItems.size();
     }
 
+    /**
+     * Called at the appropriate time by the presenter in the fragments to insert a string list
+     * @param strings the data to show
+     */
     public void insertList(ArrayList<String> strings) {
         mItems = strings;
         notifyDataSetChanged();

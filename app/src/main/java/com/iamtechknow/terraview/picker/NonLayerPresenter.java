@@ -10,9 +10,20 @@ import java.util.TreeMap;
  * but when necessary allows views to request data to update the UI
  */
 public interface NonLayerPresenter {
+
+    void attachView(NonLayerView v);
+
+    void detachView();
+
+    void emitEvent(String data);
+
+    void handleEvent(Object event);
+
     TreeMap<String, ArrayList<String>> getMap(boolean isCategoryTab);
 
     ArrayList<String> getMeasurementList(String category);
+
+    ArrayList<String> getDefaultList();
 
     void getData();
 
