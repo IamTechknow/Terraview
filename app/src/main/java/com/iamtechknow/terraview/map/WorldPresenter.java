@@ -39,6 +39,7 @@ import retrofit2.Retrofit;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 import static com.iamtechknow.terraview.map.WorldActivity.*;
 import static com.iamtechknow.terraview.anim.AnimDialogActivity.*;
@@ -532,6 +533,19 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
         }
     }
 
+    @Override
+    public void onNextFrame() {
+        //Here we don't need the date, just an index since they are in order
+        if (currFrame == maxFrames)
+            stopOrRepeat();
+        else {
+            for (TileOverlay t : animCache.get(currFrame))
+                t.setVisible(false);
+
+            currFrame++;
+        }
+    }
+
     private void startAnim() {
         currFrame = 0;
         currAnimCal.setTime(start);
@@ -542,19 +556,10 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
             animSub = Observable.interval(delay, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(aLong -> {
-                    //Here we don't need the date, just an index since they are in order
-                    if (currFrame == maxFrames)
-                        stopOrRepeat();
-                    else {
-                        for (TileOverlay t : animCache.get(currFrame))
-                            t.setVisible(false);
-
-                        currFrame++;
-                    }
+                    onNextFrame();
                 });
-        } else { //Restore tiles
+        } else  //Restore tiles
             restoreAnimTiles();
-        }
     }
 
     /**

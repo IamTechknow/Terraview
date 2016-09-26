@@ -15,6 +15,8 @@ public interface AnimPresenter {
 
     void run();
 
+    void onNextFrame();
+
     boolean isRunning();
 
     void stop(boolean terminate);

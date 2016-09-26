@@ -61,4 +61,34 @@ public class MapPresenterTest {
         verify(view).setLayerList(stack);
         presenter.detachView();
     }
+
+    @Test
+    public void showColorMapsUI() {
+        //When user chooses show layer info menu option
+        presenter.presentColorMaps();
+
+        //Color maps dialog is displayed
+        verify(view).showColorMaps();
+    }
+
+    @Test
+    public void showPickerUI() {
+        presenter.chooseLayers();
+
+        verify(view).showPicker();
+    }
+
+    @Test
+    public void showFeedbackUI() {
+        presenter.sendFeedback();
+
+        verify(view).openEmail();
+    }
+
+    @Test
+    public void showAboutUI() {
+        presenter.presentAbout();
+
+        verify(view).showAbout();
+    }
 }
