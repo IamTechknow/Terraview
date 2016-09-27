@@ -49,8 +49,6 @@
         </html>
     ]]></string>
     <string name="internet">Turn on connection to get data</string>
-    <string name="no_results">No result</string>
-    <string name="retry">Retry</string>
     <string name="colormap_info">Colormap Information</string>
     <string name="layer_settings">Layer Settings</string>
     <string name="colormap_none">No color map available</string>
@@ -74,4 +72,6 @@
     <string name="feedback">Send Feedback</string>
     <string name="email" translatable="false">edmondlee.dev@gmail.com</string>
     <string name="email_subject">Terraview - Feedback</string>
+    <string name="search_hint">Type a layer</string>
+    <string name="search">Search</string>
 </resources>
