@@ -1,5 +1,6 @@
 package com.iamtechknow.terraview.picker;
 
+import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -8,8 +9,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.InputMethodManager;
 
 import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.map.WorldActivity;
@@ -18,14 +22,16 @@ import com.iamtechknow.terraview.model.TapEvent;
 
 import java.util.ArrayList;
 
-public class LayerActivity extends AppCompatActivity {
+public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener {
     //Constants for RxBus events and Intent
-    public static final int SELECT_MEASURE_TAB = 1, SELECT_LAYER_TAB = 2;
+    public static final int SELECT_MEASURE_TAB = 1, SELECT_LAYER_TAB = 2, SELECT_SUGGESTION = 4;
+    private static final int PAGE_LIMIT = 2;
     public static final String RESULT_STACK = "result", LAYER_EXTRA = "layer";
 
     //UI handling
     private TabLayout mTabLayout;
     private RxBus _rxBus;
+    private SearchView searchView;
 
     //Reference to layer stack from map
     private ArrayList<Layer> result;
@@ -66,9 +72,11 @@ public class LayerActivity extends AppCompatActivity {
         adapter.addFragment(frag2, "Measurements");
         adapter.addFragment(frag3, "Layers");
         viewPager.setAdapter(adapter);
+        viewPager.setOffscreenPageLimit(PAGE_LIMIT);
 
         mTabLayout = (TabLayout) findViewById(R.id.tabs);
         mTabLayout.setupWithViewPager(viewPager);
+        mTabLayout.addOnTabSelectedListener(this);
 
         _rxBus = RxBus.getInstance();
     }
@@ -78,6 +86,22 @@ public class LayerActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
 
         outState.putParcelableArrayList(LAYER_EXTRA, result);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.layer_menu, menu);
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        searchView = (SearchView) searchItem.getActionView();
+
+        SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
+        if (searchView != null) {
+            searchView.setMaxWidth(Integer.MAX_VALUE); //take up entire toolbar
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+            searchView.setIconifiedByDefault(true);
+        }
+
+        return true;
     }
 
     @Override
@@ -104,8 +128,37 @@ public class LayerActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        setResult();
-        super.onBackPressed();
+        if(!searchView.isIconified())
+            searchView.onActionViewCollapsed();
+        else {
+            setResult();
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public void onTabSelected(TabLayout.Tab tab) {
+        //Hide keyboard to avoid InputConnection warnings
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
+        searchView.onActionViewCollapsed();
+    }
+
+    @Override
+    public void onTabUnselected(TabLayout.Tab tab) {}
+
+    @Override
+    public void onTabReselected(TabLayout.Tab tab) {}
+
+    /**
+     * Called when autocomplete suggestion is tapped. Here access the layer identifier
+     * and emit an event to the RxBus to tell layer presenter to update selected lists and layer stack
+     * @param intent Intent with the layer identifier from clicked suggestion
+     */
+    @Override
+    protected void onNewIntent(Intent intent) {
+        if(intent.getAction().equals(Intent.ACTION_VIEW))
+            _rxBus.send(new TapEvent(SELECT_SUGGESTION, null, intent.getStringExtra(SearchManager.EXTRA_DATA_KEY), null));
     }
 
     /**
@@ -126,6 +179,7 @@ public class LayerActivity extends AppCompatActivity {
      * @param event Object from the RxBus
      */
     private void handleEvent(Object event) {
+        searchView.onActionViewCollapsed();
         if(event instanceof TapEvent)
             switch(((TapEvent) event).getTab()) {
                 case SELECT_LAYER_TAB:
@@ -145,7 +199,7 @@ public class LayerActivity extends AppCompatActivity {
         private final ArrayList<Fragment> mFragmentList = new ArrayList<>();
         private final ArrayList<String> mFragmentTitleList = new ArrayList<>();
 
-        public Adapter(FragmentManager manager) {
+        Adapter(FragmentManager manager) {
             super(manager);
         }
 
@@ -159,7 +213,7 @@ public class LayerActivity extends AppCompatActivity {
             return mFragmentList.size();
         }
 
-        public void addFragment(Fragment fragment, String title) {
+        void addFragment(Fragment fragment, String title) {
             mFragmentList.add(fragment);
             mFragmentTitleList.add(title);
         }

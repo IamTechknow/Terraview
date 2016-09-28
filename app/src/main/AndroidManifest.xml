@@ -41,14 +41,25 @@
             android:label="@string/app_name"
             android:theme="@style/AppTheme.Tabs"
             android:launchMode="singleTop">
-            <meta-data android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.iamtechknow.terraview.map.WorldActivity" />
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH"/>
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
         </activity>
 
         <activity
             android:name="com.iamtechknow.terraview.anim.AnimDialogActivity"
             android:label="@string/make_animation"
             android:launchMode="singleTop" />
+        
+        <provider
+            android:authorities="com.iamtechknow.terraview.LayerProvider"
+            android:name="com.iamtechknow.terraview.data.LayerProvider"
+            android:exported="false"
+            android:syncable="false" />
     </application>
 
 </manifest>

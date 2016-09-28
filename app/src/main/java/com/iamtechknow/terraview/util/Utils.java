@@ -15,11 +15,14 @@ import android.util.Log;
 import android.webkit.WebView;
 
 import com.iamtechknow.terraview.R;
+import com.iamtechknow.terraview.model.Layer;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.Locale;
 
 public class Utils {
@@ -94,6 +97,13 @@ public class Utils {
         c.set(Calendar.MINUTE, 0);
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
+    }
+
+    public static Hashtable<String, Layer> getLayerTable(ArrayList<Layer> layers) {
+        Hashtable<String, Layer> temp = new Hashtable<>(layers.size());
+        for(Layer l : layers)
+            temp.put(l.getIdentifier(), l);
+        return temp;
     }
 
     /**

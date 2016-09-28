@@ -6,11 +6,13 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.iamtechknow.terraview.model.Layer;
+import com.iamtechknow.terraview.util.Utils;
 
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.TreeMap;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -37,6 +39,7 @@ public class RemoteDataSource implements DataSource {
     private SharedPreferences prefs;
     private ArrayList<Layer> layers;
     private TreeMap<String, ArrayList<String>> categories, measurements;
+    private Hashtable<String, Layer> layerTable;
 
     public RemoteDataSource(Context c) {
         db = LayerDatabase.getInstance(c);
@@ -69,6 +72,7 @@ public class RemoteDataSource implements DataSource {
                     parser.parse(layers);
                     measurements = parser.getMeasurementMap();
                     categories = parser.getCategoryMap();
+                    layerTable = Utils.getLayerTable(layers);
 
                     saveToDB(layers, measurements, categories);
                 } catch (IOException | ParserConfigurationException | SAXException e) {
@@ -108,6 +112,11 @@ public class RemoteDataSource implements DataSource {
     @Override
     public TreeMap<String, ArrayList<String>> getCategories() {
         return categories;
+    }
+
+    @Override
+    public Hashtable<String, Layer> getLayerTable() {
+        return layerTable;
     }
 
     /**

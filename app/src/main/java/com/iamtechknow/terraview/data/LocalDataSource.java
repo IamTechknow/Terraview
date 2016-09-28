@@ -10,6 +10,7 @@ import com.iamtechknow.terraview.model.DataWrapper;
 import com.iamtechknow.terraview.model.Layer;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.TreeMap;
 
 /**
@@ -52,6 +53,11 @@ public class LocalDataSource implements DataSource, LoaderManager.LoaderCallback
     @Override
     public TreeMap<String, ArrayList<String>> getCategories() {
         return allData != null ? allData.cats : null;
+    }
+
+    @Override
+    public Hashtable<String, Layer> getLayerTable() {
+        return allData != null ? allData.layerTable : null;
     }
 
     @Override

@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import com.iamtechknow.terraview.model.Layer;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.TreeMap;
 
 /**
@@ -27,4 +28,6 @@ public interface DataSource {
     TreeMap<String, ArrayList<String>> getMeasurements();
 
     TreeMap<String, ArrayList<String>> getCategories();
+
+    Hashtable<String, Layer> getLayerTable();
 }
