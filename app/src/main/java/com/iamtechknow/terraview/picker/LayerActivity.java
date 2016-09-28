@@ -11,6 +11,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -21,7 +22,7 @@ import com.iamtechknow.terraview.model.TapEvent;
 
 import java.util.ArrayList;
 
-public class LayerActivity extends AppCompatActivity implements SearchView.OnQueryTextListener, TabLayout.OnTabSelectedListener {
+public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener {
     //Constants for RxBus events and Intent
     public static final int SELECT_MEASURE_TAB = 1, SELECT_LAYER_TAB = 2;
     public static final String RESULT_STACK = "result", LAYER_EXTRA = "layer";
@@ -96,7 +97,6 @@ public class LayerActivity extends AppCompatActivity implements SearchView.OnQue
             searchView.setMaxWidth(Integer.MAX_VALUE); //take up entire toolbar
             searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
             searchView.setIconifiedByDefault(true);
-            searchView.setOnQueryTextListener(this);
         }
 
         return true;
@@ -135,23 +135,22 @@ public class LayerActivity extends AppCompatActivity implements SearchView.OnQue
     }
 
     @Override
-    public boolean onQueryTextChange(String newText) {
-        return false;
-    }
-
-    @Override
     public void onTabSelected(TabLayout.Tab tab) {
         searchView.onActionViewCollapsed();
     }
-
-    @Override
-    public boolean onQueryTextSubmit(String query) { return false; }
 
     @Override
     public void onTabUnselected(TabLayout.Tab tab) {}
 
     @Override
     public void onTabReselected(TabLayout.Tab tab) {}
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        if(intent.getAction().equals(Intent.ACTION_VIEW)) {
+            Log.d("Test", intent.getStringExtra(SearchManager.EXTRA_DATA_KEY));
+        }
+    }
 
     /**
      * Put the layer stack in a bundle to be returned. If the layer fragment is never created

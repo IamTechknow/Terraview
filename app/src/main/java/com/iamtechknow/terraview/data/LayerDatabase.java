@@ -10,16 +10,19 @@ import com.iamtechknow.terraview.model.Layer;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.TreeMap;
 import java.util.Set;
 
+import static android.app.SearchManager.*;
+
 public class LayerDatabase extends SQLiteOpenHelper {
     //General and layer table constants
-    private static final String DB_NAME = "layers.sqlite", TABLE_LAYER = "layer",
+    private static final String DB_NAME = "layers.sqlite", TABLE_LAYER = "layer", TABLE_SEARCH = "search",
             COL_LAYER_TITLE = "title", COL_LAYER_FORMAT = "format", COL_LAYER_MATRIX = "matrix",
             COL_LAYER_SUBTITLE = "subtitle", COL_LAYER_START = "start", COL_LAYER_END = "end",
             COL_LAYER_ISBASE = "isbase", COL_LAYER_ID = "identifier", COL_LAYER_DESC = "desc",
-            COL_LAYER_PALETTE = "palette";
+            COL_LAYER_PALETTE = "palette", COL_ID = "_id";
 
     private static LayerDatabase mInstance = null; //Ensure only one instance in app lifecycle
 
@@ -50,6 +53,9 @@ public class LayerDatabase extends SQLiteOpenHelper {
         //Tables with the same format, contains a key string and value concatenated string
         db.execSQL("create table " + TABLE_CAT + " ( key text, value text)");
         db.execSQL("create table " + TABLE_MEASURE + " ( key text, value text )");
+
+        //Table for searching
+        db.execSQL(String.format("create table %s ( _id integer primary key autoincrement, %s text, %s text)", TABLE_SEARCH, SUGGEST_COLUMN_TEXT_1, SUGGEST_COLUMN_INTENT_EXTRA_DATA));
     }
 
     @Override
@@ -65,8 +71,9 @@ public class LayerDatabase extends SQLiteOpenHelper {
         SQLiteDatabase DB = getWritableDatabase();
         DB.beginTransaction();
         SQLiteStatement st = DB.compileStatement("insert into " + TABLE_LAYER + " (title, subtitle, identifier, format, matrix, start, end, desc, palette, isbase) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+        SQLiteStatement st_search = DB.compileStatement(String.format(Locale.US, "insert into %s (%s, %s) values (?, ?);", TABLE_SEARCH, SUGGEST_COLUMN_TEXT_1, SUGGEST_COLUMN_INTENT_EXTRA_DATA));
         for(Layer l: layers)
-            insertLayer(l.getTitle(), l.getSubtitle(), l.getIdentifier(), l.getFormat(), l.getTileMatrixSet(), l.getStartDateRaw(), l.getEndDateRaw(), l.getDescription(), l.getPalette(), l.isBaseLayer(), st);
+            insertLayer(l.getTitle(), l.getSubtitle(), l.getIdentifier(), l.getFormat(), l.getTileMatrixSet(), l.getStartDateRaw(), l.getEndDateRaw(), l.getDescription(), l.getPalette(), l.isBaseLayer(), st, st_search);
         DB.setTransactionSuccessful();
         DB.endTransaction();
     }
@@ -83,9 +90,10 @@ public class LayerDatabase extends SQLiteOpenHelper {
      * @param palette The layer's palette id if any
      * @param format The layer's image format
      * @param matrix The layer's tile matrix set
-     * @param st the statement to bind data with
+     * @param st The statement to bind data with
+     * @param search The search table statement
      */
-    private void insertLayer(String title, String subtitle, String identifier, String format, String matrix, String start, String end, String desc, String palette, boolean isBase, SQLiteStatement st) {
+    private void insertLayer(String title, String subtitle, String identifier, String format, String matrix, String start, String end, String desc, String palette, boolean isBase, SQLiteStatement st, SQLiteStatement search) {
         st.bindString(1, title);
         if(subtitle != null)
             st.bindString(2, subtitle);
@@ -104,6 +112,11 @@ public class LayerDatabase extends SQLiteOpenHelper {
 
         st.executeInsert(); //returns the entry ID (unused)
         st.clearBindings();
+
+        search.bindString(1, title);
+        search.bindString(2, identifier);
+        search.executeInsert();
+        search.clearBindings();
     }
 
     /**
@@ -199,5 +212,23 @@ public class LayerDatabase extends SQLiteOpenHelper {
 
     public TreeMap<String, ArrayList<String>> queryCategories() {
         return queryMap(TABLE_CAT);
+    }
+
+    /**
+     * Called by LayerProvider to query the database with the argument for autocomplete search
+     * @param arg The String query
+     * @return A cursor that contains the titles for the autocomplete query
+     */
+    public Cursor searchQuery(String arg) {
+        String sql = String.format(Locale.US, "SELECT %s, %s, %s FROM %s WHERE %s like '%s%%'", COL_ID, SUGGEST_COLUMN_TEXT_1, SUGGEST_COLUMN_INTENT_EXTRA_DATA, TABLE_SEARCH, SUGGEST_COLUMN_TEXT_1, arg);
+        Cursor c = getReadableDatabase().rawQuery(sql, null);
+
+        if (c == null)
+            return null;
+        else if (!c.moveToFirst()) {
+            c.close();
+            return null;
+        }
+        return c;
     }
 }

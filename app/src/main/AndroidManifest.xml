@@ -54,6 +54,12 @@
             android:name="com.iamtechknow.terraview.anim.AnimDialogActivity"
             android:label="@string/make_animation"
             android:launchMode="singleTop" />
+        
+        <provider
+            android:authorities="com.iamtechknow.terraview.LayerProvider"
+            android:name="com.iamtechknow.terraview.data.LayerProvider"
+            android:exported="false"
+            android:syncable="false" />
     </application>
 
 </manifest>
