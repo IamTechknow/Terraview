@@ -179,7 +179,6 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
      * @param event Object from the RxBus
      */
     private void handleEvent(Object event) {
-        searchView.onActionViewCollapsed();
         if(event instanceof TapEvent)
             switch(((TapEvent) event).getTab()) {
                 case SELECT_LAYER_TAB:

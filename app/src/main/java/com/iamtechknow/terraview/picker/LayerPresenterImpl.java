@@ -86,8 +86,8 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
         } else if(tap != null && getView() != null && tap.getTab() == SELECT_SUGGESTION) {
             Layer l = searchLayerById(tap.getMeasurement());
             if(!titleSet.contains(l.getTitle())) { //check if not already selected first
-                stack.add(l);
-                updateListView();
+                changeStack(l, true);
+                updateListView(); //Without adapter, must force refresh of selected states
             }
         }
     }
@@ -181,16 +181,21 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     }
 
     /**
-     * Modify the list of layers to be shown on the map
+     * Modify the list of layers to be shown on the map.
+     * Calling this does not force a refresh of the hash set and boolean array.
      * @param l The layer in question
      * @param queue Whether to place to or remove from the stack
      */
     @Override
     public void changeStack(Layer l, boolean queue) {
-        if(queue)
+        if(queue) {
             stack.add(l);
-        else
+            titleSet.add(l.getTitle());
+        }
+        else {
             stack.remove(l);
+            titleSet.remove(l.getTitle());
+        }
     }
 
     /**
