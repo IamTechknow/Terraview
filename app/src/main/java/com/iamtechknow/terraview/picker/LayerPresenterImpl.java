@@ -24,6 +24,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 import static com.iamtechknow.terraview.picker.LayerActivity.SELECT_LAYER_TAB;
+import static com.iamtechknow.terraview.picker.LayerActivity.SELECT_SUGGESTION;
 
 public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallback {
     private static final String BASE_URL = "https://worldview.earthdata.nasa.gov/";
@@ -82,6 +83,12 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
         if(tap != null && getView() != null && tap.getTab() == SELECT_LAYER_TAB) {
             ArrayList<String> layerTitles = getLayerTitlesForMeasurement(tap.getMeasurement());
             getView().updateLayerList(layerTitles);
+        } else if(tap != null && getView() != null && tap.getTab() == SELECT_SUGGESTION) {
+            Layer l = searchLayerById(tap.getMeasurement());
+            if(!titleSet.contains(l.getTitle())) { //check if not already selected first
+                stack.add(l);
+                updateListView();
+            }
         }
     }
 
@@ -221,6 +228,19 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
      */
     @Override
     public void onDataLoaded() {
+        updateListView();
+    }
+
+    @Override
+    public void onDataNotAvailable() {
+
+    }
+
+    private LayerView getView() {
+        return viewRef == null ? null : viewRef.get();
+    }
+
+    private void updateListView() {
         if(getView() != null) {
             if (measurement != null)
                 getView().updateLayerList(getLayerTitlesForMeasurement(measurement));
@@ -232,15 +252,6 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
                 updateSelectedItems(layer_list);
             }
         }
-    }
-
-    @Override
-    public void onDataNotAvailable() {
-
-    }
-
-    private LayerView getView() {
-        return viewRef == null ? null : viewRef.get();
     }
 
     /**

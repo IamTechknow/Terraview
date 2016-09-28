@@ -72,6 +72,6 @@
     <string name="feedback">Send Feedback</string>
     <string name="email" translatable="false">edmondlee.dev@gmail.com</string>
     <string name="email_subject">Terraview - Feedback</string>
-    <string name="search_hint">Type a layer</string>
+    <string name="search_hint">Type a layer to add</string>
     <string name="search">Search</string>
 </resources>

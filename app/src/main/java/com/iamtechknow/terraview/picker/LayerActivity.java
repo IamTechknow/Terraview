@@ -11,9 +11,9 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.InputMethodManager;
 
 import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.map.WorldActivity;
@@ -24,7 +24,8 @@ import java.util.ArrayList;
 
 public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener {
     //Constants for RxBus events and Intent
-    public static final int SELECT_MEASURE_TAB = 1, SELECT_LAYER_TAB = 2;
+    public static final int SELECT_MEASURE_TAB = 1, SELECT_LAYER_TAB = 2, SELECT_SUGGESTION = 4;
+    private static final int PAGE_LIMIT = 2;
     public static final String RESULT_STACK = "result", LAYER_EXTRA = "layer";
 
     //UI handling
@@ -71,6 +72,7 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
         adapter.addFragment(frag2, "Measurements");
         adapter.addFragment(frag3, "Layers");
         viewPager.setAdapter(adapter);
+        viewPager.setOffscreenPageLimit(PAGE_LIMIT);
 
         mTabLayout = (TabLayout) findViewById(R.id.tabs);
         mTabLayout.setupWithViewPager(viewPager);
@@ -136,6 +138,9 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
 
     @Override
     public void onTabSelected(TabLayout.Tab tab) {
+        //Hide keyboard to avoid InputConnection warnings
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
         searchView.onActionViewCollapsed();
     }
 
@@ -145,11 +150,15 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
     @Override
     public void onTabReselected(TabLayout.Tab tab) {}
 
+    /**
+     * Called when autocomplete suggestion is tapped. Here access the layer identifier
+     * and emit an event to the RxBus to tell layer presenter to update selected lists and layer stack
+     * @param intent Intent with the layer identifier from clicked suggestion
+     */
     @Override
     protected void onNewIntent(Intent intent) {
-        if(intent.getAction().equals(Intent.ACTION_VIEW)) {
-            Log.d("Test", intent.getStringExtra(SearchManager.EXTRA_DATA_KEY));
-        }
+        if(intent.getAction().equals(Intent.ACTION_VIEW))
+            _rxBus.send(new TapEvent(SELECT_SUGGESTION, null, intent.getStringExtra(SearchManager.EXTRA_DATA_KEY), null));
     }
 
     /**
