@@ -50,7 +50,7 @@ public class ColorMapAdapter extends RecyclerView.Adapter<ColorMapAdapter.ViewHo
         Layer l = mItems.get(position);
         holder.text.setText(l.getTitle());
         if(l.hasColorMap())
-            holder.canvas.setLayerId(l.getIdentifier());
+            holder.canvas.setLayerId(l.getPalette());
         else {
             holder.canvas.setVisibility(View.GONE);
             holder.itemView.findViewById(R.id.color_map_info).setVisibility(View.GONE);
