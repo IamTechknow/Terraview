@@ -9,13 +9,33 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:paddingStart="@dimen/colormap_title_margin"
-        android:layout_marginBottom="@dimen/colormap_margin" />
+        android:paddingStart="@dimen/colormap_title_margin" />
+
+    <RelativeLayout
+        android:id="@+id/dateContainer"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/colormap_title_margin">
+        <TextView
+            android:id="@+id/start_date"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@+id/end_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+        <TextView
+            android:id="@id/end_date"
+            android:layout_alignParentEnd="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+    </RelativeLayout>
 
     <!-- Divider -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1px"
+        android:layout_marginTop="@dimen/colormap_margin"
         android:background="@color/dividerColor" />
 
     <!-- Set visible when no color map available -->
@@ -37,7 +57,8 @@
         android:layout_marginTop="@dimen/colormap_margin" />
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:id="@+id/color_map_info">
         <TextView
             android:id="@+id/color_map_start"
             android:layout_alignParentStart="true"

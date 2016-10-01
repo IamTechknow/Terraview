@@ -9,8 +9,10 @@ import android.widget.TextView;
 import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.colormaps.ColorMapViewImpl;
 import com.iamtechknow.terraview.model.Layer;
+import com.iamtechknow.terraview.util.Utils;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class ColorMapAdapter extends RecyclerView.Adapter<ColorMapAdapter.ViewHolder> {
     private ArrayList<Layer> mItems;
@@ -19,15 +21,17 @@ public class ColorMapAdapter extends RecyclerView.Adapter<ColorMapAdapter.ViewHo
         mItems = list;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
-        TextView text, none;
+    class ViewHolder extends RecyclerView.ViewHolder{
+        TextView text, none, start, end;
         ColorMapViewImpl canvas;
 
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
 
             text = (TextView) itemView.findViewById(R.id.color_map_id);
             none = (TextView) itemView.findViewById(R.id.color_map_none);
+            start = (TextView) itemView.findViewById(R.id.start_date);
+            end = (TextView) itemView.findViewById(R.id.end_date);
             canvas = (ColorMapViewImpl) itemView.findViewById(R.id.color_map_palette);
         }
     }
@@ -49,8 +53,25 @@ public class ColorMapAdapter extends RecyclerView.Adapter<ColorMapAdapter.ViewHo
             holder.canvas.setLayerId(l.getIdentifier());
         else {
             holder.canvas.setVisibility(View.GONE);
+            holder.itemView.findViewById(R.id.color_map_info).setVisibility(View.GONE);
             holder.none.setVisibility(View.VISIBLE);
             holder.none.setText(R.string.colormap_none);
+        }
+
+        if(l.hasNoDates())
+            holder.itemView.findViewById(R.id.dateContainer).setVisibility(View.GONE);
+        else {
+            if (l.getStartDateRaw() != null) {
+                String start_str = Utils.parseDateForDialog(Utils.parseISODate(l.getStartDateRaw()));
+                start_str = start_str.substring(start_str.indexOf(',') + 2);
+                holder.start.setText(String.format(Locale.US, "Starts: %s", start_str));
+            }
+
+            if (l.getEndDateRaw() != null) {
+                String end_str = Utils.parseDateForDialog(Utils.parseISODate(l.getEndDateRaw()));
+                end_str = end_str.substring(end_str.indexOf(',') + 2);
+                holder.end.setText(String.format(Locale.US, "Ends: %s", end_str));
+            }
         }
     }
 

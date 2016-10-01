@@ -188,6 +188,13 @@ public class Layer implements Parcelable, Comparable<Layer> {
         return palette != null;
     }
 
+    /**
+     * Does the layer have dates? (No if Reference Labels, Coastlines, Blue Marble, Earth at Night 2012)
+     */
+    public boolean hasNoDates() {
+        return endDate == null && startDate == null;
+    }
+
     @Override
     public int describeContents() {
         return hashCode();
