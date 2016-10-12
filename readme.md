@@ -44,7 +44,6 @@ I worked on improvements on the project in an internship in NASA's Goddard Space
 
 ## Future development
 * Improve the MVP structure to simplify the WorldPresenter (in progress)
-* Allow searching of layers within the layer picker feature
 * Allow Colormaps to be touchable to reveal information based on where a tap occur
 * Seperate the utility layers, such as Coastlines, Reference Features and Labels
 * Integrate [NASA EONET](http://eonet.sci.gsfc.nasa.gov/) to allow easier discovery of natural events
@@ -52,16 +51,6 @@ I worked on improvements on the project in an internship in NASA's Goddard Space
 
 ## Requirements
 This project uses API Level 24, Google Play Services for Google Maps, and an API key for Google Maps. Replace the API key value with your own API key. Android N features are not used yet, but some Java 8 features are in use (effectively final variables, lambdas) and more may be used in the future.
-
-## Helpful Tutorials and samples I used:
-* [RecyclerView drag and swipe tutorial](https://medium.com/@ipaulpro/drag-and-swipe-with-recyclerview-b9456d2b1aaf#.hhn9yujya)
-* [TODO-MVP samples](https://github.com/googlesamples/android-architecture/tree/todo-mvp)
-* [Event Bus with RxJava tutorial](http://blog.kaush.co/2014/12/24/implementing-an-event-bus-with-rxjava-rxbus/)
-* [Android MVP Unit Testing](http://verybadalloc.com/android/adding-unit-tests-to-MVP-project.html)
-* [Testing RecyclerView with Espresso](https://spin.atomicobject.com/2016/04/15/espresso-testing-recyclerviews/)
-* [RxJava Android Samples](https://github.com/kaushikgopal/RxJava-Android-Samples)
-* [Google I/O app repository](https://github.com/google/iosched)
-* [GIBS API for Developers](https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+API+for+Developers)
 
 ## Helpful Tutorials and samples I used:
 * [RecyclerView drag and swipe tutorial](https://medium.com/@ipaulpro/drag-and-swipe-with-recyclerview-b9456d2b1aaf#.hhn9yujya)
