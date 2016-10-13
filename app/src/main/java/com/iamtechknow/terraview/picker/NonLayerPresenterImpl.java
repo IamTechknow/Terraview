@@ -39,7 +39,7 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
             viewRef.clear();
             viewRef = null;
         }
-        busSub.unsubscribe();
+        cleanUp();
     }
 
     @Override
@@ -122,5 +122,12 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
 
     private NonLayerView getView() {
         return viewRef == null ? null : viewRef.get();
+    }
+
+    //Clean up references to avoid memory leaks
+    private void cleanUp() {
+        busSub.unsubscribe();
+        busSub = null;
+        bus = null;
     }
 }

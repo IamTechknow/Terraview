@@ -22,6 +22,8 @@ import com.iamtechknow.terraview.model.TapEvent;
 
 import java.util.ArrayList;
 
+import rx.Subscription;
+
 public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener {
     //Constants for RxBus events and Intent
     public static final int SELECT_MEASURE_TAB = 1, SELECT_LAYER_TAB = 2, SELECT_SUGGESTION = 4;
@@ -30,7 +32,7 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
 
     //UI handling
     private TabLayout mTabLayout;
-    private RxBus _rxBus;
+    private Subscription subscription;
     private SearchView searchView;
 
     //Reference to layer stack from map
@@ -77,8 +79,6 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
         mTabLayout = (TabLayout) findViewById(R.id.tabs);
         mTabLayout.setupWithViewPager(viewPager);
         mTabLayout.addOnTabSelectedListener(this);
-
-        _rxBus = RxBus.getInstance();
     }
 
     @Override
@@ -123,7 +123,14 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
     @Override
     public void onStart() {
         super.onStart();
-        _rxBus.toObserverable().subscribe(this::handleEvent);
+        subscription = RxBus.getInstance().toObserverable().subscribe(this::handleEvent);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        subscription.unsubscribe();
+        subscription = null;
     }
 
     @Override
@@ -158,7 +165,7 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
     @Override
     protected void onNewIntent(Intent intent) {
         if(intent.getAction().equals(Intent.ACTION_VIEW))
-            _rxBus.send(new TapEvent(SELECT_SUGGESTION, null, intent.getStringExtra(SearchManager.EXTRA_DATA_KEY), null));
+            RxBus.getInstance().send(new TapEvent(SELECT_SUGGESTION, null, intent.getStringExtra(SearchManager.EXTRA_DATA_KEY), null));
     }
 
     /**

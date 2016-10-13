@@ -74,4 +74,8 @@ public class NonLayerDataAdapter extends RecyclerView.Adapter<NonLayerDataAdapte
         mItems = strings;
         notifyDataSetChanged();
     }
+
+    public void clearPresenter() {
+        presenter = null;
+    }
 }

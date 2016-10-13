@@ -69,7 +69,7 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
             viewRef.clear();
             viewRef = null;
         }
-        busSub.unsubscribe();
+        cleanUp();
     }
 
     @Override
@@ -266,5 +266,11 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
      */
     private Layer searchLayerById(String id) {
         return dataSource.getLayerTable().get(id);
+    }
+
+    private void cleanUp() {
+        busSub.unsubscribe();
+        busSub = null;
+        bus = null;
     }
 }

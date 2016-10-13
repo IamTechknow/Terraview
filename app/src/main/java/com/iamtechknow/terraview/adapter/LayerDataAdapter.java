@@ -97,4 +97,8 @@ public class LayerDataAdapter extends RecyclerView.Adapter<LayerDataAdapter.View
         mItems = strings;
         notifyDataSetChanged();
     }
+
+    public void clearPresenter() {
+        presenter = null;
+    }
 }

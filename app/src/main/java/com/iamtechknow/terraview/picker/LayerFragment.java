@@ -57,6 +57,8 @@ public class LayerFragment extends Fragment implements LayerView {
     public void onDestroy() {
         super.onDestroy();
         presenter.detachView();
+        adapter.clearPresenter();
+        presenter = null;
     }
 
     //Inflate the fragment view and setup the RecyclerView
