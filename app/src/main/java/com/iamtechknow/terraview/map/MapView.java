@@ -21,4 +21,6 @@ public interface MapView {
     void showPicker();
 
     void showAbout();
+
+    void showHelp();
 }

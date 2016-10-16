@@ -291,6 +291,12 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
             getMapView().showAbout();
     }
 
+    @Override
+    public void presentHelp() {
+        if(getMapView() != null)
+            getMapView().showHelp();
+    }
+
     /**
      * First the cache is checked to ensure tiles exist for the arguments
      * and the layer by generating a key and checking if it is in the cache already.

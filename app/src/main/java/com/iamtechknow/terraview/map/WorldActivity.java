@@ -177,6 +177,9 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
             case R.id.action_layersettings:
                 mDrawerLayout.openDrawer(GravityCompat.END);
                 break;
+            case R.id.action_help:
+                mapPresenter.presentHelp();
+                break;
         }
         mDrawerLayout.closeDrawer(GravityCompat.START);
         return false;
@@ -350,6 +353,11 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
     @Override
     public void showAbout() {
         Utils.showAbout(this);
+    }
+
+    @Override
+    public void showHelp() {
+        Utils.showWebPage(this, getString(R.string.faq), getString(R.string.faq_title)); //for now FAQ
     }
 
     @Override

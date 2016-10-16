@@ -27,7 +27,7 @@ import java.util.Locale;
 
 public class Utils {
     private static final String HTML_EXTRA = "html", ABOUT_TAG = "dialog_about", ISO_FMT = "yyyy-MM-dd", DIALOG_FMT = "EEE, MMM dd, yyyy";
-    private static final String TAG = "Utils";
+    private static final String TAG = "Utils", TITLE_EXTRA = "title";
 
     private static final SimpleDateFormat ISO = new SimpleDateFormat(ISO_FMT, Locale.US);
     private static final SimpleDateFormat DIALOG = new SimpleDateFormat(DIALOG_FMT, Locale.US);
@@ -111,15 +111,16 @@ public class Utils {
      * @param activity The activity in which to display the fragment in
      */
     public static void showAbout(Activity activity) {
-        showWebPage(activity, activity.getString(R.string.about_html));
+        showWebPage(activity, activity.getString(R.string.about_html), activity.getString(R.string.about));
     }
 
-    public static void showWebPage(Activity activity, String html) {
+    public static void showWebPage(Activity activity, String html, String title) {
         FragmentManager fm = activity.getFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
         Fragment prev = fm.findFragmentByTag(ABOUT_TAG);
         Bundle extra1 = new Bundle();
         extra1.putString(HTML_EXTRA, html);
+        extra1.putString(TITLE_EXTRA, title);
         if (prev != null)
             ft.remove(prev);
 
@@ -141,7 +142,7 @@ public class Utils {
             webView.loadData(getArguments().getString(HTML_EXTRA), MIME_TYPE, null);
 
             return new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.about)
+                .setTitle(getArguments().getString(TITLE_EXTRA))
                 .setView(webView)
                 .setPositiveButton(android.R.string.yes, (dialog, whichButton) -> dialog.dismiss()).create();
         }

@@ -90,6 +90,6 @@ public class LayerFragment extends Fragment implements LayerView {
 
     @Override
     public void showInfo(String html) {
-        Utils.showWebPage(getActivity(), html);
+        Utils.showWebPage(getActivity(), html, getString(R.string.about));
     }
 }

@@ -10,7 +10,7 @@
         <html lang=\'en\'>
             <head>
                 <title></title>
-                <meta charset=\"UTF-8\">
+                <meta charset=\"UTF-8\"></meta>
                 <style> body { font-family: sans-serif; } pre { background-color: #eeeeee; padding: 1em; white-space: pre-wrap; } </style>
             </head>
             <body>
@@ -48,6 +48,51 @@
             </body>
         </html>
     ]]></string>
+    <string name="faq"><![CDATA[
+        <!DOCTYPE html>
+        <html lang=\'en\'>
+            <head>
+                <title></title>
+                <meta charset=\"UTF-8\"></meta>
+                <style> body { font-family: sans-serif; } pre { background-color: #eeeeee; padding: 1em; white-space: pre-wrap; } </style>
+            </head>
+            <body>
+                <h3>Why is the Google logo shown at the bottom?</h3>
+                <pre>Simply because the app uses the Google Maps API and the logo is part of the map view. No map tiles are used from Google Maps however. Reference labels and layers from Google Maps are all disabled to improve performance of loading the tiles from GIBS.
+                </pre>
+                <h3>How does this app differ from Worldview?</h3>
+                <pre>NASA Worldview is the default client for NASA GIBS, which provides access to all available satellite imagery and data from NASA. Terraview is also a
+                    GIBS clients, and so in this respect it does not differ from Worldview because both are HTTP REST clients.
+
+                    <br /><br />Terraview however is built for mobile devices that run Android and therefore takes advantage of the components and libraries available to the Android platform. It uses material design elements such as the toolbar,
+                    but to maximize the size of the map the app menu is hidden in the left hand drawer while the layer controls are in the right hand drawer. It may also download and store data into its internal app data storage
+                    to quickly load all the layer metadata the next time the application is started up. This is all done natively in Android by using the Google Maps API, as opposed to Worldview having to work in a browser environment and may not function well for all devices.
+
+                    <br /><br />Some elements from Worldview do not translate to mobile computing easily and therefore are done differently in Worldview. Choosing layers is done in a different screen for example.
+                    The timeline does not serve as an intuitive date picker for most people, so a calendar date picker is used.
+                </pre>
+                <h3>Why do some layers not show up?</h3>
+                <pre>All layers have a start date while some also have an end date. Choosing a date before a layer\'s start date or after a layer\'s end date will result in no data or imagery for that layer.
+                    You can check these dates at the Layer Info menu option. In particular, all AMSR-E layers are from 2002 to 2011, and AMSR2 layers start at 2015.
+
+                    <br /><br />Some layers that do not have an end date are delayed by a day, meaning if you choose the day before today, the layer may be visible but not for today. So far this has been verified with the SMAP and GHRSST layers.
+                </pre>
+                <h3>Why are layers available in Worldview not here?</h3>
+                <pre>Terraview uses the Google Maps API which displays the map in a Mercator projection which distorts objects in the map so objects further from the equator look bigger than they are to preserve their shape in a rectangle surface.
+                    The layers displayed in Worldview are in a different projection that does not distort objects but cannot be viewed directly with Google Maps. Not all GIBS layers support the Mercator projection such as the Fires and Thermal Anomalies layers, but a large number are.
+                </pre>
+                <h3>How does a colorbar work?</h3>
+                <pre>Layers that are not for utility and are not base satellite imagery layers are data overlays that represent a measurement. In the Layer info menu option, you can see a visual of the colorbar,
+                    which represents the range of values of that measurement. At both ends are text that tell you the minimum and maximum value as well as the units, if any.
+                    Future releases of Terraview will allow you to touch the colorbar to display the value for the touched portion of the colorbar.
+                </pre>
+                <h3>Why do I have to wait for tiles to load before starting an animation?</h3>
+                <pre>The animation feature is currently experimental. During my internship at NASA I found when developing animations for Worldview data is fetched as soon as the date changed. Worldview handles caching of the data downloaded,
+                    however Google Maps API handles the caching here, and I found that animating before all layers are loaded could result in undefined behaviour.
+                </pre>
+            </body>
+        </html>
+    ]]></string>
     <string name="internet">Turn on connection to get data</string>
     <string name="colormap_info">Colormap Information</string>
     <string name="layer_settings">Layer Settings</string>
@@ -74,4 +119,5 @@
     <string name="email_subject">Terraview - Feedback</string>
     <string name="search_hint">Type a layer to add</string>
     <string name="search">Search</string>
+    <string name="faq_title">FAQ</string>
 </resources>
