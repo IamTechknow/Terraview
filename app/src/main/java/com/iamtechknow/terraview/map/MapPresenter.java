@@ -47,6 +47,8 @@ public interface MapPresenter {
 
     void presentAbout();
 
+    void presentFaq();
+
     void presentHelp();
 
     void chooseLayers();

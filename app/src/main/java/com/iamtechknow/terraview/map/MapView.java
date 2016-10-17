@@ -23,4 +23,6 @@ public interface MapView {
     void showAbout();
 
     void showHelp();
+
+    void showFaq();
 }

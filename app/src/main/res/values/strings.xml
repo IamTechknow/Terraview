@@ -87,7 +87,7 @@
                     Future releases of Terraview will allow you to touch the colorbar to display the value for the touched portion of the colorbar.
                 </pre>
                 <h3>Why do I have to wait for tiles to load before starting an animation?</h3>
-                <pre>The animation feature is currently experimental. During my internship at NASA I found when developing animations for Worldview data is fetched as soon as the date changed. Worldview handles caching of the data downloaded,
+                <pre>The animation feature is currently experimental. GIF animations will be part of a future major release. During my internship at NASA I found when developing animations for Worldview data is fetched as soon as the date changed. Worldview handles caching of the data downloaded,
                     however Google Maps API handles the caching here, and I found that animating before all layers are loaded could result in undefined behaviour.
                 </pre>
             </body>
@@ -120,4 +120,12 @@
     <string name="search_hint">Type a layer to add</string>
     <string name="search">Search</string>
     <string name="faq_title">FAQ</string>
+    <string name="help">App Tour</string>
+    <string name="tour_start">Terraview tour</string>
+    <string name="tour_start_sub">Tap here to start</string>
+    <string name="tour_menu">The Main Menu</string>
+    <string name="tour_menu_desc">Choose layers, see layer info, set the date, or animate</string>
+    <string name="tour_menu_ctrls_title">Right swipe for layer controls</string>
+    <string name="tour_menu_ctrls_desc">Hide, swap, or swipe away layers</string>
+    <string name="tour_end">You reached the end of the tour. Enjoy!</string>
 </resources>

@@ -292,6 +292,12 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     }
 
     @Override
+    public void presentFaq() {
+        if(getMapView() != null)
+            getMapView().showFaq();
+    }
+
+    @Override
     public void presentHelp() {
         if(getMapView() != null)
             getMapView().showHelp();

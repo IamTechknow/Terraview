@@ -11,7 +11,9 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
 import android.webkit.WebView;
 
 import com.iamtechknow.terraview.R;
@@ -104,6 +106,17 @@ public class Utils {
         for(Layer l : layers)
             temp.put(l.getIdentifier(), l);
         return temp;
+    }
+
+    /**
+     * Finds the reference to the home button view
+     * @param bar The support toolbar
+     * @return The ImageButton view
+     */
+    public static View findNavView(Toolbar bar) {
+        ArrayList<View> result = new ArrayList<>(1);
+        bar.findViewsWithText(result, bar.getNavigationContentDescription(), View.FIND_VIEWS_WITH_CONTENT_DESCRIPTION);
+        return result.get(0);
     }
 
     /**
