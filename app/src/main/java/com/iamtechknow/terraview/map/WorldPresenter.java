@@ -39,7 +39,6 @@ import retrofit2.Retrofit;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
 import static com.iamtechknow.terraview.map.WorldActivity.*;
 import static com.iamtechknow.terraview.anim.AnimDialogActivity.*;
@@ -567,9 +566,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
             animRunning = true;
             animSub = Observable.interval(delay, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aLong -> {
-                    onNextFrame();
-                });
+                .subscribe(aLong -> onNextFrame());
         } else  //Restore tiles
             restoreAnimTiles();
     }

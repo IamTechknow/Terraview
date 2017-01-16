@@ -17,7 +17,6 @@ import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 import rx.Observable;
 import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class ColorMapPresenterImpl implements ColorMapPresenter {

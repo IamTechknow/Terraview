@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Rect;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -28,9 +27,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
 
-import com.getkeepsafe.taptargetview.TapTarget;
-import com.getkeepsafe.taptargetview.TapTargetSequence;
-import com.getkeepsafe.taptargetview.TapTargetView;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -44,6 +40,7 @@ import com.iamtechknow.terraview.adapter.CurrLayerAdapter;
 import com.iamtechknow.terraview.adapter.ItemTouchHelperCallback;
 import com.iamtechknow.terraview.adapter.DragAndHideListener;
 import com.iamtechknow.terraview.model.Layer;
+import com.iamtechknow.terraview.util.FeatureDiscovery;
 import com.iamtechknow.terraview.util.Utils;
 
 import java.util.ArrayList;
@@ -87,8 +84,8 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
         Toolbar mToolbar = (Toolbar) findViewById(R.id.tool_bar);
         setSupportActionBar(mToolbar);
         mDrawerLayout.addDrawerListener(this);
-        NavigationView mNavLeft = (NavigationView) findViewById(R.id.nav_menu);
-        mNavLeft.setNavigationItemSelectedListener(this);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_menu);
+        navigationView.setNavigationItemSelectedListener(this);
 
         // Adding menu icon to Toolbar
         ActionBar actionBar = getSupportActionBar();
@@ -131,7 +128,6 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-
         mapPresenter.onRestoreInstanceState(savedInstanceState);
     }
 
@@ -372,47 +368,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
      */
     @Override
     public void showHelp() {
-        //Calculate rect bounds, based on where the home button is
-        View home_icon = Utils.findNavView((Toolbar) findViewById(R.id.tool_bar));
-        final int[] coord = new int[2]; //X, Y of left corner of view
-        home_icon.getLocationOnScreen(coord);
-
-        Rect right_bounds = new Rect(mCoordinatorLayout.getWidth() - coord[0] - home_icon.getWidth(), coord[1], mCoordinatorLayout.getWidth(), coord[1] + home_icon.getHeight()),
-        left_bounds = new Rect(coord[0], coord[1], coord[0] + home_icon.getWidth(), coord[1] + home_icon.getHeight());
-
-        TapTarget part2 = TapTarget.forBounds(right_bounds, getString(R.string.tour_menu), getString(R.string.tour_menu_desc)),
-                part3 = TapTarget.forBounds(left_bounds, getString(R.string.tour_menu_ctrls_title), getString(R.string.tour_menu_ctrls_desc));
-
-        //Define the listeners for each part, must define last first
-        TapTargetView.Listener part3_listener = new TapTargetView.Listener() {
-            @Override
-            public void onTargetClick(TapTargetView view) {
-                super.onTargetClick(view);
-                mDrawerLayout.closeDrawers();
-                Snackbar.make(mCoordinatorLayout, R.string.tour_end, Snackbar.LENGTH_LONG).show();
-            }
-        }, part2_listener = new TapTargetView.Listener() {
-            @Override
-            public void onTargetClick(TapTargetView view) {
-                super.onTargetClick(view);
-                mDrawerLayout.closeDrawer(GravityCompat.START);
-                mDrawerLayout.openDrawer(GravityCompat.END);
-                TapTargetView.showFor(WorldActivity.this, part3, part3_listener);
-            }
-        };
-
-        //Set up and display the first target
-        TapTargetView.showFor(this, TapTarget.forToolbarNavigationIcon((Toolbar) findViewById(R.id.tool_bar),
-                getString(R.string.tour_start), getString(R.string.tour_start_sub)),
-            new TapTargetView.Listener() {
-                @Override
-                public void onTargetClick(TapTargetView view) {
-                    super.onTargetClick(view);
-                    mDrawerLayout.openDrawer(GravityCompat.START);
-
-                    TapTargetView.showFor(WorldActivity.this, part2, part2_listener);
-                }
-            });
+        FeatureDiscovery.guidedTour(this);
     }
 
     @Override
