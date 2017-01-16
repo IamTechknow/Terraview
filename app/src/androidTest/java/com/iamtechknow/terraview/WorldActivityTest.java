@@ -11,7 +11,6 @@ import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.v4.view.GravityCompat;
-import android.view.View;
 
 import com.dannyroa.espresso_samples.recyclerview.RecyclerViewMatcher;
 import com.iamtechknow.terraview.colormaps.ColorMapViewImpl;
@@ -65,8 +64,7 @@ public class WorldActivityTest {
         onView(matcher.atPosition(0)).perform(swipeLeftCenter());
 
         //Assert RecyclerView is empty
-        onView(withId(R.id.layer_list))
-                .check(matches(SizeMatcher.withListSize(0)));
+        onView(withId(R.id.layer_list)).check(matches(SizeMatcher.withListSize(0)));
     }
 
     /**
@@ -78,10 +76,8 @@ public class WorldActivityTest {
         onView(withId(R.id.drawer)).perform(open(GravityCompat.END));
         onView(matcher.atPosition(0)).perform(swipeDownEnd());
 
-        onView(matcher.atPosition(1))
-                .check(matches(hasDescendant(withText("Coastlines (OSM)"))));
-        onView(matcher.atPosition(0))
-                .check(matches(hasDescendant(withText("Corrected Reflectance (True Color, VIIRS, SNPP)"))));
+        onView(matcher.atPosition(1)).check(matches(hasDescendant(withText("Coastlines (OSM)"))));
+        onView(matcher.atPosition(0)).check(matches(hasDescendant(withText("Corrected Reflectance (True Color, VIIRS, SNPP)"))));
     }
 
     /**
@@ -115,8 +111,7 @@ public class WorldActivityTest {
      * @return ViewAction representing a swipe from the center to the left
      */
     private static ViewAction swipeLeftCenter() {
-        return new GeneralSwipeAction(Swipe.FAST, GeneralLocation.CENTER,
-                GeneralLocation.CENTER_LEFT, Press.FINGER);
+        return new GeneralSwipeAction(Swipe.FAST, GeneralLocation.CENTER, GeneralLocation.CENTER_LEFT, Press.FINGER);
     }
 
     /**

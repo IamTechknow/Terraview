@@ -16,11 +16,8 @@ import com.iamtechknow.terraview.model.Layer;
 
 import java.util.ArrayList;
 
-public class ColorMapFragment extends BottomSheetDialogFragment{
+public class ColorMapFragment extends BottomSheetDialogFragment {
     public static final String COLORMAP_ARG = "layers";
-
-    private RecyclerView mRecyclerView;
-    private ColorMapAdapter adapter;
 
     /**
      * Behaviour for the bottom sheet, just dismiss it when swiped down
@@ -33,9 +30,7 @@ public class ColorMapFragment extends BottomSheetDialogFragment{
         }
 
         @Override
-        public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-
-        }
+        public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
     };
 
     /**
@@ -57,11 +52,9 @@ public class ColorMapFragment extends BottomSheetDialogFragment{
         }
         ArrayList<Layer> colorMapLayers = getArguments().getParcelableArrayList(COLORMAP_ARG);
 
-        mRecyclerView = (RecyclerView) contentView.findViewById(R.id.color_map_rv);
+        RecyclerView mRecyclerView = (RecyclerView) contentView.findViewById(R.id.color_map_rv);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        adapter = new ColorMapAdapter(colorMapLayers);
-        mRecyclerView.setAdapter(adapter);
+        mRecyclerView.setAdapter(new ColorMapAdapter(colorMapLayers));
     }
 }
