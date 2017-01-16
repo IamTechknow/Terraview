@@ -197,10 +197,10 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
         if(getSharedPreferences(PREFS_FILE, MODE_PRIVATE).getBoolean(PREFS_DB_KEY, false))
             mapPresenter.getLocalData(getSupportLoaderManager(), this);
         else { //Check internet access to get layer data or set up receiver, also start tour for first timers
-            mapPresenter.presentHelp();
-            if(Utils.isOnline(this))
+            if(Utils.isOnline(this)) {
                 mapPresenter.getRemoteData(this);
-            else {
+                Snackbar.make(mCoordinatorLayout, R.string.tour_new, Snackbar.LENGTH_LONG).setAction(R.string.start_tour, view -> mapPresenter.presentHelp()).show();
+            } else {
                 Snackbar.make(mCoordinatorLayout, R.string.internet, Snackbar.LENGTH_LONG).show();
                 IntentFilter filter = new IntentFilter();
                 filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -294,7 +294,8 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION) && Utils.isOnline(context)) {
                 mapPresenter.getRemoteData(context);
-                unregisterReceiver(connectReceiver);
+                Snackbar.make(mCoordinatorLayout, R.string.tour_new, Snackbar.LENGTH_LONG).setAction(R.string.start_tour, view -> mapPresenter.presentHelp()).show();
+                unregisterReceiver(this);
             }
         }
     };

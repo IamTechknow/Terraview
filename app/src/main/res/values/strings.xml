@@ -121,6 +121,8 @@
     <string name="search">Search</string>
     <string name="faq_title">FAQ</string>
     <string name="help">App Tour</string>
+    <string name="tour_new">New to Terraview?</string>
+    <string name="start_tour">Start Tour</string>
     <string name="tour_start">Terraview tour</string>
     <string name="tour_start_sub">Tap here to start</string>
     <string name="tour_menu">The Main Menu</string>
@@ -128,4 +130,6 @@
     <string name="tour_menu_ctrls_title">Right swipe for layer controls</string>
     <string name="tour_menu_ctrls_desc">Hide, swap, or swipe away layers</string>
     <string name="tour_end">You reached the end of the tour. Enjoy!</string>
+    <string name="share">Share</string>
+    <string name="share_url">Share or copy animation URL</string>
 </resources>
