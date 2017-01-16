@@ -23,7 +23,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false //true makes app crash in Android N
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
