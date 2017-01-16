@@ -196,7 +196,8 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
     public void onMapReady(GoogleMap googleMap) {
         if(getSharedPreferences(PREFS_FILE, MODE_PRIVATE).getBoolean(PREFS_DB_KEY, false))
             mapPresenter.getLocalData(getSupportLoaderManager(), this);
-        else { //Check internet access to get layer data or set up receiver
+        else { //Check internet access to get layer data or set up receiver, also start tour for first timers
+            mapPresenter.presentHelp();
             if(Utils.isOnline(this))
                 mapPresenter.getRemoteData(this);
             else {
