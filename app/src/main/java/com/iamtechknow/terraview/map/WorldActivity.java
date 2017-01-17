@@ -51,7 +51,7 @@ import static com.iamtechknow.terraview.anim.AnimDialogActivity.*;
 public class WorldActivity extends AppCompatActivity implements MapView, AnimView, OnMapReadyCallback,
         NavigationView.OnNavigationItemSelectedListener, DragAndHideListener, DrawerLayout.DrawerListener {
     public static final String RESULT_LIST = "list", PREFS_FILE = "settings", PREFS_DB_KEY = "have_db";
-    public static final String TIME_EXTRA = "time", LAYER_EXTRA = "layer";
+    public static final String RESTORE_TIME_EXTRA = "time", RESTORE_LAYER_EXTRA = "layer";
     public static final int LAYER_CODE = 1, ANIM_CODE = 2, SECONDS_PER_DAY = 24*60*60*1000;
 
     //UI fields
@@ -121,8 +121,8 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
         animPresenter.stop(true);
 
         //Save current date and layers
-        outState.putParcelableArrayList(LAYER_EXTRA, mapPresenter.getCurrLayerStack());
-        outState.putLong(TIME_EXTRA, mapPresenter.getCurrDate().getTime());
+        outState.putParcelableArrayList(RESTORE_LAYER_EXTRA, mapPresenter.getCurrLayerStack());
+        outState.putLong(RESTORE_TIME_EXTRA, mapPresenter.getCurrDate().getTime());
     }
 
     @Override
@@ -344,6 +344,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
     public void showAnimDialog() {
         Intent anim_i = new Intent(WorldActivity.this, AnimDialogActivity.class)
                 .putExtra(AnimDialogActivity.ANIM_ARG, Utils.parseDateForDialog(mapPresenter.getCurrDate()))
+                .putParcelableArrayListExtra(LAYER_EXTRA, mapPresenter.getCurrLayerStack())
                 .putExtras(animPresenter.getAnimationSettings());
         startActivityForResult(anim_i, ANIM_CODE);
     }

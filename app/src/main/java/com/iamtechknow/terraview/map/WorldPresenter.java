@@ -127,8 +127,8 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         isRestoring = true;
 
-        layer_stack = savedInstanceState.getParcelableArrayList(LAYER_EXTRA);
-        Long l = savedInstanceState.getLong(TIME_EXTRA);
+        layer_stack = savedInstanceState.getParcelableArrayList(RESTORE_LAYER_EXTRA);
+        Long l = savedInstanceState.getLong(RESTORE_TIME_EXTRA);
         currentDate = new Date(l);
 
         if(getMapView() != null)

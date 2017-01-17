@@ -15,7 +15,25 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
--keep class com.google.android.gms.** { *; }
+-keep class com.google.android.gms.maps.** { *; }
 -keep class android.support.design.** { *; }
 -keep class android.support.v7.widget.** { *; }
--dontwarn com.google.android.gms.**
+-dontwarn com.google.android.gms.maps.**
+
+#Needed for RxJava 1.2.5, found at https://github.com/artem-zinnatullin/RxJavaProGuardRules
+-dontwarn sun.misc.**
+
+-keepclassmembers class rx.internal.util.unsafe.*ArrayQueue*Field* {
+   long producerIndex;
+   long consumerIndex;
+}
+
+-keepclassmembers class rx.internal.util.unsafe.BaseLinkedQueueProducerNodeRef {
+    rx.internal.util.atomic.LinkedQueueNode producerNode;
+}
+
+-keepclassmembers class rx.internal.util.unsafe.BaseLinkedQueueConsumerNodeRef {
+    rx.internal.util.atomic.LinkedQueueNode consumerNode;
+}
+
+-dontnote rx.internal.util.PlatformDependent

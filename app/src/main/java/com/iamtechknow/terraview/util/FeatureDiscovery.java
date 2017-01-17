@@ -84,7 +84,7 @@ public final class FeatureDiscovery {
                                 TapTargetView.showFor(map, part2, part2_listener);
                             } else
                                 mNavLeft.getMenu().getItem((int) (aLong + 1)).setChecked(true);
-                        });
+                        }, Throwable::printStackTrace);
                 }
             });
     }

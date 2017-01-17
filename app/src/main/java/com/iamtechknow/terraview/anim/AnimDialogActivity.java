@@ -16,15 +16,17 @@ import android.widget.TextView;
 import android.support.v7.widget.Toolbar;
 
 import com.iamtechknow.terraview.R;
+import com.iamtechknow.terraview.model.Layer;
 import com.iamtechknow.terraview.util.Utils;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Calendar;
 
 public class AnimDialogActivity extends AppCompatActivity implements View.OnClickListener, DatePickerDialog.OnDateSetListener {
     public static final String ANIM_ARG = "anim", START_EXTRA = "start", END_EXTRA = "end", INTERVAL_EXTRA = "year",
-                               LOOP_EXTRA = "loop", SAVE_EXTRA = "save", SPEED_EXTRA = "speed";
-    private static final String URL_BASE = "https://worldview.earthdata.nasa.gov/?", URL_AB = "ab=on",
+                               LOOP_EXTRA = "loop", SAVE_EXTRA = "save", SPEED_EXTRA = "speed", LAYER_EXTRA = "layer";
+    private static final String URL_BASE = "https://worldview.earthdata.nasa.gov/?p=geographic&", URL_AB = "ab=on", URL_L = "l=",
                                 URL_AS = "as=", URL_AE = "ae=", URL_AV = "av=", URL_AL = "al=", TEXT = "text/plain";
     public static final int DAY = 0, MONTH = 1, YEAR = 2, WEEK = 3, SPEED_OFFSET = 1, DEFAULT_SPEED = 30;
 
@@ -215,7 +217,7 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
     private void shareURL() {
         String startStr = Utils.parseDate(Utils.parseDialogDate(start.getText().toString())),
         endStr = Utils.parseDate(Utils.parseDialogDate(end.getText().toString())),
-        result = encodeURL(startStr, endStr, seekBar.getProgress() + SPEED_OFFSET, loop.isChecked());
+        result = encodeURL(getIntent().getParcelableArrayListExtra(LAYER_EXTRA), startStr, endStr, seekBar.getProgress() + SPEED_OFFSET, loop.isChecked());
 
         Intent intent = new Intent(Intent.ACTION_SEND)
             .setType(TEXT)
@@ -226,8 +228,13 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
     /**
      * Encode Worldview URL for the current animation settings
      */
-    private String encodeURL(String start, String end, int speed, boolean loop) {
-        return URL_BASE + URL_AB + '&' +
+    private String encodeURL(ArrayList<Layer> layers, String start, String end, int speed, boolean loop) {
+        StringBuilder result = new StringBuilder(URL_BASE).append(URL_L);
+        for(Layer l : layers)
+            result.append(l.getTitle()).append(',');
+        result.deleteCharAt(result.length() - 1); //delete trailing comma
+
+        return result + URL_AB + '&' +
                 URL_AS + start + '&' + URL_AE + end + '&' +
                 URL_AV + Math.min(speed, 10) + '&' + URL_AL + loop;
     }
