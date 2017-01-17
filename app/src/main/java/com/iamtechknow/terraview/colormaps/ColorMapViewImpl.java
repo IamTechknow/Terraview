@@ -5,7 +5,9 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
@@ -18,7 +20,7 @@ import com.iamtechknow.terraview.model.ColorMapEntry;
  * to prevent it from being GCed, and to allow it to be called to draw the color map
  */
 public class ColorMapViewImpl extends View implements ColorMapView {
-    private float RECT_HEIGHT = dPToPixel();
+    private float RECT_HEIGHT = dPToPixel(R.dimen.md_keylines);
 
     private Paint mPaint;
 
@@ -85,11 +87,35 @@ public class ColorMapViewImpl extends View implements ColorMapView {
     }
 
     /**
+     * Respond to events in the canvas itself. Calculate the color that is being tapped,
+     * then show a popup that displays the value of the color being tapped.
+     */
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        float x = event.getX();
+        int index = Math.max(0, (int) (x / getWidth() * (colorMap.getList().size() - 1))); //percentage from right edge x size
+        Log.d(getClass().getSimpleName(), "X: " + x + " Value: " + colorMap.getList().get(index).getLabel() + " Index: " + index + " / " + (colorMap.getList().size() - 1));
+        switch(event.getAction()) {
+            case MotionEvent.ACTION_DOWN: //show tooltip
+
+                break;
+            case MotionEvent.ACTION_MOVE: //move tooltip
+
+                break;
+            case MotionEvent.ACTION_UP: //hide tooltip
+
+                break;
+            default:
+        }
+        return true;
+    }
+
+    /**
      * Do some preprocessing by converting the DP dimension to pixels to get the rectangle height
      * @return pixel size of the DP
      */
-    private float dPToPixel() {
+    private float dPToPixel(int dimen) {
         Resources r = getResources();
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(R.dimen.md_keylines), r.getDisplayMetrics());
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(dimen), r.getDisplayMetrics());
     }
 }

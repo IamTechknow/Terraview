@@ -41,10 +41,10 @@ I worked on improvements on the project in an internship in NASA's Goddard Space
 * [OkHttp3](http://square.github.io/okhttp/)
 * [Espresso](https://google.github.io/android-testing-support-library/docs/espresso/index.html)
 * [Mockito](http://mockito.org/)
+* [TapTargetView](https://github.com/KeepSafe/TapTargetView/)
 
 ## Future development
 * Improve the MVP structure to simplify the WorldPresenter (in progress)
-* Allow Colormaps to be touchable to reveal information based on where a tap occur
 * Seperate the utility layers, such as Coastlines, Reference Features and Labels
 * Integrate [NASA EONET](http://eonet.sci.gsfc.nasa.gov/) to allow easier discovery of natural events
 * Allow generation of GIF animations and pictures of the shown satellite data

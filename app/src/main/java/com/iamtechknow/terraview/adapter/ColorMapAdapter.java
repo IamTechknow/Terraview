@@ -55,7 +55,6 @@ public class ColorMapAdapter extends RecyclerView.Adapter<ColorMapAdapter.ViewHo
             holder.canvas.setVisibility(View.GONE);
             holder.itemView.findViewById(R.id.color_map_info).setVisibility(View.GONE);
             holder.none.setVisibility(View.VISIBLE);
-            holder.none.setText(R.string.colormap_none);
         }
 
         if(l.hasNoDates())

@@ -46,6 +46,7 @@
         android:visibility="gone"
         android:paddingStart="@dimen/colormap_title_margin"
         android:layout_marginTop="@dimen/colormap_margin"
+        android:text="@string/colormap_none"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <!-- Used when color map is available -->
