@@ -45,7 +45,6 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         android:paddingStart="@dimen/colormap_title_margin"
-        android:layout_marginTop="@dimen/colormap_margin"
         android:text="@string/colormap_none"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
@@ -54,7 +53,6 @@
         android:id="@+id/color_map_palette"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/md_keylines"
-        android:layout_marginBottom="@dimen/colormap_margin"
         android:layout_marginTop="@dimen/colormap_margin" />
     <RelativeLayout
         android:layout_width="fill_parent"
@@ -68,10 +66,25 @@
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
         <TextView
+            android:id="@+id/color_map_val"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:visibility="gone" />
+        <TextView
             android:id="@id/color_map_end"
             android:layout_alignParentEnd="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
     </RelativeLayout>
+    <SeekBar
+        android:id="@+id/color_map_picker"
+        android:layout_marginTop="@dimen/anim_header_margin"
+        android:layout_marginBottom="@dimen/anim_header_margin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:progress="50"
+        android:visibility="gone" />
 </LinearLayout>

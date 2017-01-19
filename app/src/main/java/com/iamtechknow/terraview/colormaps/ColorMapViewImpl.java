@@ -5,29 +5,38 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
-import android.view.MotionEvent;
 import android.view.View;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.model.ColorMap;
 import com.iamtechknow.terraview.model.ColorMapEntry;
 
+import java.util.ArrayList;
+
 /**
  * View implementation for the color map list item. Needs a reference to the presenter
  * to prevent it from being GCed, and to allow it to be called to draw the color map
  */
-public class ColorMapViewImpl extends View implements ColorMapView {
+public class ColorMapViewImpl extends View implements ColorMapView, SeekBar.OnSeekBarChangeListener {
     private float RECT_HEIGHT = dPToPixel(R.dimen.md_keylines);
 
+    //Controls the color for drawing the color map
     private Paint mPaint;
 
+    //Presenter half of the MVP contract
     private ColorMapPresenter presenter;
 
-    private ColorMap colorMap;
+    //List of all color map entries
+    private ArrayList<ColorMapEntry> colorMap;
+
+    //Length of each rectangle being drawn depending on the color map size
     private float rectLength;
+
+    //Text view of the current value being shown in the color map by the slider
+    private TextView val;
 
     public ColorMapViewImpl(Context context) {
         super(context);
@@ -48,6 +57,12 @@ public class ColorMapViewImpl extends View implements ColorMapView {
 
     @Override
     public void setLayerId(String id) {
+        val = (TextView) getRootView().findViewById(R.id.color_map_val);
+        SeekBar bar = (SeekBar) getRootView().findViewById(R.id.color_map_picker);
+        val.setVisibility(View.VISIBLE);
+        bar.setVisibility(View.VISIBLE);
+        bar.setOnSeekBarChangeListener(this);
+
         presenter = new ColorMapPresenterImpl();
         presenter.attachView(this);
         presenter.parseColorMap(id);
@@ -57,8 +72,8 @@ public class ColorMapViewImpl extends View implements ColorMapView {
     //Then invalidate the view to have onDraw() be called
     @Override
     public void setColorMapData(ColorMap map) {
-        colorMap = map;
-        rectLength = (float) getWidth() / (float) colorMap.getList().size();
+        colorMap = map.getList();
+        rectLength = (float) getWidth() / (float) colorMap.size();
         invalidate(); //will call onDraw()
     }
 
@@ -73,7 +88,7 @@ public class ColorMapViewImpl extends View implements ColorMapView {
 
         int index = 0;
         if(colorMap != null) {
-            for (ColorMapEntry e : colorMap.getList()) {
+            for (ColorMapEntry e : colorMap) {
                 mPaint.setARGB(255, e.getR(), e.getG(), e.getB());
                 canvas.drawRect(index * rectLength, 0f, (index + 1) * rectLength, RECT_HEIGHT, mPaint);
                 index++;
@@ -81,34 +96,27 @@ public class ColorMapViewImpl extends View implements ColorMapView {
             View parent = (View) getParent();
             TextView start = (TextView) parent.findViewById(R.id.color_map_start),
                     end = (TextView) parent.findViewById(R.id.color_map_end);
-            start.setText(colorMap.getList().get(0).getLabel());
-            end.setText(colorMap.getList().get(index - 1).getLabel());
+            start.setText(colorMap.get(0).getLabel());
+            end.setText(colorMap.get(index - 1).getLabel());
+            val.setText(colorMap.get(index / 2).getLabel());
         }
     }
 
     /**
-     * Respond to events in the canvas itself. Calculate the color that is being tapped,
-     * then show a popup that displays the value of the color being tapped.
+     * Slider value has been changed, update the current value text by calculating
+     * the index being mapped by the new progress percentage.
      */
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        float x = event.getX();
-        int index = Math.max(0, (int) (x / getWidth() * (colorMap.getList().size() - 1))); //percentage from right edge x size
-        Log.d(getClass().getSimpleName(), "X: " + x + " Value: " + colorMap.getList().get(index).getLabel() + " Index: " + index + " / " + (colorMap.getList().size() - 1));
-        switch(event.getAction()) {
-            case MotionEvent.ACTION_DOWN: //show tooltip
-
-                break;
-            case MotionEvent.ACTION_MOVE: //move tooltip
-
-                break;
-            case MotionEvent.ACTION_UP: //hide tooltip
-
-                break;
-            default:
-        }
-        return true;
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        float index = ((float) progress) / 100 * (colorMap.size() - 1); //percentage x size
+        val.setText(colorMap.get((int) index).getLabel());
     }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {}
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {}
 
     /**
      * Do some preprocessing by converting the DP dimension to pixels to get the rectangle height
