@@ -94,7 +94,8 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
                 }
                 break;
             case R.id.anim_url:
-                shareURL();
+                if(dialogStateOK())
+                    shareURL();
         }
         return true;
     }
