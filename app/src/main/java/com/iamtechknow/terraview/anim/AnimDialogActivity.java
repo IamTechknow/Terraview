@@ -232,8 +232,8 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
     private String encodeURL(ArrayList<Layer> layers, String start, String end, int speed, boolean loop) {
         StringBuilder result = new StringBuilder(URL_BASE).append(URL_L);
         for(Layer l : layers)
-            result.append(l.getTitle()).append(',');
-        result.deleteCharAt(result.length() - 1); //delete trailing comma
+            result.append(l.getIdentifier()).append(',');
+        result.deleteCharAt(result.length() - 1).append('&'); //delete trailing comma
 
         return result + URL_AB + '&' +
                 URL_AS + start + '&' + URL_AE + end + '&' +
