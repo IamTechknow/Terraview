@@ -146,9 +146,11 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
     @Override
     public void onTabSelected(TabLayout.Tab tab) {
         //Hide keyboard to avoid InputConnection warnings
-        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
-        searchView.onActionViewCollapsed();
+        if(searchView != null && !searchView.isIconified()) {
+            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
+            searchView.onActionViewCollapsed();
+        }
     }
 
     @Override
