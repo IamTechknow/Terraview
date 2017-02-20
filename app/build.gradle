@@ -14,6 +14,7 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         jackOptions.enabled true
+		resConfigs "en"
     }
 
     compileOptions {
