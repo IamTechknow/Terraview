@@ -6,9 +6,8 @@ import com.iamtechknow.terraview.util.Utils;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -20,7 +19,6 @@ import static org.mockito.Mockito.verify;
  * Note the lack of useful tests here, this is because GMaps cannot be mocked.
  * TODO: improve presenter/view contract of the map to improve tests
  */
-@RunWith(MockitoJUnitRunner.class)
 public class MapPresenterTest {
     @Mock
     private WorldActivity view;
@@ -34,6 +32,7 @@ public class MapPresenterTest {
 
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
         stack = new ArrayList<>();
         presenter = new WorldPresenter();
         presenter.attachView((MapView) view);

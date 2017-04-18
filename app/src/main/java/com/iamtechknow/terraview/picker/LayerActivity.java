@@ -22,7 +22,7 @@ import com.iamtechknow.terraview.model.TapEvent;
 
 import java.util.ArrayList;
 
-import rx.Subscription;
+import io.reactivex.disposables.Disposable;
 
 public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener {
     //Constants for RxBus events and Intent
@@ -32,7 +32,7 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
 
     //UI handling
     private TabLayout mTabLayout;
-    private Subscription subscription;
+    private Disposable subscription;
     private SearchView searchView;
 
     //Reference to layer stack from map
@@ -129,7 +129,7 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
     @Override
     protected void onStop() {
         super.onStop();
-        subscription.unsubscribe();
+        subscription.dispose();
         subscription = null;
     }
 

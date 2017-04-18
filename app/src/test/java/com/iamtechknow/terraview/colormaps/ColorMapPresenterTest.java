@@ -3,31 +3,35 @@ package com.iamtechknow.terraview.colormaps;
 import com.iamtechknow.terraview.model.ColorMap;
 
 import org.junit.Before;
-import org.junit.Rule;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import uk.co.ribot.androidboilerplate.util.RxSchedulersOverrideRule;
+import io.reactivex.android.plugins.RxAndroidPlugins;
+import io.reactivex.schedulers.Schedulers;
 
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ColorMapPresenterTest {
-
-    //Needed to allow mocking of AndroidSchedulers.mainThread()
-    @Rule
-    public RxSchedulersOverrideRule rule = new RxSchedulersOverrideRule();
-
     @Mock
     private ColorMapView view;
 
     private ColorMapPresenterImpl presenter;
 
+    @BeforeClass
+    public void setupClass() {
+        //Allow AndroidSchedulers.mainThread() to be overridden
+        RxAndroidPlugins.setInitMainThreadSchedulerHandler(__ -> Schedulers.trampoline());
+    }
+
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
         presenter = new ColorMapPresenterImpl();
         presenter.attachView(view);
     }

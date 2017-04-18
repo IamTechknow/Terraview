@@ -1,13 +1,11 @@
 package com.iamtechknow.terraview.picker;
 
-import rx.Observable;
-import rx.subjects.PublishSubject;
-import rx.subjects.SerializedSubject;
-import rx.subjects.Subject;
+import io.reactivex.Observable;
+import io.reactivex.subjects.PublishSubject;
 
 public class RxBus {
 	//A subject is both an Observable and an Observer, which allows items to be emitted and observed on by subscribers
-    private final Subject<Object, Object> _bus = new SerializedSubject<>(PublishSubject.create());
+    private final PublishSubject<Object> _bus = PublishSubject.create();
     private static RxBus INSTANCE;
 
     /**

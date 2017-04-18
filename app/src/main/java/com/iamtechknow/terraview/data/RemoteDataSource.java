@@ -17,14 +17,14 @@ import java.util.TreeMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import rx.Observable;
-import rx.Observer;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 
 /**
  * Implementation of a remote data source by communicating with the NASA GIBS to obtain and parse data.
@@ -58,33 +58,33 @@ public class RemoteDataSource implements DataSource {
         Request request = new Request.Builder().url(XML_METADATA).build();
         Request jsonRequest = new Request.Builder().url(JSON_METADATA).build();
 
-        Observable.just(true).map(new Func1<Boolean, Void>() {
-            @Override
-            public Void call(Boolean aBoolean) {
-                try {
-                    Response xmlResponse = client.newCall(request).execute();
-                    Response jsonResponse = client.newCall(jsonRequest).execute();
+        Observable.just(true).map(aBoolean -> {
+            try {
+                Response xmlResponse = client.newCall(request).execute();
+                Response jsonResponse = client.newCall(jsonRequest).execute();
 
-                    WMTSReader reader = new WMTSReader();
-                    reader.run(xmlResponse.body().byteStream());
-                    WVJsonParser parser = new WVJsonParser(jsonResponse.body().byteStream());
-                    layers = reader.getResult();
-                    parser.parse(layers);
-                    measurements = parser.getMeasurementMap();
-                    categories = parser.getCategoryMap();
-                    layerTable = Utils.getLayerTable(layers);
+                WMTSReader reader = new WMTSReader();
+                reader.run(xmlResponse.body().byteStream());
+                WVJsonParser parser = new WVJsonParser(jsonResponse.body().byteStream());
+                layers = reader.getResult();
+                parser.parse(layers);
+                measurements = parser.getMeasurementMap();
+                categories = parser.getCategoryMap();
+                layerTable = Utils.getLayerTable(layers);
 
-                    saveToDB(layers, measurements, categories);
-                } catch (IOException | ParserConfigurationException | SAXException e) {
-                    e.printStackTrace();
-                }
-                return null;
+                saveToDB(layers, measurements, categories);
+            } catch (IOException | ParserConfigurationException | SAXException e) {
+                e.printStackTrace();
             }
+            return true;
         }).subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(new Observer<Void>() {
+          .subscribe(new Observer<Boolean>() {
               @Override
-              public void onCompleted() {
+              public void onSubscribe(Disposable disposable) {}
+
+              @Override
+              public void onComplete() {
                   callback.onDataLoaded();
               }
 
@@ -95,7 +95,7 @@ public class RemoteDataSource implements DataSource {
               }
 
               @Override
-              public void onNext(Void v) {}
+              public void onNext(Boolean b) {}
           });
     }
 

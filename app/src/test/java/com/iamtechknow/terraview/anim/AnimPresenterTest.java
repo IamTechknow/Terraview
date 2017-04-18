@@ -3,30 +3,30 @@ package com.iamtechknow.terraview.anim;
 import com.iamtechknow.terraview.map.WorldPresenter;
 
 import org.junit.Before;
-import org.junit.Rule;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.MockitoAnnotations;
 
-import uk.co.ribot.androidboilerplate.util.RxSchedulersOverrideRule;
+import io.reactivex.android.plugins.RxAndroidPlugins;
+import io.reactivex.schedulers.Schedulers;
 
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
 public class AnimPresenterTest {
-    //Needed to allow mocking of AndroidSchedulers.mainThread()
-    @Rule
-    public RxSchedulersOverrideRule rule = new RxSchedulersOverrideRule();
-
     @Mock
     private AnimView view;
 
     private WorldPresenter presenter;
 
+    @BeforeClass
+    public void setupClass() {
+        RxAndroidPlugins.setInitMainThreadSchedulerHandler(__ -> Schedulers.trampoline());
+    }
+
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
         presenter = new WorldPresenter();
         presenter.attachView(view);
     }

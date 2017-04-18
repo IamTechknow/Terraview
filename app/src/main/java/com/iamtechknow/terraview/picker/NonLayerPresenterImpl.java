@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
-import rx.Subscription;
+import io.reactivex.disposables.Disposable;
 
 import static com.iamtechknow.terraview.picker.LayerActivity.SELECT_LAYER_TAB;
 import static com.iamtechknow.terraview.picker.LayerActivity.SELECT_MEASURE_TAB;
@@ -17,7 +17,7 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
     private WeakReference<NonLayerView> viewRef;
     private DataSource dataSource;
     private RxBus bus;
-    private Subscription busSub;
+    private Disposable busSub;
 
     //Used for state restoration in config change
     private String category;
@@ -126,7 +126,7 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
 
     //Clean up references to avoid memory leaks
     private void cleanUp() {
-        busSub.unsubscribe();
+        busSub.dispose();
         busSub = null;
         bus = null;
     }

@@ -16,9 +16,9 @@ import com.iamtechknow.terraview.map.WorldActivity;
 
 import java.util.concurrent.TimeUnit;
 
-import rx.Observable;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 
 /**
  * Class designed to implement feature discovery of Material Design as a guided tour of the app.
@@ -29,7 +29,7 @@ public final class FeatureDiscovery {
 
     public static void guidedTour(WorldActivity map) {
         //Tour animation subscription
-        final Subscription[] tour_sub = new Subscription[1];
+        final Disposable[] tour_sub = new Disposable[1];
 
         DrawerLayout mDrawerLayout = (DrawerLayout) map.findViewById(R.id.drawer);
         CoordinatorLayout mCoordinatorLayout = (CoordinatorLayout) map.findViewById(R.id.thelayout);
@@ -79,7 +79,7 @@ public final class FeatureDiscovery {
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(aLong -> {
                             if(aLong == IDX_LIMIT) {
-                                tour_sub[0].unsubscribe();
+                                tour_sub[0].dispose();
                                 mNavLeft.getMenu().getItem(IDX_LIMIT).setChecked(false);
                                 TapTargetView.showFor(map, part2, part2_listener);
                             } else

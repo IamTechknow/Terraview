@@ -32,13 +32,13 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import rx.Observable;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
 
 import static com.iamtechknow.terraview.map.WorldActivity.*;
 import static com.iamtechknow.terraview.anim.AnimDialogActivity.*;
@@ -66,7 +66,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     private LruCache<String, byte[]> byteCache;
 
     //Animation data
-    private Subscription animSub;
+    private Disposable animSub;
     private int interval, speed;
     private boolean loop, saveGif, animRunning, animInSession;
     private String startDate, endDate;
@@ -575,7 +575,7 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
      * Stop the animation, cancel the timer and delete the timer task, which must be remade again.
      */
     private void stopAnimTimer() {
-        animSub.unsubscribe();
+        animSub.dispose();
     }
 
     private void restoreAnimTiles() {

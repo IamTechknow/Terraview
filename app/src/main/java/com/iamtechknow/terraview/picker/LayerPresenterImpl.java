@@ -13,15 +13,15 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import rx.Observable;
-import rx.Observer;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
 import static com.iamtechknow.terraview.picker.LayerActivity.SELECT_LAYER_TAB;
 import static com.iamtechknow.terraview.picker.LayerActivity.SELECT_SUGGESTION;
@@ -32,7 +32,7 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     private WeakReference<LayerView> viewRef;
     private Retrofit retrofit;
     private RxBus bus;
-    private Subscription busSub;
+    private Disposable busSub;
 
     private DataSource dataSource;
 
@@ -116,7 +116,10 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Observer<Response<ResponseBody>>() {
                 @Override
-                public void onCompleted() {}
+                public void onSubscribe(Disposable disposable) {}
+
+                @Override
+                public void onComplete() {}
 
                 @Override
                 public void onError(Throwable e) {
@@ -269,7 +272,7 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     }
 
     private void cleanUp() {
-        busSub.unsubscribe();
+        busSub.dispose();
         busSub = null;
         bus = null;
     }

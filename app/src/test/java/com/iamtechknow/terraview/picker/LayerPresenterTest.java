@@ -3,20 +3,19 @@ package com.iamtechknow.terraview.picker;
 import android.util.SparseBooleanArray;
 
 import com.iamtechknow.terraview.data.DataSource;
-import com.iamtechknow.terraview.model.Layer;
 
 import org.junit.Before;
-import org.junit.Rule;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 
-import uk.co.ribot.androidboilerplate.util.RxSchedulersOverrideRule;
+import io.reactivex.android.plugins.RxAndroidPlugins;
+import io.reactivex.schedulers.Schedulers;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -24,13 +23,7 @@ import static org.mockito.Mockito.verify;
 /**
  * Unit tests for the implementation of {@link LayerPresenter}
  */
-@RunWith(MockitoJUnitRunner.class)
 public class LayerPresenterTest {
-
-    //Needed to allow mocking of AndroidSchedulers.mainThread()
-    @Rule
-    public RxSchedulersOverrideRule rule = new RxSchedulersOverrideRule();
-
     @Mock
     private LayerView view;
 
@@ -41,12 +34,19 @@ public class LayerPresenterTest {
     private SparseBooleanArray array;
 
     @Captor
-    ArgumentCaptor<ArrayList<String>> captor;
+    private ArgumentCaptor<ArrayList<String>> captor;
 
     private LayerPresenterImpl presenter;
 
+    @BeforeClass
+    public void setupClass() {
+        //Allow AndroidSchedulers.mainThread() to be overridden
+        RxAndroidPlugins.setInitMainThreadSchedulerHandler(__ -> Schedulers.trampoline());
+    }
+
     @Before
     public void setupPresenter() {
+        MockitoAnnotations.initMocks(this);
         presenter = new LayerPresenterImpl(RxBus.getInstance(), new ArrayList<>(), data, array);
         presenter.attachView(view);
     }

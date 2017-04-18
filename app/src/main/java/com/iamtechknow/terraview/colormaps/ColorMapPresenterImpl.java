@@ -10,14 +10,15 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.HashSet;
 
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
-import rx.Observable;
-import rx.Observer;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
 public class ColorMapPresenterImpl implements ColorMapPresenter {
     private static final String BASE_URL = "http://gibs.earthdata.nasa.gov";
@@ -64,7 +65,10 @@ public class ColorMapPresenterImpl implements ColorMapPresenter {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Observer<Response<ColorMap>>() {
                 @Override
-                public void onCompleted() {}
+                public void onSubscribe(Disposable disposable) {}
+
+                @Override
+                public void onComplete() {}
 
                 @Override
                 public void onError(Throwable e) {

@@ -4,11 +4,10 @@ import com.iamtechknow.terraview.data.DataSource;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 
@@ -17,7 +16,6 @@ import static org.mockito.Mockito.verify;
 /**
  * Unit test for the implementation of {@link NonLayerPresenter}
  */
-@RunWith(MockitoJUnitRunner.class)
 public class NonLayerPresenterTest {
 
     @Mock
@@ -27,12 +25,13 @@ public class NonLayerPresenterTest {
     private DataSource data;
 
     @Captor
-    ArgumentCaptor<ArrayList<String>> captor;
+    private ArgumentCaptor<ArrayList<String>> captor;
 
     private NonLayerPresenterImpl presenter;
 
     @Before
     public void setupPresenter() {
+        MockitoAnnotations.initMocks(this);
         presenter = new NonLayerPresenterImpl(RxBus.getInstance(), data);
         presenter.attachView(view);
     }
