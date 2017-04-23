@@ -58,10 +58,7 @@ public class ColorMapViewImpl extends View implements ColorMapView, SeekBar.OnSe
     @Override
     public void setLayerId(String id) {
         val = (TextView) getRootView().findViewById(R.id.color_map_val);
-        SeekBar bar = (SeekBar) getRootView().findViewById(R.id.color_map_picker);
         val.setVisibility(View.VISIBLE);
-        bar.setVisibility(View.VISIBLE);
-        bar.setOnSeekBarChangeListener(this);
 
         presenter = new ColorMapPresenterImpl();
         presenter.attachView(this);
@@ -69,11 +66,17 @@ public class ColorMapViewImpl extends View implements ColorMapView, SeekBar.OnSe
     }
 
     //Called by the presenter when data is received. Calculate the length of each rectangle
-    //Then invalidate the view to have onDraw() be called
+    //Then invalidate the view to have onDraw() be called. Seekbar is set when colormap exists
     @Override
     public void setColorMapData(ColorMap map) {
         colorMap = map.getList();
         rectLength = (float) getWidth() / (float) colorMap.size();
+
+        View parent = (View) getParent();
+        SeekBar bar = (SeekBar) parent.findViewById(R.id.color_map_picker);
+        bar.setVisibility(View.VISIBLE);
+        bar.setOnSeekBarChangeListener(this);
+
         invalidate(); //will call onDraw()
     }
 

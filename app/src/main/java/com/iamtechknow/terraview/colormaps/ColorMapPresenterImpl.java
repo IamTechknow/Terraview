@@ -77,7 +77,7 @@ public class ColorMapPresenterImpl implements ColorMapPresenter {
 
                 @Override
                 public void onNext(Response<ColorMap> r) {
-                    if(viewRef.get() != null) {
+                    if(viewRef != null && viewRef.get() != null) {
                         cleanColorMap(r.body());
                         viewRef.get().setColorMapData(r.body());
                     }
