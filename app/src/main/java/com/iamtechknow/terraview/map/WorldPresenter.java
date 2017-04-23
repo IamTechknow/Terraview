@@ -44,8 +44,8 @@ import static com.iamtechknow.terraview.map.WorldActivity.*;
 import static com.iamtechknow.terraview.anim.AnimDialogActivity.*;
 
 public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresenter, DataSource.LoadCallback {
-    private static final String BASE_URL = "http://gibs.earthdata.nasa.gov", TAG = "WorldPresenter";
-    private static final String URL_FORMAT = "http://gibs.earthdata.nasa.gov/wmts/epsg3857/best/%s/default/%s/%s/%d/%d/%d.%s";
+    private static final String BASE_URL = "https://gibs.earthdata.nasa.gov", TAG = "WorldPresenter";
+    private static final String URL_FORMAT = "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/%s/default/%s/%s/%d/%d/%d.%s";
     private static final float Z_OFFSET = 5.0f, BASE_Z_OFFSET = -50.0f, MAX_ZOOM = 9.0f; //base layers cannot cover overlays
     private static final int DAY_IN_MILLS = 24*60*60*1000, DAYS_IN_WEEK = 7, DAYS_IN_MONTH = 30, DAYS_IN_YEAR = 365, MIN_FRAMES = 1;
 

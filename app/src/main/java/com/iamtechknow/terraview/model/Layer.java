@@ -18,7 +18,7 @@ import java.util.Locale;
  */
 public class Layer implements Parcelable, Comparable<Layer> {
     //First string is title/identifier, second is time, third is tile matrix set
-    public static final String URLtemplate = "http://gibs.earthdata.nasa.gov/wmts/epsg3857/best/%s/default/%s/%s/";
+    public static final String URLtemplate = "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/%s/default/%s/%s/";
 
     //Fields for XML tags that are stored to database
     private String identifier, tileMatrixSet, format, title, subtitle, endDate, startDate, description, palette;

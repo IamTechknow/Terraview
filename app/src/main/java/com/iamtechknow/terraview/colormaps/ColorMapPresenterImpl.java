@@ -21,7 +21,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 
 public class ColorMapPresenterImpl implements ColorMapPresenter {
-    private static final String BASE_URL = "http://gibs.earthdata.nasa.gov";
+    private static final String BASE_URL = "https://gibs.earthdata.nasa.gov";
 
     private WeakReference<ColorMapView> viewRef;
 
