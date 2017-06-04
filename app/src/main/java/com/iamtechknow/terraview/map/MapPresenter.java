@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.iamtechknow.terraview.model.Layer;
 
 import java.util.ArrayList;
@@ -13,15 +14,13 @@ import java.util.Date;
 /**
  * Presenter portion of the Map contract, exposes all methods needed by the map view.
  */
-public interface MapPresenter {
+public interface MapPresenter extends OnMapReadyCallback {
 
     void attachView(MapView v);
 
     void detachView();
 
     void onRestoreInstanceState(Bundle savedInstanceState);
-
-    void onMapReady(GoogleMap gmaps);
 
     void onDateChanged(Date date);
 

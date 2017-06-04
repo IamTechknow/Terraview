@@ -3,6 +3,7 @@ package com.iamtechknow.terraview.map;
 import com.google.android.gms.maps.model.Tile;
 import com.google.android.gms.maps.model.TileProvider;
 import com.iamtechknow.terraview.model.Layer;
+import com.iamtechknow.terraview.util.Utils;
 
 /**
  * Tile provider that accesses tiles from an image cache, or makes a network request to access them from a remote source.
@@ -10,14 +11,15 @@ import com.iamtechknow.terraview.model.Layer;
  */
 public class CacheTileProvider implements TileProvider {
     private static final int SIZE = 256; //Assume all images are 256x256 pixels
-    private static final byte[] EMPTY_ARRAY = new byte[0];
 
-    private CachePresenter presenter;
+    private MapInteractor map;
     private Layer layer;
+    private String date;
 
-    public CacheTileProvider(Layer _layer, CachePresenter mapPresenter) {
+    public CacheTileProvider(Layer _layer, String isoDate, MapInteractor interactor) {
         layer = _layer;
-        presenter = mapPresenter;
+        map = interactor;
+        date = isoDate;
     }
 
     /**
@@ -26,7 +28,7 @@ public class CacheTileProvider implements TileProvider {
      */
     @Override
     public Tile getTile(int x, int y, int zoom) {
-        byte[] imageData = presenter.getMapTile(layer, zoom, y, x);
-        return imageData.length != EMPTY_ARRAY.length ? new Tile(SIZE, SIZE, imageData) : TileProvider.NO_TILE;
+        byte[] imageData = map.getMapTile(layer, date, zoom, y, x);
+        return imageData.length != 0 ? new Tile(SIZE, SIZE, imageData) : TileProvider.NO_TILE;
     }
 }
