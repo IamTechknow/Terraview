@@ -78,13 +78,6 @@ public class MapPresenterTest {
     }
 
     @Test
-    public void showFeedbackUI() {
-        presenter.sendFeedback();
-
-        verify(view).openEmail();
-    }
-
-    @Test
     public void showAboutUI() {
         presenter.presentAbout();
 

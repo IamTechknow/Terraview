@@ -30,6 +30,7 @@ import android.widget.DatePicker;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.iamtechknow.terraview.about.AboutActivity;
 import com.iamtechknow.terraview.anim.AnimDialogActivity;
 import com.iamtechknow.terraview.anim.AnimPresenter;
 import com.iamtechknow.terraview.anim.AnimView;
@@ -162,9 +163,6 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
             case R.id.action_about:
                 mapPresenter.presentAbout();
                 break;
-            case R.id.feedback:
-                mapPresenter.sendFeedback();
-                break;
             case R.id.action_date:
                 mDateDialog.show();
                 break;
@@ -176,9 +174,6 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
                 break;
             case R.id.action_layersettings:
                 mDrawerLayout.openDrawer(GravityCompat.END);
-                break;
-            case R.id.action_faq:
-                mapPresenter.presentFaq();
                 break;
             case R.id.action_help:
                 mapPresenter.presentHelp();
@@ -322,15 +317,6 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
     }
 
     @Override
-    public void openEmail() {
-        //Send an intent to start Gmail, by using the appropriate intent action and extras.
-        Intent feedback = new Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", getString(R.string.email), null))
-                .putExtra(Intent.EXTRA_EMAIL, new String[] {getString(R.string.email)})
-                .putExtra(Intent.EXTRA_SUBJECT, getString(R.string.email_subject));
-        startActivity(feedback);
-    }
-
-    @Override
     public void showColorMaps() {
         BottomSheetDialogFragment frag = new ColorMapFragment();
         Bundle args = new Bundle();
@@ -358,12 +344,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
 
     @Override
     public void showAbout() {
-        Utils.showAbout(this);
-    }
-
-    @Override
-    public void showFaq() {
-        Utils.showWebPage(this, getString(R.string.faq), getString(R.string.faq_title));
+        startActivity(new Intent(WorldActivity.this, AboutActivity.class));
     }
 
     /**

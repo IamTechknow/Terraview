@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/tool_bar"/>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/about_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/about_ver"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/anim_margin"
+            android:layout_marginStart="@dimen/text_padding_left"
+            tools:text="@string/about_ver" />
+
+        <TextView
+            android:id="@+id/about_main"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:layout_marginStart="@dimen/text_padding_left"
+            android:minHeight="?android:listPreferredItemHeightSmall"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:text="@string/about" />
+
+        <TextView
+            android:id="@+id/about_faq"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:layout_marginStart="@dimen/text_padding_left"
+            android:minHeight="?android:listPreferredItemHeightSmall"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:text="@string/faq_title" />
+
+        <TextView
+            android:id="@+id/about_feedback"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:layout_marginStart="@dimen/text_padding_left"
+            android:minHeight="?android:listPreferredItemHeightSmall"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:text="@string/feedback" />
+
+        <TextView
+            android:id="@+id/about_github"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:layout_marginStart="@dimen/text_padding_left"
+            android:minHeight="?android:listPreferredItemHeightSmall"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:text="@string/about_github" />
+    </LinearLayout>
+</LinearLayout>

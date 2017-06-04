@@ -14,8 +14,6 @@ public interface MapView {
 
     void setLayerList(ArrayList<Layer> stack);
 
-    void openEmail();
-
     void showColorMaps();
 
     void showPicker();
@@ -23,6 +21,4 @@ public interface MapView {
     void showAbout();
 
     void showHelp();
-
-    void showFaq();
 }

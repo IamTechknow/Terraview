@@ -132,4 +132,11 @@
     <string name="tour_end">You reached the end of the tour. Enjoy!</string>
     <string name="share">Share</string>
     <string name="share_url">Share or copy animation URL</string>
+    <string name="about_github">Terraview on Github</string>
+
+    <!-- Shown in the 'About' window of the app. -->
+    <string name="about_ver"><![CDATA[
+        <b>Terraview</b><br>
+        Version %s
+    ]]></string>
 </resources>

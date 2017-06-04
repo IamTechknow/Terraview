@@ -41,13 +41,9 @@ public interface MapPresenter {
 
     ArrayList<Layer> getCurrLayerStack();
 
-    void sendFeedback();
-
     void presentColorMaps();
 
     void presentAbout();
-
-    void presentFaq();
 
     void presentHelp();
 

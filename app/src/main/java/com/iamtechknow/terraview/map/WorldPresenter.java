@@ -267,12 +267,6 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     }
 
     @Override
-    public void sendFeedback() {
-        if(getMapView() != null)
-            getMapView().openEmail();
-    }
-
-    @Override
     public void presentColorMaps() {
         if(getMapView() != null)
             getMapView().showColorMaps();
@@ -288,12 +282,6 @@ public class WorldPresenter implements MapPresenter, CachePresenter, AnimPresent
     public void presentAbout() {
         if(getMapView() != null)
             getMapView().showAbout();
-    }
-
-    @Override
-    public void presentFaq() {
-        if(getMapView() != null)
-            getMapView().showFaq();
     }
 
     @Override
