@@ -55,8 +55,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/anim_margin"
             android:layout_marginEnd="@dimen/md_keylines"
-            android:progress="29"
-            android:max="29" />
+            android:progress="9"
+            android:max="9" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -78,13 +78,6 @@
                 android:text="@string/day"
                 android:textAppearance="@style/TextAppearance.AppCompat.Menu"
                 android:checked="true" />
-            <RadioButton
-                android:id="@+id/week_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/md_keylines"
-                android:text="@string/week"
-                android:textAppearance="@style/TextAppearance.AppCompat.Menu" />
             <RadioButton
                 android:id="@+id/month_button"
                 android:layout_width="wrap_content"
@@ -114,11 +107,5 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/loop_checkbox" />
-        <CheckBox
-            android:text="@string/save"
-            android:textAppearance="@style/TextAppearance.AppCompat.Menu"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/save_checkbox" />
     </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>

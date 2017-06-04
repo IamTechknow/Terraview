@@ -46,5 +46,7 @@ public interface MapPresenter extends OnMapReadyCallback {
 
     void presentHelp();
 
+    void presentAnimDialog();
+
     void chooseLayers();
 }

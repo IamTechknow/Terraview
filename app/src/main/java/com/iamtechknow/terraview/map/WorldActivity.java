@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialogFragment;
@@ -22,9 +21,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.DatePicker;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -32,8 +29,6 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.iamtechknow.terraview.about.AboutActivity;
 import com.iamtechknow.terraview.anim.AnimDialogActivity;
-import com.iamtechknow.terraview.anim.AnimPresenter;
-import com.iamtechknow.terraview.anim.AnimView;
 import com.iamtechknow.terraview.colormaps.ColorMapFragment;
 import com.iamtechknow.terraview.picker.LayerActivity;
 import com.iamtechknow.terraview.R;
@@ -49,11 +44,11 @@ import java.util.Calendar;
 
 import static com.iamtechknow.terraview.anim.AnimDialogActivity.*;
 
-public class WorldActivity extends AppCompatActivity implements MapView, AnimView, OnMapReadyCallback,
-        NavigationView.OnNavigationItemSelectedListener, DragAndHideListener, DrawerLayout.DrawerListener {
+public class WorldActivity extends AppCompatActivity implements MapView, OnMapReadyCallback,
+        NavigationView.OnNavigationItemSelectedListener, DragAndHideListener {
     public static final String RESULT_LIST = "list", PREFS_FILE = "settings", PREFS_DB_KEY = "have_db";
     public static final String RESTORE_TIME_EXTRA = "time", RESTORE_LAYER_EXTRA = "layer";
-    public static final int LAYER_CODE = 1, ANIM_CODE = 2, SECONDS_PER_DAY = 24*60*60*1000;
+    public static final int LAYER_CODE = 1, SECONDS_PER_DAY = 24*60*60*1000;
 
     //UI fields
     private DrawerLayout mDrawerLayout;
@@ -61,22 +56,17 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
     private DatePickerDialog mDateDialog;
     private CurrLayerAdapter mItemAdapter;
     private ItemTouchHelper mDragHelper;
-    private boolean playButtonVisible;
 
     //Presenters
     private MapPresenter mapPresenter;
-    private AnimPresenter animPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        WorldPresenter presenter = new WorldPresenter();
-        mapPresenter = presenter;
+        mapPresenter = new WorldPresenter();
         mapPresenter.attachView(this);
-        animPresenter = presenter;
-        animPresenter.attachView(this);
 
         //Setup UI
         mItemAdapter = new CurrLayerAdapter(this);
@@ -84,7 +74,6 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.thelayout);
         Toolbar mToolbar = (Toolbar) findViewById(R.id.tool_bar);
         setSupportActionBar(mToolbar);
-        mDrawerLayout.addDrawerListener(this);
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_menu);
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -113,13 +102,11 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
     protected void onDestroy() {
         super.onDestroy();
         mapPresenter.detachView();
-        animPresenter.detachView();
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        animPresenter.stop(true);
 
         //Save current date and layers
         outState.putParcelableArrayList(RESTORE_LAYER_EXTRA, mapPresenter.getCurrLayerStack());
@@ -133,21 +120,11 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.anim_play, menu);
-        menu.findItem(R.id.anim_play).setVisible(playButtonVisible);
-        return true;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
             case android.R.id.home:
                 mDrawerLayout.openDrawer(GravityCompat.START);
-                return true;
-            case R.id.anim_play:
-                animPresenter.run();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -167,7 +144,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
                 mDateDialog.show();
                 break;
             case R.id.action_anim:
-                animPresenter.newAnimation();
+                mapPresenter.presentAnimDialog();
                 break;
             case R.id.action_layers:
                 mapPresenter.chooseLayers();
@@ -208,45 +185,11 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch(requestCode) {
-            case ANIM_CODE:
-                if(resultCode == RESULT_OK) {
-                    int interval = data.getIntExtra(INTERVAL_EXTRA, DAY),
-                        speed = data.getIntExtra(SPEED_EXTRA, DEFAULT_SPEED);
-                    String start = data.getStringExtra(START_EXTRA),
-                           end = data.getStringExtra(END_EXTRA);
-                    boolean loop = data.getBooleanExtra(LOOP_EXTRA, false),
-                            gif = data.getBooleanExtra(SAVE_EXTRA, false);
-
-                    animPresenter.setAnimation(start, end, interval, speed, loop);
-                }
-                break;
             default:
                 ArrayList<Layer> layer_stack = data.getParcelableArrayListExtra(LayerActivity.RESULT_STACK);
                 mapPresenter.setLayersAndUpdateMap(layer_stack);
         }
     }
-
-    @Override
-    public void onBackPressed() {
-        if(animPresenter.isRunning())
-            animPresenter.stop(true);
-        else
-            super.onBackPressed();
-    }
-
-    @Override
-    public void onDrawerOpened(View drawerView) {
-        animPresenter.stop(true);
-    }
-
-    @Override
-    public void onDrawerSlide(View drawerView, float slideOffset) {}
-
-    @Override
-    public void onDrawerClosed(View drawerView) {}
-
-    @Override
-    public void onDrawerStateChanged(int newState) {}
 
     //Reload layers on date change. Cut off time, dates should always be midnight
     private DatePickerDialog.OnDateSetListener mDateListener = new DatePickerDialog.OnDateSetListener() {
@@ -330,9 +273,8 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
     public void showAnimDialog() {
         Intent anim_i = new Intent(WorldActivity.this, AnimDialogActivity.class)
                 .putExtra(AnimDialogActivity.ANIM_ARG, Utils.parseDateForDialog(mapPresenter.getCurrDate()))
-                .putParcelableArrayListExtra(LAYER_EXTRA, mapPresenter.getCurrLayerStack())
-                .putExtras(animPresenter.getAnimationSettings());
-        startActivityForResult(anim_i, ANIM_CODE);
+                .putParcelableArrayListExtra(LAYER_EXTRA, mapPresenter.getCurrLayerStack());
+        startActivity(anim_i);
     }
 
     @Override
@@ -353,11 +295,5 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
     @Override
     public void showHelp() {
         FeatureDiscovery.guidedTour(this);
-    }
-
-    @Override
-    public void setAnimButton(boolean enable) {
-        playButtonVisible = enable;
-        invalidateOptionsMenu(); //calls onCreateOptionsMenu(), set button there
     }
 }

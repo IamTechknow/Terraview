@@ -2,6 +2,7 @@ package com.iamtechknow.terraview.anim;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -24,19 +25,18 @@ import java.util.Date;
 import java.util.Calendar;
 
 public class AnimDialogActivity extends AppCompatActivity implements View.OnClickListener, DatePickerDialog.OnDateSetListener {
-    public static final String ANIM_ARG = "anim", START_EXTRA = "start", END_EXTRA = "end", INTERVAL_EXTRA = "year",
-                               LOOP_EXTRA = "loop", SAVE_EXTRA = "save", SPEED_EXTRA = "speed", LAYER_EXTRA = "layer";
+    public static final String ANIM_ARG = "anim", LAYER_EXTRA = "layer";
     private static final String URL_BASE = "https://worldview.earthdata.nasa.gov/?p=geographic&", URL_AB = "ab=on", URL_L = "l=",
-                                URL_AS = "as=", URL_AE = "ae=", URL_AV = "av=", URL_AL = "al=", TEXT = "text/plain";
-    public static final int DAY = 0, MONTH = 1, YEAR = 2, WEEK = 3, SPEED_OFFSET = 1, DEFAULT_SPEED = 30;
+                                URL_AS = "as=", URL_AE = "ae=", URL_AV = "av=", URL_AL = "al=", URL_INTERVAL = "z=", TEXT = "text/plain";
+    public static final int DAY = 1, MONTH = 2, YEAR = 3, SPEED_OFFSET = 1;
 
     private enum DateState {
         NONE, START, END
     }
 
     private TextView start, end;
-    private RadioButton day, month, year, week;
-    private CheckBox loop, saveGIF;
+    private RadioButton day, month;
+    private CheckBox loop;
     private DatePickerDialog mDateDialog;
     private SeekBar seekBar;
 
@@ -59,12 +59,7 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
 
         day = (RadioButton) findViewById(R.id.day_button);
         month = (RadioButton) findViewById(R.id.month_button);
-        year = (RadioButton) findViewById(R.id.year_button);
-        week = (RadioButton) findViewById(R.id.week_button);
-
         loop = (CheckBox) findViewById(R.id.loop_checkbox);
-        saveGIF = (CheckBox) findViewById(R.id.save_checkbox);
-
         seekBar = (SeekBar) findViewById(R.id.anim_speed);
 
         Calendar c = Calendar.getInstance();
@@ -88,10 +83,8 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
                 finish();
                 break;
             case R.id.anim_start:
-                if(dialogStateOK()) {
-                    setResult(RESULT_OK, getResult());
-                    finish();
-                }
+                if(dialogStateOK())
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getURL())));
                 break;
             case R.id.anim_url:
                 if(dialogStateOK())
@@ -125,55 +118,11 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
             start.setText(Utils.parseDateForDialog(c.getTime()));
         else
             end.setText(Utils.parseDateForDialog(c.getTime()));
-
         dateState = DateState.NONE;
     }
 
     private void initDialog(Intent extras) {
-        if(extras.getStringExtra(START_EXTRA) != null) {
-            start.setText(extras.getStringExtra(START_EXTRA));
-            end.setText(extras.getStringExtra(END_EXTRA));
-            seekBar.setProgress(extras.getIntExtra(SPEED_EXTRA, DEFAULT_SPEED - SPEED_OFFSET) - SPEED_OFFSET);
-            loop.setChecked(extras.getBooleanExtra(LOOP_EXTRA, false));
-
-            switch(extras.getIntExtra(INTERVAL_EXTRA, DAY)) {
-                case DAY:
-                    day.setChecked(true);
-                    break;
-
-                case MONTH:
-                    month.setChecked(true);
-                    break;
-
-                case WEEK:
-                    week.setChecked(true);
-                    break;
-
-                default:
-                    year.setChecked(true);
-            }
-        } else
-            start.setText(extras.getStringExtra(ANIM_ARG));
-    }
-
-    /**
-     * Get the current states of the dialog's UI elements and save them end the intent bundle.
-     * @return intent end be sent as the activity result
-     */
-    private Intent getResult() {
-        int interval = day.isChecked() ? DAY : month.isChecked() ? MONTH : YEAR;
-        String startStr = Utils.parseDate(Utils.parseDialogDate(start.getText().toString()));
-        String endStr = Utils.parseDate(Utils.parseDialogDate(end.getText().toString()));
-
-        Intent result = new Intent();
-        result.putExtra(START_EXTRA, startStr)
-            .putExtra(END_EXTRA, endStr)
-            .putExtra(LOOP_EXTRA, loop.isChecked())
-            .putExtra(SAVE_EXTRA, saveGIF.isChecked())
-            .putExtra(INTERVAL_EXTRA, interval)
-            .putExtra(SPEED_EXTRA, seekBar.getProgress() + SPEED_OFFSET); //1 - 30 FPS
-
-        return result;
+        start.setText(extras.getStringExtra(ANIM_ARG));
     }
 
     /**
@@ -188,7 +137,6 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
             warnUserAboutDates();
             return false;
         }
-
         return true;
     }
 
@@ -216,14 +164,16 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
      * Note: Animations are not supported on the mobile web interface at this time.
      */
     private void shareURL() {
-        String startStr = Utils.parseDate(Utils.parseDialogDate(start.getText().toString())),
-        endStr = Utils.parseDate(Utils.parseDialogDate(end.getText().toString())),
-        result = encodeURL(getIntent().getParcelableArrayListExtra(LAYER_EXTRA), startStr, endStr, seekBar.getProgress() + SPEED_OFFSET, loop.isChecked());
-
         Intent intent = new Intent(Intent.ACTION_SEND)
             .setType(TEXT)
-            .putExtra(Intent.EXTRA_TEXT, result);
+            .putExtra(Intent.EXTRA_TEXT, getURL());
         startActivity(Intent.createChooser(intent, getString(R.string.share_url)));
+    }
+
+    private String getURL() {
+        String startStr = Utils.parseDate(Utils.parseDialogDate(start.getText().toString())),
+                endStr = Utils.parseDate(Utils.parseDialogDate(end.getText().toString()));
+        return encodeURL(getIntent().getParcelableArrayListExtra(LAYER_EXTRA), startStr, endStr, seekBar.getProgress() + SPEED_OFFSET, loop.isChecked());
     }
 
     /**
@@ -235,8 +185,17 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
             result.append(l.getIdentifier()).append(',');
         result.deleteCharAt(result.length() - 1).append('&'); //delete trailing comma
 
-        return result + URL_AB + '&' +
+        return result + URL_INTERVAL + getInterval() + '&' + URL_AB + '&' +
                 URL_AS + start + '&' + URL_AE + end + '&' +
                 URL_AV + Math.min(speed, 10) + '&' + URL_AL + loop;
+    }
+
+    private int getInterval() {
+        if(day.isChecked())
+            return DAY;
+        else if(month.isChecked())
+            return MONTH;
+        else //No need to explicitly check
+            return YEAR;
     }
 }

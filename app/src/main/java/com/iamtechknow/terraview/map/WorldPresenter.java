@@ -7,8 +7,6 @@ import android.support.v4.app.LoaderManager;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.iamtechknow.terraview.Injection;
-import com.iamtechknow.terraview.anim.AnimPresenter;
-import com.iamtechknow.terraview.anim.AnimView;
 import com.iamtechknow.terraview.data.DataSource;
 import com.iamtechknow.terraview.data.LocalDataSource;
 import com.iamtechknow.terraview.model.Layer;
@@ -19,22 +17,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
-
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 
 import static com.iamtechknow.terraview.map.WorldActivity.*;
-import static com.iamtechknow.terraview.anim.AnimDialogActivity.*;
 
-public class WorldPresenter implements MapPresenter, AnimPresenter, DataSource.LoadCallback {
+public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     private static final float Z_OFFSET = 5.0f, BASE_Z_OFFSET = -50.0f; //base layers cannot cover overlays
-    private static final int DAY_IN_MILLS = 24*60*60*1000, DAYS_IN_WEEK = 7, DAYS_IN_MONTH = 30, DAYS_IN_YEAR = 365, MIN_FRAMES = 1;
 
     private WeakReference<MapView> mapViewRef;
-    private WeakReference<AnimView> animViewRef;
     private DataSource dataSource;
 
     //Used to let presenter know to restore state after map loads
@@ -46,28 +35,15 @@ public class WorldPresenter implements MapPresenter, AnimPresenter, DataSource.L
     private ArrayList<TileOverlay> mCurrLayers;
     private Date currentDate;
 
-    //Animation data
-    private Disposable animSub;
-    private int interval, speed;
-    private boolean loop, saveGif, animRunning, animInSession;
-    private String startDate, endDate;
-    private Date start, end;
-    private Calendar currAnimCal;
-    private int maxFrames, currFrame, delay;
-    private ArrayList<ArrayList<TileOverlay>> animCache;
-
     public WorldPresenter() {
         mCurrLayers = new ArrayList<>();
         layer_stack = new ArrayList<>();
-        animCache = new ArrayList<>();
 
         currentDate = new Date();
         Calendar c = Calendar.getInstance();
         c.setTime(currentDate);
         Utils.getCalendarMidnightTime(c);
         currentDate = c.getTime();
-
-        speed = DEFAULT_SPEED;
     }
 
     @Override
@@ -77,20 +53,10 @@ public class WorldPresenter implements MapPresenter, AnimPresenter, DataSource.L
     }
 
     @Override
-    public void attachView(AnimView v) {
-        animViewRef = new WeakReference<>(v);
-    }
-
-    @Override
     public void detachView() {
         if(mapViewRef != null) {
             mapViewRef.clear();
             mapViewRef = null;
-        }
-
-        if(animViewRef != null) {
-            animViewRef.clear();
-            animViewRef = null;
         }
     }
 
@@ -250,89 +216,13 @@ public class WorldPresenter implements MapPresenter, AnimPresenter, DataSource.L
     }
 
     @Override
-    public void newAnimation() {
-        if(getAnimView() != null)
-            getAnimView().showAnimDialog();
-    }
-
-    @Override
-    public void setAnimation(String start, String end, int interval, int speed, boolean loop) {
-        startDate = start;
-        endDate = end;
-        this.interval = interval;
-        this.speed = speed;
-        this.loop = loop;
-
-        initAnim();
-        animInSession = true;
-        if(getAnimView() != null)
-            getAnimView().setAnimButton(true);
-    }
-
-    @Override
-    public Bundle getAnimationSettings() {
-        Bundle b = new Bundle();
-        if(start != null && end != null) { //no dialog restore on first animation
-            b.putString(START_EXTRA, Utils.parseDateForDialog(start));
-            b.putString(END_EXTRA, Utils.parseDateForDialog(end));
-        }
-        b.putBoolean(LOOP_EXTRA, loop);
-        b.putInt(INTERVAL_EXTRA, interval);
-        b.putInt(SPEED_EXTRA, speed);
-
-        return b;
-    }
-
-    @Override
-    public void run() {
-        if(!animRunning)
-            startAnim();
-    }
-
-    @Override
-    public boolean isRunning() {
-        return animInSession;
-    }
-
-    /**
-     * Called by the view or an animation end to stop with or without the possibility to restore.
-     * If terminated, the layer stack is restored, otherwise the play button may be pressed again.
-     */
-    @Override
-    public void stop(boolean terminate) {
-        if(animRunning) {
-            animRunning = false;
-            stopAnimTimer();
-        }
-
-        if(terminate && animInSession && getAnimView() != null) {
-            animInSession = false;
-            getAnimView().setAnimButton(false);
-            setLayersAndUpdateMap(layer_stack); //restore layers FIXME: takes longer with long animations
-            for(ArrayList<TileOverlay> list : animCache)
-                for(TileOverlay t : list)
-                    t.remove();
-        }
+    public void presentAnimDialog() {
+        if(getMapView() != null)
+            getMapView().showAnimDialog();
     }
 
     private MapView getMapView() {
         return mapViewRef == null ? null : mapViewRef.get();
-    }
-
-    private AnimView getAnimView() {
-        return animViewRef == null ? null : animViewRef.get();
-    }
-
-    /**
-     * Called when an animation ends but can be restored by pressing the play button or a loop.
-     */
-    private void stopOrRepeat() {
-        if(loop)
-            startAnim();
-        else {
-            stop(false);
-            restoreAnimTiles();
-        }
     }
 
     /**
@@ -378,114 +268,5 @@ public class WorldPresenter implements MapPresenter, AnimPresenter, DataSource.L
         for(TileOverlay t : mCurrLayers)
             t.remove();
         mCurrLayers.clear();
-    }
-
-    /**
-     * Check input for the animation, that is calculate how many frames there are to animate,
-     * and from there modify the start/end dates based on the start/end dates of the layers
-     */
-    private void initAnim() {
-        delay = 1000 / speed;
-        start = Utils.parseISODate(startDate);
-        end = Utils.parseISODate(endDate);
-        long delta_in_days = (end.getTime() - start.getTime()) / DAY_IN_MILLS;
-
-        switch(interval) {
-            case DAY:
-                maxFrames = (int) delta_in_days;
-                break;
-            case WEEK:
-                maxFrames = (int) delta_in_days / DAYS_IN_WEEK;
-                break;
-            case MONTH:
-                maxFrames = (int) delta_in_days / DAYS_IN_MONTH;
-                break;
-
-            default: //year
-                maxFrames = (int) delta_in_days / DAYS_IN_YEAR;
-        }
-        if(maxFrames == MIN_FRAMES)
-            loop = false;
-
-        currAnimCal = Calendar.getInstance();
-        currAnimCal.setTimeZone(TimeZone.getTimeZone("UTC"));
-        initAnimCache();
-    }
-
-    /**
-     * Populate the animation tile overlays by adding all overlays for a specific date,
-     * putting it into the list, incrementing the calendar by the interval, and
-     * repeating for all frames
-     */
-    private void initAnimCache() {
-        animCache.clear();
-        currAnimCal.setTime(start);
-
-        for(int i = 0; i > -maxFrames - 1; i--) {
-            ArrayList<TileOverlay> temp = new ArrayList<>();
-
-            for(Layer l: layer_stack)
-                temp.add(map.addTileForAnimation(l, i, Utils.parseDate(currAnimCal.getTime())));
-            animCache.add(temp);
-
-            incrementCal(currAnimCal);
-        }
-    }
-
-    @Override
-    public void onNextFrame() {
-        //Here we don't need the date, just an index since they are in order
-        if (currFrame == maxFrames)
-            stopOrRepeat();
-        else {
-            for (TileOverlay t : animCache.get(currFrame))
-                t.setVisible(false);
-
-            currFrame++;
-        }
-    }
-
-    private void startAnim() {
-        currFrame = 0;
-        currAnimCal.setTime(start);
-
-        //Create an observable to wait for the tiles to load, then process each animation frame
-        if(!animRunning) {
-            animRunning = true;
-            animSub = Observable.interval(delay, TimeUnit.MILLISECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aLong -> onNextFrame());
-        } else  //Restore tiles
-            restoreAnimTiles();
-    }
-
-    /**
-     * Stop the animation, cancel the timer and delete the timer task, which must be remade again.
-     */
-    private void stopAnimTimer() {
-        animSub.dispose();
-    }
-
-    private void restoreAnimTiles() {
-        for(ArrayList<TileOverlay> list : animCache)
-            for(TileOverlay t : list)
-                t.setVisible(true);
-    }
-
-    //Increment calendar depending on interval
-    private void incrementCal(Calendar currAnimCal) {
-        switch (interval) {
-            case DAY:
-                currAnimCal.set(Calendar.DAY_OF_MONTH, currAnimCal.get(Calendar.DAY_OF_MONTH) + 1);
-                break;
-            case WEEK:
-                currAnimCal.set(Calendar.WEEK_OF_MONTH, currAnimCal.get(Calendar.WEEK_OF_MONTH) + 1);
-                break;
-            case MONTH:
-                currAnimCal.set(Calendar.MONTH, currAnimCal.get(Calendar.MONTH) + 1);
-                break;
-            default: //year
-                currAnimCal.set(Calendar.YEAR, currAnimCal.get(Calendar.YEAR) + 1);
-        }
     }
 }
