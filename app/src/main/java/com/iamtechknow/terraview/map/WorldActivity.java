@@ -194,7 +194,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, AnimVie
         else { //Check internet access to get layer data or set up receiver, also start tour for first timers
             if(Utils.isOnline(this)) {
                 mapPresenter.getRemoteData(this);
-                Snackbar.make(mCoordinatorLayout, R.string.tour_new, Snackbar.LENGTH_LONG).setAction(R.string.start_tour, view -> mapPresenter.presentHelp()).show();
+                Snackbar.make(mCoordinatorLayout, R.string.tour_new, Snackbar.LENGTH_INDEFINITE).setAction(R.string.start_tour, view -> mapPresenter.presentHelp()).show();
             } else {
                 Snackbar.make(mCoordinatorLayout, R.string.internet, Snackbar.LENGTH_LONG).show();
                 IntentFilter filter = new IntentFilter();

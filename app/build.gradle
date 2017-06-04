@@ -13,7 +13,7 @@ android {
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
-		resConfigs "en"
+        resConfigs "en"
     }
 
     compileOptions {
@@ -44,7 +44,7 @@ android {
     android.variantFilter { variant ->
         if(variant.buildType.name == 'release'
                 && variant.getFlavors().get(0).name == 'mock') {
-            variant.setIgnore(true);
+            variant.setIgnore(true)
         }
     }
 
@@ -62,6 +62,8 @@ configurations.all {
         }
     }
     exclude group: 'xpp3', module: 'xpp3'
+    exclude group: 'stax', module: 'stax-api'
+    exclude group: 'stax', module: 'stax'
 }
 
 dependencies {
