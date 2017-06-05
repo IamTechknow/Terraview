@@ -24,11 +24,12 @@ public class CacheTileProvider implements TileProvider {
 
     /**
      * This method runs on a custom background thread.
-     * The images should be in the cache now, so we can use the arguments to get the image, and then create a tile.
+     * Attempt to fetch the cached tile, or download it from GIBS.
+     * If a download fails due to a connection timeout, return null to try again later.
      */
     @Override
     public Tile getTile(int x, int y, int zoom) {
         byte[] imageData = map.getMapTile(layer, date, zoom, y, x);
-        return imageData.length != 0 ? new Tile(SIZE, SIZE, imageData) : TileProvider.NO_TILE;
+        return imageData.length != 0 ? new Tile(SIZE, SIZE, imageData) : null;
     }
 }

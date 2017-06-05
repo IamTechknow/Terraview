@@ -59,11 +59,6 @@ public class MapInteractorImpl implements MapInteractor {
     }
 
     @Override
-    public TileOverlay addTileForAnimation(Layer l, int index, String isoDate) {
-        return gMaps.addTileOverlay(new TileOverlayOptions().tileProvider(getTile(l, isoDate)).fadeIn(false).zIndex(index));
-    }
-
-    @Override
     public void removeTile(TileOverlay tile, Layer l) {
         //Get all keys and remove all entries that start with the identifier
         Set<String> keys =  byteCache.snapshot().keySet();

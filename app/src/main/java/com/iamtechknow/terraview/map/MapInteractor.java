@@ -11,8 +11,6 @@ import com.iamtechknow.terraview.model.Layer;
 public interface MapInteractor {
     TileOverlay addTile(Layer l, String date);
 
-    TileOverlay addTileForAnimation(Layer l, int index, String isoDate);
-
     void removeTile(TileOverlay tile, Layer l);
 
     byte[] getMapTile(Layer l, String date, int zoom, int y, int x);
