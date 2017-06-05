@@ -8,8 +8,6 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import java.util.ArrayList;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 /**
  * Parses WMTSCapabilities.xml to obtain layer data. Uses the online version which is the most up-to-date.
  */
@@ -29,7 +27,7 @@ public class WMTSHandler extends DefaultHandler {
     //Avoid unwanted elements, indicate that we're in the layer element, not style or dimension
     private boolean inLayerTag, inTileMatrixSetLink;
 
-    public WMTSHandler() throws ParserConfigurationException, SAXException {
+    public WMTSHandler() {
         contents = new ArrayList<>();
     }
 

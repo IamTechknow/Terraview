@@ -17,9 +17,6 @@ import java.util.Locale;
  * POGO (Plain old Java object) that represents the XML structure for a layer in WMTSCapabilities.xml
  */
 public class Layer implements Parcelable, Comparable<Layer> {
-    //First string is title/identifier, second is time, third is tile matrix set
-    public static final String URLtemplate = "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/%s/default/%s/%s/";
-
     //Fields for XML tags that are stored to database
     private String identifier, tileMatrixSet, format, title, subtitle, endDate, startDate, description, palette;
     private boolean isBaseLayer;
@@ -128,7 +125,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
     }
 
     public String getStartDate() {
-        return startDate != null ? startDate : "1979-01-01";
+        return startDate != null ? startDate : "1948-01-01";
     }
 
     public void setStartDate(String startDate) {
@@ -153,32 +150,6 @@ public class Layer implements Parcelable, Comparable<Layer> {
 
     public String getPalette() {
         return palette;
-    }
-
-    /**
-     * Formats a string with layer data and specified date to be used for a tile provider
-     * A date is needed even when a layer does not have a time interval, in which it is unused
-     * TODO: not used at the moment, change or delete
-     * @param d A date string to be formatted in ISO 8601
-     * @return A URL String that may be used for UrlTileProvider.getTileURL()
-     */
-    public String generateURL(Date d) {
-        String date;
-        boolean isOngoing = endDate == null;
-        try {
-            Date end = dateFormat.parse(getEndDate()), begin = dateFormat.parse(getStartDate());
-
-            if(isOngoing) //compare start date and today
-                date = d.before(new Date()) && d.after(begin) ? dateFormat.format(d) : dateFormat.format(new Date());
-            else
-                date = d.before(end) && d.after(begin) ? dateFormat.format(d) : dateFormat.format(new Date());
-        } catch(ParseException e) {
-            Log.w(WorldActivity.class.getSimpleName(), e.getMessage());
-            date = dateFormat.format(new Date(System.currentTimeMillis()));
-        }
-
-        String str = String.format(Locale.US, URLtemplate, identifier, date, tileMatrixSet);
-        return str + "%d/%d/%d." + format;
     }
 
     /**

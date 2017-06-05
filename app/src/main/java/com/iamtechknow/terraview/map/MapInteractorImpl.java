@@ -118,24 +118,4 @@ public class MapInteractorImpl implements MapInteractor {
         }
         return temp;
     }
-
-    /**
-     * Used to provide instances of a TileProvider suitable for animation.
-     * @param l The layer with the data to fill the URL
-     * @param date The date for the tile
-     * @return tile provider for an animation
-     */
-    private UrlTileProvider getTile(Layer l, String date) {
-        return new UrlTileProvider(256, 256) {
-            @Override
-            public URL getTileUrl(int x, int y, int z) {
-                try {
-                    return new URL(String.format(Locale.US, URL_FORMAT, l.getIdentifier(), date, l.getTileMatrixSet(), z, y, x, l.getFormat()));
-                } catch (MalformedURLException e) {
-                    Log.w(getClass().getSimpleName(), e);
-                    return null;
-                }
-            }
-        };
-    }
 }
