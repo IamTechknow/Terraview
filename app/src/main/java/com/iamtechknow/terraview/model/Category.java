@@ -28,4 +28,12 @@ public class Category {
     public String getLink() {
         return String.format(Locale.US, CATEGORY_FMT, id);
     }
+
+    /**
+     * Tell the EONET client to get all events.
+     * @return A category encompassing all events.
+     */
+    public static Category getAll() {
+        return new Category(0, "All");
+    }
 }

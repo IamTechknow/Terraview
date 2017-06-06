@@ -10,7 +10,6 @@ import java.util.TreeMap;
  * but when necessary allows views to request data to update the UI
  */
 public interface NonLayerPresenter {
-
     void attachView(NonLayerView v);
 
     void detachView();

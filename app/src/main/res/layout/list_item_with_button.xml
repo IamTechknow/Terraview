@@ -2,33 +2,20 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="@dimen/item_height"
     android:clickable="true"
     android:focusable="true"
-    android:foreground="?android:attr/selectableItemBackground"
-    android:background="@drawable/layerstate">
+    android:foreground="?android:attr/selectableItemBackground">
     <TextView
         android:id="@+id/item_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toStartOf="@+id/layer_info"
+        android:layout_centerVertical="true"
         android:layout_alignParentStart="true"
         android:paddingStart="@dimen/text_padding_left"
-        android:paddingTop="20dp"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
-    <TextView
-        android:id="@+id/layer_sub"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toStartOf="@+id/layer_info"
-        android:layout_below="@id/item_text"
-        android:layout_alignParentStart="true"
-        android:paddingStart="@dimen/text_padding_left"
-        android:paddingBottom="20dp"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:textStyle="italic" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Small" />
     <ImageView
-        android:id="@+id/layer_info"
+        android:id="@+id/item_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"

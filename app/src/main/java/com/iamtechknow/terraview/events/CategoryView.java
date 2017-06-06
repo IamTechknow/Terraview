@@ -1,5 +1,9 @@
 package com.iamtechknow.terraview.events;
 
-public interface CategoryView {
+import com.iamtechknow.terraview.model.Category;
 
+import java.util.ArrayList;
+
+public interface CategoryView {
+    void insertList(ArrayList<Category> list);
 }

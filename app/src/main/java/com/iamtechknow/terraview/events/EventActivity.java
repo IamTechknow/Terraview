@@ -18,10 +18,11 @@ import io.reactivex.disposables.Disposable;
 public class EventActivity extends AppCompatActivity {
     public static final int SELECT_EVENT_TAB = 3, SELECT_EVENT = 5;
     private static final int EVENT_TAB = 1, PAGE_LIMIT = 2;
+    private static final String EVENT_EXTRA = "event";
 
     //UI handling
     private TabLayout mTabLayout;
-    private Disposable subscription;
+    private Disposable sub;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,14 +64,14 @@ public class EventActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        subscription = RxBus.getInstance().toObserverable().subscribe(this::handleEvent);
+        sub = RxBus.getInstance().toObserverable().subscribe(this::handleEvent);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        subscription.dispose();
-        subscription = null;
+        sub.dispose();
+        sub = null;
     }
 
     private void handleEvent(Object event) {
@@ -81,11 +82,10 @@ public class EventActivity extends AppCompatActivity {
                     break;
 
                 case SELECT_EVENT:
-                    //TODO: set result, finish
                     Bundle b = new Bundle();
+                    b.putParcelable(EVENT_EXTRA, ((TapEvent) event).getEonetEvent());
                     setResult(RESULT_OK, new Intent().putExtras(b));
                     finish();
-                    break;
             }
     }
 }
