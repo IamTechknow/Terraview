@@ -4,9 +4,6 @@ import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
@@ -16,6 +13,7 @@ import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 
 import com.iamtechknow.terraview.R;
+import com.iamtechknow.terraview.adapter.TabAdapter;
 import com.iamtechknow.terraview.map.WorldActivity;
 import com.iamtechknow.terraview.model.Layer;
 import com.iamtechknow.terraview.model.TapEvent;
@@ -41,7 +39,7 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_layer);
+        setContentView(R.layout.activity_tabs);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -49,7 +47,7 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
 
 		//Create arguments for each fragments which will be used when they're created
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
-        Adapter adapter = new Adapter(getSupportFragmentManager());
+        TabAdapter adapter = new TabAdapter(getSupportFragmentManager());
         NonLayerFragment frag1 = new NonLayerFragment(), frag2 = new NonLayerFragment();
         LayerFragment frag3 = new LayerFragment();
         Bundle extra1 = new Bundle(), extra2 = new Bundle(), extra3 = new Bundle();
@@ -70,9 +68,9 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
             extra3.putParcelableArrayList(RESULT_STACK, result);
         frag3.setArguments(extra3);
 
-        adapter.addFragment(frag1, "Categories"); //Add the fragment and its tab title
-        adapter.addFragment(frag2, "Measurements");
-        adapter.addFragment(frag3, "Layers");
+        adapter.addFragment(frag1, getString(R.string.categories)); //Add the fragment and its tab title
+        adapter.addFragment(frag2, getString(R.string.measurements));
+        adapter.addFragment(frag3, getString(R.string.layers));
         viewPager.setAdapter(adapter);
         viewPager.setOffscreenPageLimit(PAGE_LIMIT);
 
@@ -198,37 +196,5 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
                     mTabLayout.getTabAt(SELECT_MEASURE_TAB).select();
                     break;
             }
-    }
-
-	/**
-	 * The Adapter provides the relevant information needed to setup the ViewPager's data source and views.
-	 */
-    static class Adapter extends FragmentPagerAdapter {
-        private final ArrayList<Fragment> mFragmentList = new ArrayList<>();
-        private final ArrayList<String> mFragmentTitleList = new ArrayList<>();
-
-        Adapter(FragmentManager manager) {
-            super(manager);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return mFragmentList.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mFragmentList.size();
-        }
-
-        void addFragment(Fragment fragment, String title) {
-            mFragmentList.add(fragment);
-            mFragmentTitleList.add(title);
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return mFragmentTitleList.get(position);
-        }
     }
 }
