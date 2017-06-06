@@ -59,6 +59,12 @@
             android:name=".about.AboutActivity"
             android:label="@string/about"
             android:launchMode="singleTop" />
+
+        <activity
+            android:name=".events.EventActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.Tabs"
+            android:launchMode="singleTop" />
         
         <provider
             android:authorities="com.iamtechknow.terraview.LayerProvider"

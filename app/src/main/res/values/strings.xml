@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Terraview</string>
-    <string name="layers">Choose Layers</string>
+    <string name="layers">Layers</string>
     <string name="layers_nav">Layers - Swipe to left to delete</string>
     <string name="layer_info">Layer Info</string>
     <string name="about">About</string>
@@ -133,6 +133,7 @@
     <string name="share">Share</string>
     <string name="share_url">Share or copy animation URL</string>
     <string name="about_github">Terraview on Github</string>
+    <string name="events">Events</string>
 
     <!-- Shown in the 'About' window of the app. -->
     <string name="about_ver"><![CDATA[

@@ -18,6 +18,8 @@ public interface MapView {
 
     void showPicker();
 
+    void showEvents();
+
     void showAbout();
 
     void showHelp();

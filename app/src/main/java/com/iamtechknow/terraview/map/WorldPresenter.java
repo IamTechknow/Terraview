@@ -204,6 +204,12 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     }
 
     @Override
+    public void presentEvents() {
+        if(getMapView() != null)
+            getMapView().showEvents();
+    }
+
+    @Override
     public void presentAbout() {
         if(getMapView() != null)
             getMapView().showAbout();

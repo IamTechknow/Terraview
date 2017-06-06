@@ -30,6 +30,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.iamtechknow.terraview.about.AboutActivity;
 import com.iamtechknow.terraview.anim.AnimDialogActivity;
 import com.iamtechknow.terraview.colormaps.ColorMapFragment;
+import com.iamtechknow.terraview.events.EventActivity;
 import com.iamtechknow.terraview.picker.LayerActivity;
 import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.adapter.CurrLayerAdapter;
@@ -48,7 +49,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         NavigationView.OnNavigationItemSelectedListener, DragAndHideListener {
     public static final String RESULT_LIST = "list", PREFS_FILE = "settings", PREFS_DB_KEY = "have_db";
     public static final String RESTORE_TIME_EXTRA = "time", RESTORE_LAYER_EXTRA = "layer";
-    public static final int LAYER_CODE = 1, SECONDS_PER_DAY = 24*60*60*1000;
+    public static final int LAYER_CODE = 1, EVENT_CODE = 2, SECONDS_PER_DAY = 24*60*60*1000;
 
     //UI fields
     private DrawerLayout mDrawerLayout;
@@ -155,6 +156,9 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
             case R.id.action_help:
                 mapPresenter.presentHelp();
                 break;
+            case R.id.action_events:
+                mapPresenter.presentEvents();
+                break;
         }
         mDrawerLayout.closeDrawer(GravityCompat.START);
         return false;
@@ -185,6 +189,9 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch(requestCode) {
+            case EVENT_CODE:
+                //TODO: receive event info
+                break;
             default:
                 ArrayList<Layer> layer_stack = data.getParcelableArrayListExtra(LayerActivity.RESULT_STACK);
                 mapPresenter.setLayersAndUpdateMap(layer_stack);
@@ -295,5 +302,11 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     @Override
     public void showHelp() {
         FeatureDiscovery.guidedTour(this);
+    }
+
+    @Override
+    public void showEvents() {
+        Intent i = new Intent(WorldActivity.this, EventActivity.class);
+        startActivityForResult(i, EVENT_CODE);
     }
 }
