@@ -228,8 +228,16 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
             getMapView().showAnimDialog();
     }
 
+    /**
+     * Change all layers to the event date and animate the camera.
+     * @param e the selected event data
+     */
     @Override
     public void presentEvent(Event e) {
+        onDateChanged(Utils.parseISODate(e.getDate()));
+        if(getMapView() != null)
+            getMapView().updateDateDialog(currentDate.getTime());
+
         if(e.hasPoint())
             map.moveCamera(e.getPoint());
         else

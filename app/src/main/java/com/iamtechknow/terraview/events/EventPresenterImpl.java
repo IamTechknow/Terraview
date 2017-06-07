@@ -1,5 +1,7 @@
 package com.iamtechknow.terraview.events;
 
+import android.util.Patterns;
+
 import com.iamtechknow.terraview.data.EONET;
 import com.iamtechknow.terraview.model.Category;
 import com.iamtechknow.terraview.model.Event;
@@ -60,9 +62,16 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
         bus.send(new TapEvent(EventActivity.SELECT_EVENT, e));
     }
 
+    /**
+     * Present the source URL after validating it
+     * @param url web link to be checked first
+     */
     @Override
     public void presentSource(String url) {
-        view.showSource(url);
+        if(Patterns.WEB_URL.matcher(url).matches())
+            view.showSource(url);
+        else
+            view.warnNoSource();
     }
 
     @Override

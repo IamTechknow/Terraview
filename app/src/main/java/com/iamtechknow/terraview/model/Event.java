@@ -10,25 +10,42 @@ import com.google.android.gms.maps.model.PolygonOptions;
  * Representation of an curated event from the EONET API.
  */
 public class Event implements Parcelable {
-    private String id, title, source;
+    //Unique identifier for the event
+    private String id;
+
+    //Event title
+    private String title;
+
+    //Source for the event
+    private String source;
+
+    //Date in which the event has ended, null if ongoing
+    private String closed;
+
+    //Category of the event
     private int categoryId;
 
-    //An event has either a point or polygon - only the first point is used
+    //Date for the first geometry object
+    private String date;
+
+    //An event has either a point or polygon - only the first geometry object is used
     private LatLng point;
     private PolygonOptions polygon;
 
-    public Event(String id, String title, String source, int category, LatLng point) {
+    public Event(String id, String title, String source, String date, int category, LatLng point) {
         this.id = id;
         this.title = title;
         this.source = source;
+        this.date = parseDate(date);
         this.categoryId = category;
         this.point = point;
     }
 
-    public Event(String id, String title, String source, int category, PolygonOptions polygon) {
+    public Event(String id, String title, String source, String date, int category, PolygonOptions polygon) {
         this.id = id;
         this.title = title;
         this.source = source;
+        this.date = parseDate(date);
         this.categoryId = category;
         this.polygon = polygon;
 
@@ -40,6 +57,7 @@ public class Event implements Parcelable {
         id = in.readString();
         title = in.readString();
         source = in.readString();
+        date = in.readString();
         categoryId = in.readInt();
         point = in.readParcelable(LatLng.class.getClassLoader());
         polygon = in.readParcelable(PolygonOptions.class.getClassLoader());
@@ -85,9 +103,25 @@ public class Event implements Parcelable {
         return polygon;
     }
 
+    public boolean isOngoing() {
+        return closed == null;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public String getClosedDate() {
+        return closed;
+    }
+
+    public void setClosedDate(String closed) {
+        this.closed = closed;
+    }
+
     @Override
     public int describeContents() {
-        return 0;
+        return id.hashCode();
     }
 
     @Override
@@ -95,8 +129,17 @@ public class Event implements Parcelable {
         dest.writeString(id);
         dest.writeString(title);
         dest.writeString(source);
+        dest.writeString(date);
         dest.writeInt(categoryId);
         dest.writeParcelable(point, flags);
         dest.writeParcelable(polygon, flags);
+    }
+
+    /**
+     * Strip the extra time on the date string to make it parsable
+     * @param isoDate date from JSON response
+     */
+    private String parseDate(String isoDate) {
+        return isoDate.substring(0, isoDate.indexOf('T'));
     }
 }

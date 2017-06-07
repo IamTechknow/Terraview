@@ -10,4 +10,6 @@ public interface EventView {
     void clearList();
 
     void showSource(String url);
+
+    void warnNoSource();
 }

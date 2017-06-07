@@ -3,6 +3,7 @@ package com.iamtechknow.terraview.events;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -71,5 +72,11 @@ public class EventViewImpl extends Fragment implements EventView {
     @Override
     public void showSource(String url) {
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+    }
+
+    @Override
+    public void warnNoSource() {
+        if(getView() != null)
+            Snackbar.make(getView(), R.string.no_source, Snackbar.LENGTH_SHORT).show();
     }
 }

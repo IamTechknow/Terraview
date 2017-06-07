@@ -38,7 +38,7 @@ public class EONET {
 
     private static final String EVENTS = "events", ID = "id", TITLE = "title", CAT = "categories",
             SOURCE = "sources", GEOMETRY = "geometries", GEO_TYPE = "type", POINT = "Point",
-            COORD = "coordinates", URL = "url";
+            COORD = "coordinates", URL = "url", GEO_DATE = "date", CLOSED = "closed";
 
     private OkHttpClient client;
 
@@ -91,24 +91,30 @@ public class EONET {
                     source_obj = obj.get(SOURCE).getAsJsonArray().get(0).getAsJsonObject();
 
                     String id = obj.get(ID).getAsString(), title = obj.get(TITLE).getAsString(),
-                            source = source_obj.get(URL).getAsString();
+                            source = source_obj.get(URL).getAsString(), date;
                     int c = obj.get(CAT).getAsJsonArray().get(0).getAsJsonObject().get(ID).getAsInt();
                     Event event;
 
                     //Get geometry object first before getting the points
                     geo_obj = geo.get(0).getAsJsonObject();
+                    date = geo_obj.get(GEO_DATE).getAsString();
                     coord_array = geo_obj.get(COORD).getAsJsonArray();
                     if(geo_obj.get(GEO_TYPE).getAsString().equals(POINT)) {
                         LatLng coord = new LatLng(coord_array.get(1).getAsDouble(), coord_array.get(0).getAsDouble());
-                        event = new Event(id, title, source, c, coord);
+                        event = new Event(id, title, source, date, c, coord);
                     } else {
                         ArrayList<LatLng> coords = new ArrayList<>();
                         for(JsonElement poly_e : coord_array.get(0).getAsJsonArray()) {
                             JsonArray poly_coord = poly_e.getAsJsonArray();
                             coords.add(new LatLng(poly_coord.get(1).getAsDouble(), poly_coord.get(0).getAsDouble()));
                         }
-                        event = new Event(id, title, source, c, new PolygonOptions().addAll(coords));
+                        event = new Event(id, title, source, date, c, new PolygonOptions().addAll(coords));
                     }
+
+                    //Set closed date if any
+                    if(obj.has(CLOSED))
+                        event.setClosedDate(obj.get(CLOSED).getAsString());
+
                     result.add(event);
                 }
             } catch (IOException e) {

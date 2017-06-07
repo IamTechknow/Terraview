@@ -1,5 +1,6 @@
 package com.iamtechknow.terraview.adapter;
 
+import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,7 +25,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     }
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView text;
+        TextView text, sub;
         ImageView icon;
 
         ViewHolder(View itemView) {
@@ -33,6 +34,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
             itemView.setClickable(true);
             itemView.setOnClickListener(this);
             text = (TextView) itemView.findViewById(R.id.item_text);
+            sub = (TextView) itemView.findViewById(R.id.item_sub);
             icon = (ImageView) itemView.findViewById(R.id.item_info);
         }
 
@@ -44,13 +46,17 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_with_button, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_with_sub, parent, false);
         return new ViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        Resources strResource = holder.itemView.getResources();
+        String closedInfo = items.get(position).isOngoing() ? strResource.getString(R.string.ongoing) : items.get(position).getClosedDate();
+
         holder.text.setText(items.get(position).getTitle());
+        holder.sub.setText(strResource.getString(R.string.closed, closedInfo));
         holder.icon.setOnClickListener(v -> presenter.presentSource(items.get(position).getSource()));
     }
 
