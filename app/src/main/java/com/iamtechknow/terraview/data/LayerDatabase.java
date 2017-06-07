@@ -46,7 +46,7 @@ public class LayerDatabase extends SQLiteOpenHelper {
      * @param db The database created
      */
     @Override
-    public void onCreate(SQLiteDatabase db) {
+    public void onCreate(SQLiteDatabase db) { //FIXME: Database upgrade
         //create the "layer" table, each entry corresponds to POJO field
         db.execSQL("create table " + TABLE_LAYER + " ( title text, subtitle text, identifier text, format text, matrix text, start text, end text, desc text, palette text, isbase integer)");
 

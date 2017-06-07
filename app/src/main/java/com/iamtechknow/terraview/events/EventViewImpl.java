@@ -11,10 +11,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.adapter.EventAdapter;
-import com.iamtechknow.terraview.model.Category;
 import com.iamtechknow.terraview.model.Event;
 import com.iamtechknow.terraview.picker.RxBus;
 import com.iamtechknow.terraview.util.Utils;
@@ -24,6 +24,10 @@ import java.util.ArrayList;
 public class EventViewImpl extends Fragment implements EventView {
     private EventPresenter presenter;
     private EventAdapter adapter;
+
+    //Default and empty views
+    private RecyclerView mRecyclerView;
+    private View empty_view;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,7 +54,8 @@ public class EventViewImpl extends Fragment implements EventView {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_tabs, container, false);
 
-        RecyclerView mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
+        empty_view = rootView.findViewById(R.id.empty_view);
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         adapter = new EventAdapter(presenter);
@@ -61,12 +66,16 @@ public class EventViewImpl extends Fragment implements EventView {
 
     @Override
     public void insertList(ArrayList<Event> list) {
+        empty_view.setVisibility(View.GONE);
+        mRecyclerView.setVisibility(View.VISIBLE);
         adapter.insertList(list);
     }
 
     @Override
     public void clearList() {
         adapter.clearList();
+        mRecyclerView.setVisibility(View.GONE);
+        empty_view.setVisibility(View.VISIBLE);
     }
 
     @Override
