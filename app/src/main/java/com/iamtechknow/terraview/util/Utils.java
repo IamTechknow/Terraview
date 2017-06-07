@@ -113,7 +113,7 @@ public class Utils {
      * @param bar The support toolbar
      * @return The ImageButton view
      */
-    public static View findNavView(Toolbar bar) {
+    static View findNavView(Toolbar bar) {
         ArrayList<View> result = new ArrayList<>(1);
         bar.findViewsWithText(result, bar.getNavigationContentDescription(), View.FIND_VIEWS_WITH_CONTENT_DESCRIPTION);
         return result.get(0);
@@ -146,8 +146,6 @@ public class Utils {
 
     public static class AboutDialog extends DialogFragment {
         public static final String MIME_TYPE = "text/html";
-
-        public AboutDialog() {}
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {

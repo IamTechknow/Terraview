@@ -52,7 +52,10 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
             TapEvent e = (TapEvent) event;
             if(e.getTab() == EventActivity.SELECT_EVENT_TAB) {
                 view.clearList();
-                client.getEventsByCategory(e.getArg());
+                if(e.getArg() == 0)
+                    client.getOpenEvents();
+                else
+                    client.getEventsByCategory(e.getArg());
             }
         }
     }

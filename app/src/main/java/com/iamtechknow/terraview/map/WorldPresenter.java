@@ -35,6 +35,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     private ArrayList<Layer> layer_stack;
     private ArrayList<TileOverlay> mCurrLayers;
     private Date currentDate;
+    private Event currEvent;
 
     public WorldPresenter() {
         mCurrLayers = new ArrayList<>();
@@ -234,14 +235,25 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
      */
     @Override
     public void presentEvent(Event e) {
+        currEvent = e;
         onDateChanged(Utils.parseISODate(e.getDate()));
-        if(getMapView() != null)
+        if(getMapView() != null) {
             getMapView().updateDateDialog(currentDate.getTime());
+            getMapView().showEvent(e);
+        }
 
+        map.clearPolygon();
         if(e.hasPoint())
             map.moveCamera(e.getPoint());
         else
             map.drawPolygon(e.getPolygon());
+    }
+
+    @Override
+    public void onClearEvent() {
+        map.clearPolygon();
+        if(getMapView() != null)
+            getMapView().clearEvent();
     }
 
     private MapView getMapView() {

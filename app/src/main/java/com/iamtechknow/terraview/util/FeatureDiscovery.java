@@ -80,10 +80,10 @@ public final class FeatureDiscovery {
                         .subscribe(aLong -> {
                             if(aLong == IDX_LIMIT) {
                                 tour_sub[0].dispose();
-                                mNavLeft.getMenu().getItem(IDX_LIMIT).setChecked(false);
+                                mNavLeft.getMenu().getItem(IDX_LIMIT - 1).setChecked(false);
                                 TapTargetView.showFor(map, part2, part2_listener);
                             } else
-                                mNavLeft.getMenu().getItem((int) (aLong + 1)).setChecked(true);
+                                mNavLeft.getMenu().getItem(aLong.intValue()).setChecked(true);
                         }, Throwable::printStackTrace);
                 }
             });

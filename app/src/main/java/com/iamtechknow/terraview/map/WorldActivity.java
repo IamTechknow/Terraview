@@ -31,6 +31,7 @@ import com.iamtechknow.terraview.about.AboutActivity;
 import com.iamtechknow.terraview.anim.AnimDialogActivity;
 import com.iamtechknow.terraview.colormaps.ColorMapFragment;
 import com.iamtechknow.terraview.events.EventActivity;
+import com.iamtechknow.terraview.model.Event;
 import com.iamtechknow.terraview.picker.LayerActivity;
 import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.adapter.CurrLayerAdapter;
@@ -49,7 +50,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         NavigationView.OnNavigationItemSelectedListener, DragAndHideListener {
     public static final String RESULT_LIST = "list", PREFS_FILE = "settings", PREFS_DB_KEY = "have_db";
     public static final String RESTORE_TIME_EXTRA = "time", RESTORE_LAYER_EXTRA = "layer";
-    public static final int LAYER_CODE = 1, EVENT_CODE = 2, SECONDS_PER_DAY = 24*60*60*1000;
+    public static final int LAYER_CODE = 1, EVENT_CODE = 2, SECONDS_PER_DAY = 24*60*60*1000, DEFAULT_HOME_ICON = 0;
 
     //UI fields
     private DrawerLayout mDrawerLayout;
@@ -60,6 +61,8 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
 
     //Presenters
     private MapPresenter mapPresenter;
+
+    private boolean eventActive;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,7 +128,10 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         // Handle item selection
         switch (item.getItemId()) {
             case android.R.id.home:
-                mDrawerLayout.openDrawer(GravityCompat.START);
+                if(eventActive)
+                    mapPresenter.onClearEvent();
+                else
+                    mDrawerLayout.openDrawer(GravityCompat.START);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -197,6 +203,14 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
                 ArrayList<Layer> layer_stack = data.getParcelableArrayListExtra(LayerActivity.RESULT_STACK);
                 mapPresenter.setLayersAndUpdateMap(layer_stack);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(eventActive)
+            mapPresenter.onClearEvent();
+        else
+            super.onBackPressed();
     }
 
     //Reload layers on date change. Cut off time, dates should always be midnight
@@ -309,5 +323,25 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     public void showEvents() {
         Intent i = new Intent(WorldActivity.this, EventActivity.class);
         startActivityForResult(i, EVENT_CODE);
+    }
+
+    @Override
+    public void showEvent(Event e) {
+        eventActive = true;
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setHomeAsUpIndicator(DEFAULT_HOME_ICON);
+            actionBar.setTitle(e.getTitle());
+        }
+    }
+
+    @Override
+    public void clearEvent() {
+        eventActive = false;
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
+            actionBar.setTitle(R.string.app_name);
+        }
     }
 }

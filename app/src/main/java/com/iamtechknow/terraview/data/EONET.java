@@ -134,6 +134,9 @@ public class EONET {
         return Observable.just(r).map(request -> {
             ArrayList<Category> result = new ArrayList<>();
 
+            //Put "All" category at top of list
+            result.add(Category.getAll());
+
             try (Response response = client.newCall(r).execute()) {
                 JsonObject root = new JsonParser().parse(response.body().string()).getAsJsonObject();
                 JsonArray catArray = root.getAsJsonArray(CAT);

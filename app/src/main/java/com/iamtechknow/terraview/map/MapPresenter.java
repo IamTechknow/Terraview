@@ -54,4 +54,6 @@ public interface MapPresenter extends OnMapReadyCallback {
     void presentEvents();
 
     void presentEvent(Event e);
+
+    void onClearEvent();
 }

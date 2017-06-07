@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.events.EventPresenter;
 import com.iamtechknow.terraview.model.Event;
+import com.iamtechknow.terraview.util.Utils;
 
 import java.util.ArrayList;
 
@@ -53,7 +54,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Resources strResource = holder.itemView.getResources();
-        String closedInfo = items.get(position).isOngoing() ? strResource.getString(R.string.ongoing) : items.get(position).getClosedDate();
+        String closedInfo = items.get(position).isOngoing()
+            ? strResource.getString(R.string.ongoing) : Utils.parseDateForDialog(Utils.parseISODate(items.get(position).getClosedDate()));
 
         holder.text.setText(items.get(position).getTitle());
         holder.sub.setText(strResource.getString(R.string.closed, closedInfo));
