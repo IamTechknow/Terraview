@@ -38,7 +38,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
 
         @Override
         public void onClick(View v) {
-            //TODO
+            presenter.presentEvent(items.get(getAdapterPosition()));
         }
     }
 

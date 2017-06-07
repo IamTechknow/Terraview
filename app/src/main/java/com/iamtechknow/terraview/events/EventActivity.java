@@ -17,8 +17,8 @@ import io.reactivex.disposables.Disposable;
 
 public class EventActivity extends AppCompatActivity {
     public static final int SELECT_EVENT_TAB = 3, SELECT_EVENT = 5;
+    public static final String EVENT_EXTRA = "event";
     private static final int EVENT_TAB = 1, PAGE_LIMIT = 2;
-    private static final String EVENT_EXTRA = "event";
 
     //UI handling
     private TabLayout mTabLayout;

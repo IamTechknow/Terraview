@@ -6,6 +6,7 @@ import android.support.v4.app.LoaderManager;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.iamtechknow.terraview.model.Event;
 import com.iamtechknow.terraview.model.Layer;
 
 import java.util.ArrayList;
@@ -51,4 +52,6 @@ public interface MapPresenter extends OnMapReadyCallback {
     void chooseLayers();
 
     void presentEvents();
+
+    void presentEvent(Event e);
 }

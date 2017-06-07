@@ -1,5 +1,7 @@
 package com.iamtechknow.terraview.map;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.iamtechknow.terraview.model.Layer;
 
@@ -14,4 +16,10 @@ public interface MapInteractor {
     void removeTile(TileOverlay tile, Layer l);
 
     byte[] getMapTile(Layer l, String date, int zoom, int y, int x);
+
+    void moveCamera(LatLng point);
+
+    void drawPolygon(PolygonOptions poly);
+
+    void clearPolygon();
 }

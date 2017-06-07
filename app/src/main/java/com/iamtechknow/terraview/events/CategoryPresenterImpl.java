@@ -13,6 +13,8 @@ public class CategoryPresenterImpl implements CategoryPresenter, EONET.LoadCallb
     private RxBus bus;
     private EONET client;
 
+    private boolean loadedCategories;
+
     public CategoryPresenterImpl(RxBus _bus, CategoryView v) {
         bus = _bus;
         view = v;
@@ -28,7 +30,8 @@ public class CategoryPresenterImpl implements CategoryPresenter, EONET.LoadCallb
 
     @Override
     public void loadCategories() {
-        client.getCategories();
+        if(!loadedCategories)
+            client.getCategories();
     }
 
     @Override
@@ -41,6 +44,7 @@ public class CategoryPresenterImpl implements CategoryPresenter, EONET.LoadCallb
 
     @Override
     public void onCategoriesLoaded(ArrayList<Category> data) {
+        loadedCategories = true;
         view.insertList(data);
     }
 }

@@ -9,6 +9,7 @@ import com.google.android.gms.maps.model.TileOverlay;
 import com.iamtechknow.terraview.Injection;
 import com.iamtechknow.terraview.data.DataSource;
 import com.iamtechknow.terraview.data.LocalDataSource;
+import com.iamtechknow.terraview.model.Event;
 import com.iamtechknow.terraview.model.Layer;
 import com.iamtechknow.terraview.util.Utils;
 
@@ -225,6 +226,14 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     public void presentAnimDialog() {
         if(getMapView() != null)
             getMapView().showAnimDialog();
+    }
+
+    @Override
+    public void presentEvent(Event e) {
+        if(e.hasPoint())
+            map.moveCamera(e.getPoint());
+        else
+            map.drawPolygon(e.getPolygon());
     }
 
     private MapView getMapView() {

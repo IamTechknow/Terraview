@@ -13,12 +13,16 @@ import io.reactivex.disposables.Disposable;
 public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
     private EventView view;
     private Disposable sub;
+    private RxBus bus;
     private EONET client;
+
+    private boolean loadedEvents;
 
     public EventPresenterImpl(RxBus _bus, EventView v) {
         view = v;
         client = new EONET();
         client.setCallback(this);
+        bus = _bus;
         sub = _bus.toObserverable().subscribe(this::handleEvent);
     }
 
@@ -29,12 +33,15 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
         view = null;
     }
 
+    /**
+     * Load current events from EONET, only if it hasn't already been done.
+     */
     @Override
-    public void loadEvents(Category c) {
-        if(c.getId() == 0)
+    public void loadEvents() {
+        if(!loadedEvents) {
+            loadedEvents = true;
             client.getOpenEvents();
-        else
-            client.getEventsByCategory(c.getId());
+        }
     }
 
     @Override
@@ -46,6 +53,11 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
                 client.getEventsByCategory(e.getArg());
             }
         }
+    }
+
+    @Override
+    public void presentEvent(Event e) {
+        bus.send(new TapEvent(EventActivity.SELECT_EVENT, e));
     }
 
     @Override

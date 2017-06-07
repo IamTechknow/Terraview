@@ -31,6 +31,9 @@ public class Event implements Parcelable {
         this.source = source;
         this.categoryId = category;
         this.polygon = polygon;
+
+        //Change default polygon options
+        this.polygon.strokeWidth(5.0f).strokeColor(0xff0000ff);
     }
 
     protected Event(Parcel in) {
@@ -94,6 +97,6 @@ public class Event implements Parcelable {
         dest.writeString(source);
         dest.writeInt(categoryId);
         dest.writeParcelable(point, flags);
-        dest.writeParcelable(polygon, flags); //TODO: If this fails, use a boolean to decide which to write/read
+        dest.writeParcelable(polygon, flags);
     }
 }

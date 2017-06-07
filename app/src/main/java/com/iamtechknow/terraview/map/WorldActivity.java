@@ -190,7 +190,8 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch(requestCode) {
             case EVENT_CODE:
-                //TODO: receive event info
+                if(resultCode == RESULT_OK)
+                    mapPresenter.presentEvent(data.getParcelableExtra(EventActivity.EVENT_EXTRA));
                 break;
             default:
                 ArrayList<Layer> layer_stack = data.getParcelableArrayListExtra(LayerActivity.RESULT_STACK);

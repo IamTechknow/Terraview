@@ -3,7 +3,12 @@ package com.iamtechknow.terraview.map;
 import android.support.v4.util.LruCache;
 import android.util.Log;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.UrlTileProvider;
@@ -23,7 +28,6 @@ import retrofit2.Retrofit;
 
 public class MapInteractorImpl implements MapInteractor {
     private static final float MAX_ZOOM = 9.0f;
-    private static final String URL_FORMAT = "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/%s/default/%s/%s/%d/%d/%d.%s";
     private static final String BASE_URL = "https://gibs.earthdata.nasa.gov";
 
     private GoogleMap gMaps;
@@ -33,6 +37,8 @@ public class MapInteractorImpl implements MapInteractor {
 
     //Cache data to hold tile image data for a given parsable key
     private LruCache<String, byte[]> byteCache;
+
+    private Polygon currPolygon;
 
     public MapInteractorImpl(GoogleMap map) {
         gMaps = map;
@@ -88,6 +94,31 @@ public class MapInteractorImpl implements MapInteractor {
         }
 
         return data;
+    }
+
+    /**
+     * Simply move the camera to the specified point
+     * @param point where to move the camera
+     */
+    @Override
+    public void moveCamera(LatLng point) {
+        gMaps.animateCamera(CameraUpdateFactory.newLatLngZoom(point, MAX_ZOOM - 1));
+    }
+
+    /**
+     * Draw the polygon and show it to the user
+     * @param poly shape to draw the camera
+     */
+    @Override
+    public void drawPolygon(PolygonOptions poly) {
+        currPolygon = gMaps.addPolygon(poly);
+        gMaps.animateCamera(CameraUpdateFactory.newLatLngZoom(poly.getPoints().get(0), MAX_ZOOM - 2));
+    }
+
+    @Override
+    public void clearPolygon() {
+        if(currPolygon != null)
+            currPolygon.remove();
     }
 
     /**

@@ -35,7 +35,7 @@ public class EventViewImpl extends Fragment implements EventView {
     public void onStart() {
         super.onStart();
         if(Utils.isOnline(getActivity()))
-            presenter.loadEvents(Category.getAll());
+            presenter.loadEvents();
     }
 
     @Override
