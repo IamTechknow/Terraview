@@ -9,9 +9,11 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 
 import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.adapter.EventAdapter;
@@ -22,6 +24,8 @@ import com.iamtechknow.terraview.util.Utils;
 import java.util.ArrayList;
 
 public class EventViewImpl extends Fragment implements EventView {
+    private static final int EVENT_INTERVAL = 30, EVENT_LIMIT = 300;
+
     private EventPresenter presenter;
     private EventAdapter adapter;
 
@@ -29,9 +33,16 @@ public class EventViewImpl extends Fragment implements EventView {
     private RecyclerView mRecyclerView;
     private View empty_view;
 
+    //Show closed or open events (API can't give both types)
+    private boolean showingClosed;
+
+    //How many events to show
+    private int eventLimit = EVENT_INTERVAL;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
 
         presenter = new EventPresenterImpl(RxBus.getInstance(), this);
     }
@@ -60,9 +71,36 @@ public class EventViewImpl extends Fragment implements EventView {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         adapter = new EventAdapter(presenter);
         mRecyclerView.setAdapter(adapter);
+        mRecyclerView.addOnScrollListener(listener);
 
         return rootView;
     }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.event_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        showingClosed = !showingClosed;
+        item.setTitle(showingClosed ? R.string.closed_toggle : R.string.open_toggle);
+        if(showingClosed) //do show closed events
+            presenter.presentClosed(eventLimit);
+        else
+            presenter.loadEvents();
+
+        return true;
+    }
+
+    private RecyclerView.OnScrollListener listener = new RecyclerView.OnScrollListener() {
+        @Override
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            //Check if can scroll down, if showing closed events, and can load more
+            if(!recyclerView.canScrollVertically(1) && showingClosed && eventLimit < EVENT_LIMIT)
+                presenter.presentClosed(eventLimit += EVENT_INTERVAL);
+        }
+    };
 
     @Override
     public void insertList(ArrayList<Event> list) {

@@ -12,4 +12,6 @@ public interface EventPresenter {
     void presentSource(String url);
 
     void presentEvent(Event e);
+
+    void presentClosed(int num);
 }

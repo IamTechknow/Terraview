@@ -34,7 +34,7 @@ public class EONET {
 
     private static final String EVENTS_ENDPOINT = "https://eonet.sci.gsfc.nasa.gov/api/v2.1/events",
         CATEGORIES_ENDPOINT = "https://eonet.sci.gsfc.nasa.gov/api/v2.1/categories",
-        CLOSED_LIMIT = "/?status=open|closed&limit=%d", CAT_FILTER = "/%d";
+        CLOSED_LIMIT = "?status=closed&limit=%d", CAT_FILTER = "/%d";
 
     private static final String EVENTS = "events", ID = "id", TITLE = "title", CAT = "categories",
             SOURCE = "sources", GEOMETRY = "geometries", GEO_TYPE = "type", POINT = "Point",
@@ -67,8 +67,9 @@ public class EONET {
      * Get events with a query to request closed events up to a limit.
      * @param limit Number of events to get
      */
-    public Disposable getClosedEvents(int limit) {
-        return getEvents(String.format(Locale.US, EVENTS_ENDPOINT + CLOSED_LIMIT, limit));
+    public Disposable getClosedEvents(int catID, int limit) {
+        return catID == 0 ? getEvents(String.format(Locale.US, EVENTS_ENDPOINT + CLOSED_LIMIT, limit))
+            : getEvents(String.format(Locale.US, CATEGORIES_ENDPOINT + CAT_FILTER + CLOSED_LIMIT, catID, limit));
     }
 
     public void setCallback(LoadCallback callback) {
@@ -87,11 +88,15 @@ public class EONET {
                 //Parse each event element
                 for(JsonElement e : eventArray) {
                     JsonObject obj = e.getAsJsonObject(), geo_obj, source_obj;
-                    JsonArray geo = obj.getAsJsonArray(GEOMETRY), coord_array;
-                    source_obj = obj.get(SOURCE).getAsJsonArray().get(0).getAsJsonObject();
-
+                    JsonArray geo = obj.getAsJsonArray(GEOMETRY), coord_array, src_array;
                     String id = obj.get(ID).getAsString(), title = obj.get(TITLE).getAsString(),
-                            source = source_obj.get(URL).getAsString(), date;
+                            source = "", date;
+
+                    //Rarely an event won't have a source, check for that.
+                    src_array = obj.get(SOURCE).getAsJsonArray();
+                    if(src_array.size() > 0)
+                        source = src_array.get(0).getAsJsonObject().get(URL).getAsString();
+
                     int c = obj.get(CAT).getAsJsonArray().get(0).getAsJsonObject().get(ID).getAsInt();
                     Event event;
 

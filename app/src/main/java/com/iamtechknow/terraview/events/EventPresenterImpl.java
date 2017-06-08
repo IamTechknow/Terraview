@@ -18,7 +18,11 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
     private RxBus bus;
     private EONET client;
 
+    //Whether open events have been loaded at startup
     private boolean loadedEvents;
+
+    //Current category used for loading closed events
+    private int currCat;
 
     public EventPresenterImpl(RxBus _bus, EventView v) {
         view = v;
@@ -51,6 +55,7 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
         if(event instanceof TapEvent) {
             TapEvent e = (TapEvent) event;
             if(e.getTab() == EventActivity.SELECT_EVENT_TAB) {
+                currCat = e.getArg();
                 view.clearList();
                 if(e.getArg() == 0)
                     client.getOpenEvents();
@@ -75,6 +80,12 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
             view.showSource(url);
         else
             view.warnNoSource();
+    }
+
+    @Override
+    public void presentClosed(int num) {
+        view.clearList();
+        client.getClosedEvents(currCat, num);
     }
 
     @Override
