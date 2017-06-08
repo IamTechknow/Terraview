@@ -74,6 +74,7 @@ public class ColorMapViewImpl extends View implements ColorMapView, SeekBar.OnSe
 
         View parent = (View) getParent();
         SeekBar bar = (SeekBar) parent.findViewById(R.id.color_map_picker);
+        parent.findViewById(R.id.empty_view).setVisibility(View.GONE);
         bar.setVisibility(View.VISIBLE);
         bar.setOnSeekBarChangeListener(this);
 
