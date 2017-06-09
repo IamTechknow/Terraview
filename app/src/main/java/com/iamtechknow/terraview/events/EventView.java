@@ -12,4 +12,6 @@ public interface EventView {
     void showSource(String url);
 
     void warnNoSource();
+
+    int getEventLimit();
 }

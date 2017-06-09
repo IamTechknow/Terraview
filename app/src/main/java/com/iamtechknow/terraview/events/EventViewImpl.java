@@ -51,7 +51,7 @@ public class EventViewImpl extends Fragment implements EventView {
     public void onStart() {
         super.onStart();
         if(Utils.isOnline(getActivity()))
-            presenter.loadEvents();
+            presenter.loadEvents(true);
     }
 
     @Override
@@ -78,17 +78,22 @@ public class EventViewImpl extends Fragment implements EventView {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        //Gets called every time tab for fragment gets selected
         inflater.inflate(R.menu.event_menu, menu);
+        menu.getItem(0).setTitle(showingClosed ? R.string.open_toggle : R.string.closed_toggle);
     }
 
+    //If the user pressed the item when it says closed,
+    //it will reset the number of events to show to the default
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         showingClosed = !showingClosed;
-        item.setTitle(showingClosed ? R.string.closed_toggle : R.string.open_toggle);
-        if(showingClosed) //do show closed events
+        item.setTitle(showingClosed ? R.string.open_toggle : R.string.closed_toggle);
+        if(showingClosed) { //do show closed events
+            eventLimit = EVENT_INTERVAL;
             presenter.presentClosed(eventLimit);
-        else
-            presenter.loadEvents();
+        } else
+            presenter.loadEvents(false);
 
         return true;
     }
@@ -97,7 +102,7 @@ public class EventViewImpl extends Fragment implements EventView {
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             //Check if can scroll down, if showing closed events, and can load more
-            if(!recyclerView.canScrollVertically(1) && showingClosed && eventLimit < EVENT_LIMIT)
+            if(!recyclerView.canScrollVertically(1) && shouldLoadMore())
                 presenter.presentClosed(eventLimit += EVENT_INTERVAL);
         }
     };
@@ -125,5 +130,16 @@ public class EventViewImpl extends Fragment implements EventView {
     public void warnNoSource() {
         if(getView() != null)
             Snackbar.make(getView(), R.string.no_source, Snackbar.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public int getEventLimit() {
+        return eventLimit;
+    }
+
+    //Is showing closed events, and is there more events to show, and not within the set limit?
+    //If the list count and eventLimit aren't the same, means there are no more events to get.
+    private boolean shouldLoadMore() {
+        return showingClosed && eventLimit == adapter.getItemCount() && eventLimit < EVENT_LIMIT;
     }
 }

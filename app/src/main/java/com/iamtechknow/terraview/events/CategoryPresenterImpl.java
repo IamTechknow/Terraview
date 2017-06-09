@@ -34,6 +34,7 @@ public class CategoryPresenterImpl implements CategoryPresenter, EONET.LoadCallb
             client.getCategories();
     }
 
+    //Send an event to the event bus when a category has been passed
     @Override
     public void emitEvent(int catId) {
         bus.send(new TapEvent(EventActivity.SELECT_EVENT_TAB, catId));

@@ -5,7 +5,7 @@ import com.iamtechknow.terraview.model.Event;
 public interface EventPresenter {
     void detachView();
 
-    void loadEvents();
+    void loadEvents(boolean onStart);
 
     void handleEvent(Object event);
 

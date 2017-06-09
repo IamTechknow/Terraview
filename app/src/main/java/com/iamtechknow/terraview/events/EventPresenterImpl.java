@@ -19,7 +19,7 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
     private EONET client;
 
     //Whether open events have been loaded at startup
-    private boolean loadedEvents;
+    private boolean loadedEvents, showingClosed;
 
     //Current category used for loading closed events
     private int currCat;
@@ -40,16 +40,24 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
     }
 
     /**
-     * Load current events from EONET, only if it hasn't already been done.
+     * Load current events from EONET, if loaded from onStart, only gets loaded once.
      */
     @Override
-    public void loadEvents() {
-        if(!loadedEvents) {
-            loadedEvents = true;
+    public void loadEvents(boolean onStart) {
+        if(onStart && loadedEvents)
+            return;
+
+        loadedEvents = true;
+        showingClosed = false;
+        view.clearList();
+        if(currCat == 0)
             client.getOpenEvents();
-        }
+        else
+            client.getEventsByCategory(currCat);
     }
 
+    //Handle the event passed when a category is tapped
+    //Need to handle whether to send open or close events
     @Override
     public void handleEvent(Object event) {
         if(event instanceof TapEvent) {
@@ -57,14 +65,17 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
             if(e.getTab() == EventActivity.SELECT_EVENT_TAB) {
                 currCat = e.getArg();
                 view.clearList();
-                if(e.getArg() == 0)
+                if(showingClosed)
+                    client.getClosedEvents(currCat, view.getEventLimit());
+                else if(currCat == 0)
                     client.getOpenEvents();
                 else
-                    client.getEventsByCategory(e.getArg());
+                    client.getEventsByCategory(currCat);
             }
         }
     }
 
+    //Send an event to the event bus when an event has been tapped
     @Override
     public void presentEvent(Event e) {
         bus.send(new TapEvent(EventActivity.SELECT_EVENT, e));
@@ -84,6 +95,7 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
 
     @Override
     public void presentClosed(int num) {
+        showingClosed = true;
         view.clearList();
         client.getClosedEvents(currCat, num);
     }
