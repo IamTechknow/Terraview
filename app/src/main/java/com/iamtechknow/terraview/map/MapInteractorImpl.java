@@ -3,16 +3,18 @@ package com.iamtechknow.terraview.map;
 import android.support.v4.util.LruCache;
 import android.util.Log;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
-import com.google.android.gms.maps.model.UrlTileProvider;
 import com.iamtechknow.terraview.api.ImageAPI;
 import com.iamtechknow.terraview.model.Layer;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Locale;
 import java.util.Set;
 
@@ -23,7 +25,6 @@ import retrofit2.Retrofit;
 
 public class MapInteractorImpl implements MapInteractor {
     private static final float MAX_ZOOM = 9.0f;
-    private static final String URL_FORMAT = "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/%s/default/%s/%s/%d/%d/%d.%s";
     private static final String BASE_URL = "https://gibs.earthdata.nasa.gov";
 
     private GoogleMap gMaps;
@@ -34,7 +35,13 @@ public class MapInteractorImpl implements MapInteractor {
     //Cache data to hold tile image data for a given parsable key
     private LruCache<String, byte[]> byteCache;
 
-    public MapInteractorImpl(GoogleMap map) {
+    private Polygon currPolygon;
+
+    //Padding value for showing polygon bounds
+    private int polyOffset;
+
+    public MapInteractorImpl(GoogleMap map, int offset) {
+        polyOffset = offset;
         gMaps = map;
         gMaps.setMaxZoomPreference(MAX_ZOOM);
         gMaps.setMapType(GoogleMap.MAP_TYPE_NONE);
@@ -91,6 +98,32 @@ public class MapInteractorImpl implements MapInteractor {
     }
 
     /**
+     * Simply move the camera to the specified point
+     * @param point where to move the camera
+     */
+    @Override
+    public void moveCamera(LatLng point) {
+        gMaps.animateCamera(CameraUpdateFactory.newLatLngZoom(point, MAX_ZOOM - 1));
+    }
+
+    /**
+     * Draw the polygon and show it to the user.
+     * Tell the camera to show the bounds of the polygon within the screen
+     * @param poly shape to draw the camera
+     */
+    @Override
+    public void drawPolygon(PolygonOptions poly) {
+        currPolygon = gMaps.addPolygon(poly);
+        gMaps.animateCamera(CameraUpdateFactory.newLatLngBounds(getPolyBounds(poly), polyOffset));
+    }
+
+    @Override
+    public void clearPolygon() {
+        if(currPolygon != null)
+            currPolygon.remove();
+    }
+
+    /**
      * Return a key to be used in the cache based on given arguments.
      * Done by concatenating the parameters between slashes to allow parsing if needed
      * @return String to be used as a key for the byte cache
@@ -119,23 +152,12 @@ public class MapInteractorImpl implements MapInteractor {
         return temp;
     }
 
-    /**
-     * Used to provide instances of a TileProvider suitable for animation.
-     * @param l The layer with the data to fill the URL
-     * @param date The date for the tile
-     * @return tile provider for an animation
-     */
-    private UrlTileProvider getTile(Layer l, String date) {
-        return new UrlTileProvider(256, 256) {
-            @Override
-            public URL getTileUrl(int x, int y, int z) {
-                try {
-                    return new URL(String.format(Locale.US, URL_FORMAT, l.getIdentifier(), date, l.getTileMatrixSet(), z, y, x, l.getFormat()));
-                } catch (MalformedURLException e) {
-                    Log.w(getClass().getSimpleName(), e);
-                    return null;
-                }
-            }
-        };
+    //Get the bounds of the polygon, which can be used to center the camera over it,
+    //as well as getting the center of the polygon.
+    private LatLngBounds getPolyBounds(PolygonOptions poly) {
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        for(LatLng coord : poly.getPoints())
+            builder.include(coord);
+        return builder.build();
     }
 }

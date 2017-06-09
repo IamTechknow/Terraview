@@ -10,13 +10,6 @@
             android:title="@string/layer_info"
             android:icon="@drawable/ic_info_outline_white_24dp" />
         <item
-            android:id="@+id/action_layers"
-            android:title="@string/layers"
-            android:icon="@drawable/ic_layers_white_24px" />
-    </group>
-
-    <group android:checkableBehavior="single" android:id="@+id/dateGroup">
-        <item
             android:id="@+id/action_date"
             android:title="@string/date"
             android:icon="@android:drawable/ic_menu_my_calendar" />
@@ -24,6 +17,17 @@
             android:id="@+id/action_anim"
             android:title="@string/make_animation"
             android:icon="@drawable/ic_movie_creation_white_24px" />
+    </group>
+
+    <group android:checkableBehavior="single" android:id="@+id/actionGroup">
+        <item
+            android:id="@+id/action_layers"
+            android:title="@string/layers"
+            android:icon="@drawable/ic_layers_white_24px" />
+        <item
+            android:id="@+id/action_events"
+            android:title="@string/events"
+            android:icon="@drawable/ic_explore_white_24px" />
     </group>
 
     <group android:checkableBehavior="single" android:id="@+id/helpGroup">

@@ -11,4 +11,8 @@
         android:scrollbars="vertical"
         android:scrollbarThumbVertical="@color/dividerColor"
         android:fadeScrollbars="true" />
+    <include layout="@layout/progress_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
 </RelativeLayout>

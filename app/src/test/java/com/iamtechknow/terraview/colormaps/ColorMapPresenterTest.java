@@ -9,7 +9,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import io.reactivex.android.plugins.RxAndroidPlugins;
 import io.reactivex.schedulers.Schedulers;
@@ -24,7 +24,7 @@ public class ColorMapPresenterTest {
     private ColorMapPresenterImpl presenter;
 
     @BeforeClass
-    public void setupClass() {
+    public static void setupClass() {
         //Allow AndroidSchedulers.mainThread() to be overridden
         RxAndroidPlugins.setInitMainThreadSchedulerHandler(__ -> Schedulers.trampoline());
     }

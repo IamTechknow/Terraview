@@ -9,6 +9,7 @@ import com.google.android.gms.maps.model.TileOverlay;
 import com.iamtechknow.terraview.Injection;
 import com.iamtechknow.terraview.data.DataSource;
 import com.iamtechknow.terraview.data.LocalDataSource;
+import com.iamtechknow.terraview.model.Event;
 import com.iamtechknow.terraview.model.Layer;
 import com.iamtechknow.terraview.util.Utils;
 
@@ -34,8 +35,10 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     private ArrayList<Layer> layer_stack;
     private ArrayList<TileOverlay> mCurrLayers;
     private Date currentDate;
+    private Event currEvent;
+    private int polyOffset;
 
-    public WorldPresenter() {
+    public WorldPresenter(int offset) {
         mCurrLayers = new ArrayList<>();
         layer_stack = new ArrayList<>();
 
@@ -44,6 +47,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         c.setTime(currentDate);
         Utils.getCalendarMidnightTime(c);
         currentDate = c.getTime();
+        polyOffset = offset;
     }
 
     @Override
@@ -76,7 +80,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     //If needed, restore map tiles or set default
     @Override
     public void onMapReady(GoogleMap gMaps) {
-        map = new MapInteractorImpl(gMaps);
+        map = new MapInteractorImpl(gMaps, polyOffset);
 
         if(isRestoring) {
             isRestoring = false;
@@ -204,6 +208,12 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     }
 
     @Override
+    public void presentEvents() {
+        if(getMapView() != null)
+            getMapView().showEvents();
+    }
+
+    @Override
     public void presentAbout() {
         if(getMapView() != null)
             getMapView().showAbout();
@@ -219,6 +229,33 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     public void presentAnimDialog() {
         if(getMapView() != null)
             getMapView().showAnimDialog();
+    }
+
+    /**
+     * Change all layers to the event date and animate the camera.
+     * @param e the selected event data
+     */
+    @Override
+    public void presentEvent(Event e) {
+        currEvent = e;
+        onDateChanged(Utils.parseISODate(e.getDate()));
+        if(getMapView() != null) {
+            getMapView().updateDateDialog(currentDate.getTime());
+            getMapView().showEvent(e);
+        }
+
+        map.clearPolygon();
+        if(e.hasPoint())
+            map.moveCamera(e.getPoint());
+        else
+            map.drawPolygon(e.getPolygon());
+    }
+
+    @Override
+    public void onClearEvent() {
+        map.clearPolygon();
+        if(getMapView() != null)
+            getMapView().clearEvent();
     }
 
     private MapView getMapView() {

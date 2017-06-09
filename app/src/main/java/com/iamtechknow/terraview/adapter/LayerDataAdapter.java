@@ -39,9 +39,9 @@ public class LayerDataAdapter extends RecyclerView.Adapter<LayerDataAdapter.View
 
             itemView.setClickable(true);
             itemView.setOnClickListener(this);
-            text = (TextView) itemView.findViewById(R.id.layer_text);
-            subtitle = (TextView) itemView.findViewById(R.id.layer_sub);
-            icon = (ImageView) itemView.findViewById(R.id.layer_info);
+            text = (TextView) itemView.findViewById(R.id.item_text);
+            subtitle = (TextView) itemView.findViewById(R.id.item_sub);
+            icon = (ImageView) itemView.findViewById(R.id.item_info);
         }
 
         /**
@@ -64,7 +64,7 @@ public class LayerDataAdapter extends RecyclerView.Adapter<LayerDataAdapter.View
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.layer_item_with_sub, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_with_sub, parent, false);
         return new ViewHolder(v);
     }
 

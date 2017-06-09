@@ -11,4 +11,5 @@
     <dimen name="dialog_text_width">192dp</dimen>
     <dimen name="anim_top_margin">72dp</dimen>
     <dimen name="anim_header_margin">4dp</dimen>
+    <dimen name="poly_padding">48dp</dimen>
 </resources>

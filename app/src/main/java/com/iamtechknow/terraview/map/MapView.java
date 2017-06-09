@@ -1,5 +1,6 @@
 package com.iamtechknow.terraview.map;
 
+import com.iamtechknow.terraview.model.Event;
 import com.iamtechknow.terraview.model.Layer;
 
 import java.util.ArrayList;
@@ -18,9 +19,15 @@ public interface MapView {
 
     void showPicker();
 
+    void showEvents();
+
     void showAbout();
 
     void showHelp();
 
     void showAnimDialog();
+
+    void showEvent(Event e);
+
+    void clearEvent();
 }

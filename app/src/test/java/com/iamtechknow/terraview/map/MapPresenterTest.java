@@ -34,8 +34,8 @@ public class MapPresenterTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         stack = new ArrayList<>();
-        presenter = new WorldPresenter();
-        presenter.attachView((MapView) view);
+        presenter = new WorldPresenter(32);
+        presenter.attachView(view);
     }
 
     //Test presenter initialization

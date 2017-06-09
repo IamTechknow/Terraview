@@ -73,11 +73,6 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     }
 
     @Override
-    public ArrayList<Layer> getCurrStack() {
-        return stack;
-    }
-
-    @Override
     public void handleEvent(Object event) {
         TapEvent tap = (TapEvent) event;
         if(tap != null && getView() != null && tap.getTab() == SELECT_LAYER_TAB) {

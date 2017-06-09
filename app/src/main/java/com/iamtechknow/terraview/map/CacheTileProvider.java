@@ -3,7 +3,6 @@ package com.iamtechknow.terraview.map;
 import com.google.android.gms.maps.model.Tile;
 import com.google.android.gms.maps.model.TileProvider;
 import com.iamtechknow.terraview.model.Layer;
-import com.iamtechknow.terraview.util.Utils;
 
 /**
  * Tile provider that accesses tiles from an image cache, or makes a network request to access them from a remote source.

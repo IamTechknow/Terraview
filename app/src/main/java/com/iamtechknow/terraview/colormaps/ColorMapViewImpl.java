@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.model.ColorMap;
 import com.iamtechknow.terraview.model.ColorMapEntry;
+import com.iamtechknow.terraview.util.Utils;
 
 import java.util.ArrayList;
 
@@ -21,7 +22,7 @@ import java.util.ArrayList;
  * to prevent it from being GCed, and to allow it to be called to draw the color map
  */
 public class ColorMapViewImpl extends View implements ColorMapView, SeekBar.OnSeekBarChangeListener {
-    private float RECT_HEIGHT = dPToPixel(R.dimen.md_keylines);
+    private float RECT_HEIGHT = Utils.dPToPixel(getResources(), R.dimen.md_keylines);
 
     //Controls the color for drawing the color map
     private Paint mPaint;
@@ -74,6 +75,7 @@ public class ColorMapViewImpl extends View implements ColorMapView, SeekBar.OnSe
 
         View parent = (View) getParent();
         SeekBar bar = (SeekBar) parent.findViewById(R.id.color_map_picker);
+        parent.findViewById(R.id.empty_view).setVisibility(View.GONE);
         bar.setVisibility(View.VISIBLE);
         bar.setOnSeekBarChangeListener(this);
 
@@ -120,13 +122,4 @@ public class ColorMapViewImpl extends View implements ColorMapView, SeekBar.OnSe
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {}
-
-    /**
-     * Do some preprocessing by converting the DP dimension to pixels to get the rectangle height
-     * @return pixel size of the DP
-     */
-    private float dPToPixel(int dimen) {
-        Resources r = getResources();
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(dimen), r.getDisplayMetrics());
-    }
 }

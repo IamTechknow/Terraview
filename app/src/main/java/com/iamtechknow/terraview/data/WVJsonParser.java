@@ -1,7 +1,5 @@
 package com.iamtechknow.terraview.data;
 
-import android.util.Log;
-
 import com.google.gson.*;
 import com.iamtechknow.terraview.model.Layer;
 

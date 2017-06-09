@@ -8,11 +8,13 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.webkit.WebView;
 
@@ -109,11 +111,19 @@ public class Utils {
     }
 
     /**
+     * Do some preprocessing by converting the DP dimension to pixels based on device's DPI value
+     * @return pixel size of the DP
+     */
+    public static float dPToPixel(Resources r, int dimen) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(dimen), r.getDisplayMetrics());
+    }
+
+    /**
      * Finds the reference to the home button view
      * @param bar The support toolbar
      * @return The ImageButton view
      */
-    public static View findNavView(Toolbar bar) {
+    static View findNavView(Toolbar bar) {
         ArrayList<View> result = new ArrayList<>(1);
         bar.findViewsWithText(result, bar.getNavigationContentDescription(), View.FIND_VIEWS_WITH_CONTENT_DESCRIPTION);
         return result.get(0);
@@ -146,8 +156,6 @@ public class Utils {
 
     public static class AboutDialog extends DialogFragment {
         public static final String MIME_TYPE = "text/html";
-
-        public AboutDialog() {}
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {

@@ -58,6 +58,10 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/color_map_info">
+        <include layout="@layout/progress_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true" />
         <TextView
             android:id="@+id/color_map_start"
             android:layout_alignParentStart="true"

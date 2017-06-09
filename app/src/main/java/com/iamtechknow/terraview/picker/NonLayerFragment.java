@@ -58,7 +58,7 @@ public class NonLayerFragment extends Fragment implements NonLayerView {
     //Inflate the fragment view and setup the RecyclerView
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_layer, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_tabs, container, false);
 
         RecyclerView mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
