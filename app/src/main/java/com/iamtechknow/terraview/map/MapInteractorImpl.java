@@ -6,6 +6,7 @@ import android.util.Log;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.TileOverlay;
@@ -36,7 +37,11 @@ public class MapInteractorImpl implements MapInteractor {
 
     private Polygon currPolygon;
 
-    public MapInteractorImpl(GoogleMap map) {
+    //Padding value for showing polygon bounds
+    private int polyOffset;
+
+    public MapInteractorImpl(GoogleMap map, int offset) {
+        polyOffset = offset;
         gMaps = map;
         gMaps.setMaxZoomPreference(MAX_ZOOM);
         gMaps.setMapType(GoogleMap.MAP_TYPE_NONE);
@@ -102,13 +107,14 @@ public class MapInteractorImpl implements MapInteractor {
     }
 
     /**
-     * Draw the polygon and show it to the user
+     * Draw the polygon and show it to the user.
+     * Tell the camera to show the bounds of the polygon within the screen
      * @param poly shape to draw the camera
      */
     @Override
     public void drawPolygon(PolygonOptions poly) {
         currPolygon = gMaps.addPolygon(poly);
-        gMaps.animateCamera(CameraUpdateFactory.newLatLngZoom(poly.getPoints().get(0), MAX_ZOOM - 2));
+        gMaps.animateCamera(CameraUpdateFactory.newLatLngBounds(getPolyBounds(poly), polyOffset));
     }
 
     @Override
@@ -144,5 +150,14 @@ public class MapInteractorImpl implements MapInteractor {
             Log.w(getClass().getSimpleName(), e);
         }
         return temp;
+    }
+
+    //Get the bounds of the polygon, which can be used to center the camera over it,
+    //as well as getting the center of the polygon.
+    private LatLngBounds getPolyBounds(PolygonOptions poly) {
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        for(LatLng coord : poly.getPoints())
+            builder.include(coord);
+        return builder.build();
     }
 }

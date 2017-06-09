@@ -36,8 +36,9 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     private ArrayList<TileOverlay> mCurrLayers;
     private Date currentDate;
     private Event currEvent;
+    private int polyOffset;
 
-    public WorldPresenter() {
+    public WorldPresenter(int offset) {
         mCurrLayers = new ArrayList<>();
         layer_stack = new ArrayList<>();
 
@@ -46,6 +47,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         c.setTime(currentDate);
         Utils.getCalendarMidnightTime(c);
         currentDate = c.getTime();
+        polyOffset = offset;
     }
 
     @Override
@@ -78,7 +80,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     //If needed, restore map tiles or set default
     @Override
     public void onMapReady(GoogleMap gMaps) {
-        map = new MapInteractorImpl(gMaps);
+        map = new MapInteractorImpl(gMaps, polyOffset);
 
         if(isRestoring) {
             isRestoring = false;

@@ -8,11 +8,13 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.webkit.WebView;
 
@@ -106,6 +108,14 @@ public class Utils {
         for(Layer l : layers)
             temp.put(l.getIdentifier(), l);
         return temp;
+    }
+
+    /**
+     * Do some preprocessing by converting the DP dimension to pixels based on device's DPI value
+     * @return pixel size of the DP
+     */
+    public static float dPToPixel(Resources r, int dimen) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(dimen), r.getDisplayMetrics());
     }
 
     /**
