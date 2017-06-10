@@ -10,7 +10,6 @@ import com.iamtechknow.terraview.model.Layer;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Locale;
 import java.util.TreeMap;
 import java.util.Set;
 
@@ -20,15 +19,18 @@ public class LayerDatabase extends SQLiteOpenHelper {
     //General and layer table constants
     private static final String DB_NAME = "layers.sqlite", TABLE_LAYER = "layer", TABLE_SEARCH = "search",
             COL_LAYER_TITLE = "title", COL_LAYER_FORMAT = "format", COL_LAYER_MATRIX = "matrix",
-            COL_LAYER_SUBTITLE = "subtitle", COL_LAYER_START = "start", COL_LAYER_END = "end",
-            COL_LAYER_ISBASE = "isbase", COL_LAYER_ID = "identifier", COL_LAYER_DESC = "desc",
-            COL_LAYER_PALETTE = "palette", COL_ID = "_id";
+            COL_LAYER_SUBTITLE = "subtitle", COL_LAYER_START = "start", COL_LAYER_END = "endDate",
+            COL_LAYER_ISBASE = "isbase", COL_LAYER_ID = "identifier", COL_LAYER_META = "meta",
+            COL_LAYER_PALETTE = "palette", COL_ID = "_id",
+            LAYER_COLS_NEW = "( title text, subtitle text, identifier text, format text, matrix text, start text, endDate text, meta text, palette text, isbase integer)",
+            LAYER_COLS = "(title, subtitle, identifier, format, matrix, start, endDate, meta, palette, isbase)";
 
     private static LayerDatabase mInstance = null; //Ensure only one instance in app lifecycle
 
     //Measurement and category table constants
-    private static final String TABLE_CAT = "category", TABLE_MEASURE = "measurement", COL_KEY = "key", COL_VAL = "value";
-    private static final int VERSION = 1;
+    private static final String TABLE_CAT = "category", TABLE_MEASURE = "measurement", COL_NAME = "name", COL_VAL = "value",
+                                NAME_COLS_NEW = "( name text, value text)", NAME_COLS = "(name, value)";
+    private static final int VERSION = 2;
 
     public static LayerDatabase getInstance(Context c) {
         if (mInstance == null)
@@ -46,13 +48,13 @@ public class LayerDatabase extends SQLiteOpenHelper {
      * @param db The database created
      */
     @Override
-    public void onCreate(SQLiteDatabase db) { //FIXME: Database upgrade
+    public void onCreate(SQLiteDatabase db) {
         //create the "layer" table, each entry corresponds to POJO field
-        db.execSQL("create table " + TABLE_LAYER + " ( title text, subtitle text, identifier text, format text, matrix text, start text, end text, desc text, palette text, isbase integer)");
+        db.execSQL("create table " + TABLE_LAYER + LAYER_COLS_NEW);
 
         //Tables with the same format, contains a key string and value concatenated string
-        db.execSQL("create table " + TABLE_CAT + " ( key text, value text)");
-        db.execSQL("create table " + TABLE_MEASURE + " ( key text, value text )");
+        db.execSQL("create table " + TABLE_CAT + NAME_COLS_NEW);
+        db.execSQL("create table " + TABLE_MEASURE + NAME_COLS_NEW);
 
         //Table for searching
         db.execSQL(String.format("create table %s ( _id integer primary key autoincrement, %s text, %s text)", TABLE_SEARCH, SUGGEST_COLUMN_TEXT_1, SUGGEST_COLUMN_INTENT_EXTRA_DATA));
@@ -61,6 +63,29 @@ public class LayerDatabase extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // implement schema changes and data massage here when upgrading
+        switch(oldVersion) {
+            case 1: //Create new tables to change key words used as columns: desc -> meta, end -> endDate
+                String layerTemp = "layer_temp", catTemp = "cat_temp", measureTemp = "measure_temp";
+                String alter = "ALTER TABLE %s RENAME TO %s", create = "CREATE TABLE %s %s", insert = "INSERT INTO %s %s SELECT %s from %s";
+                String old_cols = "title, subtitle, identifier, format, matrix, start, end, desc, palette, isbase";
+                db.beginTransaction();
+
+                db.execSQL(String.format(alter, TABLE_LAYER, layerTemp));
+                db.execSQL(String.format(alter, TABLE_CAT, catTemp));
+                db.execSQL(String.format(alter, TABLE_MEASURE, measureTemp));
+                db.execSQL(String.format(create, TABLE_LAYER, LAYER_COLS_NEW));
+                db.execSQL(String.format(create, TABLE_CAT, NAME_COLS_NEW));
+                db.execSQL(String.format(create, TABLE_MEASURE, NAME_COLS_NEW));
+                db.execSQL(String.format(insert, TABLE_LAYER, LAYER_COLS, old_cols, layerTemp));
+                db.execSQL(String.format(insert, TABLE_CAT, NAME_COLS, "key, value", catTemp));
+                db.execSQL(String.format(insert, TABLE_MEASURE, NAME_COLS, "key, value", measureTemp));
+
+                for(String table : new String[] {layerTemp, catTemp, measureTemp})
+                    db.execSQL(String.format("DROP TABLE %s", table));
+
+                db.setTransactionSuccessful();
+                db.endTransaction();
+        }
     }
 
     /**
@@ -70,8 +95,8 @@ public class LayerDatabase extends SQLiteOpenHelper {
     public void insertLayers(ArrayList<Layer> layers) {
         SQLiteDatabase DB = getWritableDatabase();
         DB.beginTransaction();
-        SQLiteStatement st = DB.compileStatement("insert into " + TABLE_LAYER + " (title, subtitle, identifier, format, matrix, start, end, desc, palette, isbase) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
-        SQLiteStatement st_search = DB.compileStatement(String.format(Locale.US, "insert into %s (%s, %s) values (?, ?);", TABLE_SEARCH, SUGGEST_COLUMN_TEXT_1, SUGGEST_COLUMN_INTENT_EXTRA_DATA));
+        SQLiteStatement st = DB.compileStatement("insert into " + TABLE_LAYER + " " + LAYER_COLS + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+        SQLiteStatement st_search = DB.compileStatement(String.format("insert into %s (%s, %s) values (?, ?);", TABLE_SEARCH, SUGGEST_COLUMN_TEXT_1, SUGGEST_COLUMN_INTENT_EXTRA_DATA));
         for(Layer l: layers)
             insertLayer(l.getTitle(), l.getSubtitle(), l.getIdentifier(), l.getFormat(), l.getTileMatrixSet(), l.getStartDateRaw(), l.getEndDateRaw(), l.getDescription(), l.getPalette(), l.isBaseLayer(), st, st_search);
         DB.setTransactionSuccessful();
@@ -85,15 +110,15 @@ public class LayerDatabase extends SQLiteOpenHelper {
      * @param subtitle The layer's subtitle
      * @param identifier The layer's identifier (not always title)
      * @param start The layer's start date in ISO format
-     * @param end The layer's end date in ISO format
-     * @param desc The layer's metadata web page
+     * @param endDate The layer's end date in ISO format
+     * @param meta The layer's metadata web page
      * @param palette The layer's palette id if any
      * @param format The layer's image format
      * @param matrix The layer's tile matrix set
      * @param st The statement to bind data with
      * @param search The search table statement
      */
-    private void insertLayer(String title, String subtitle, String identifier, String format, String matrix, String start, String end, String desc, String palette, boolean isBase, SQLiteStatement st, SQLiteStatement search) {
+    private void insertLayer(String title, String subtitle, String identifier, String format, String matrix, String start, String endDate, String meta, String palette, boolean isBase, SQLiteStatement st, SQLiteStatement search) {
         st.bindString(1, title);
         if(subtitle != null)
             st.bindString(2, subtitle);
@@ -102,10 +127,10 @@ public class LayerDatabase extends SQLiteOpenHelper {
         st.bindString(5, matrix);
         if(start != null)
             st.bindString(6, start);
-        if(end != null)
-            st.bindString(7, end);
-        if(desc != null)
-            st.bindString(8, desc);
+        if(endDate != null)
+            st.bindString(7, endDate);
+        if(meta != null)
+            st.bindString(8, meta);
         if(palette != null)
             st.bindString(9, palette);
         st.bindLong(10, (isBase ? 1 : 0));
@@ -128,7 +153,7 @@ public class LayerDatabase extends SQLiteOpenHelper {
     private void insertMap(TreeMap<String, ArrayList<String>> map, String table) {
         SQLiteDatabase DB = getWritableDatabase();
         DB.beginTransaction();
-        SQLiteStatement st = DB.compileStatement("insert into " + table + " (key, value) values(?, ?);" );
+        SQLiteStatement st = DB.compileStatement("insert into " + table + " " + NAME_COLS + " values(?, ?);" );
 
         Set<String> keys = map.keySet();
         for(String key : keys) {
@@ -171,7 +196,7 @@ public class LayerDatabase extends SQLiteOpenHelper {
                     subtitle = c.getString(c.getColumnIndex(COL_LAYER_SUBTITLE)),
                     end = c.isNull(c.getColumnIndex(COL_LAYER_END)) ? null : c.getString(c.getColumnIndex(COL_LAYER_END)),
                     start = c.isNull(c.getColumnIndex(COL_LAYER_START)) ? null : c.getString(c.getColumnIndex(COL_LAYER_START)),
-                    desc = c.isNull(c.getColumnIndex(COL_LAYER_DESC)) ? null : c.getString(c.getColumnIndex(COL_LAYER_DESC)),
+                    desc = c.isNull(c.getColumnIndex(COL_LAYER_META)) ? null : c.getString(c.getColumnIndex(COL_LAYER_META)),
                     palette = c.isNull(c.getColumnIndex(COL_LAYER_PALETTE)) ? null : c.getString(c.getColumnIndex(COL_LAYER_PALETTE));
             boolean isBase = c.getLong(c.getColumnIndex(COL_LAYER_ISBASE)) != 0;
             Layer l = new Layer(id, matrix, format, title, subtitle, end, start, desc, palette, isBase);
@@ -195,7 +220,7 @@ public class LayerDatabase extends SQLiteOpenHelper {
         c.moveToFirst();
 
         while(!c.isAfterLast()) {
-            String key = c.getString(c.getColumnIndex(COL_KEY)), val = c.getString(c.getColumnIndex(COL_VAL));
+            String key = c.getString(c.getColumnIndex(COL_NAME)), val = c.getString(c.getColumnIndex(COL_VAL));
             ArrayList<String> list = new ArrayList<>();
             Collections.addAll(list, val.split(";"));
             map.put(key, list);
@@ -220,7 +245,7 @@ public class LayerDatabase extends SQLiteOpenHelper {
      * @return A cursor that contains the titles for the autocomplete query
      */
     public Cursor searchQuery(String arg) {
-        String sql = String.format(Locale.US, "SELECT %s, %s, %s FROM %s WHERE %s like '%s%%'", COL_ID, SUGGEST_COLUMN_TEXT_1, SUGGEST_COLUMN_INTENT_EXTRA_DATA, TABLE_SEARCH, SUGGEST_COLUMN_TEXT_1, arg);
+        String sql = String.format("SELECT %s, %s, %s FROM %s WHERE %s like '%s%%'", COL_ID, SUGGEST_COLUMN_TEXT_1, SUGGEST_COLUMN_INTENT_EXTRA_DATA, TABLE_SEARCH, SUGGEST_COLUMN_TEXT_1, arg);
         Cursor c = getReadableDatabase().rawQuery(sql, null);
 
         if (c == null)
