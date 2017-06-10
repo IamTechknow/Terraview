@@ -254,7 +254,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION) && Utils.isOnline(context)) {
                 mapPresenter.getRemoteData(context);
-                Snackbar.make(mCoordinatorLayout, R.string.tour_new, Snackbar.LENGTH_LONG).setAction(R.string.start_tour, view -> mapPresenter.presentHelp()).show();
+                Snackbar.make(mCoordinatorLayout, R.string.tour_new, Snackbar.LENGTH_INDEFINITE).setAction(R.string.start_tour, view -> mapPresenter.presentHelp()).show();
                 unregisterReceiver(this);
             }
         }
@@ -343,5 +343,14 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
             actionBar.setTitle(R.string.app_name);
         }
+    }
+
+
+    @Override
+    public void warnUserAboutActiveLayers() {
+        Snackbar bar = Snackbar.make(mCoordinatorLayout, R.string.start_warning, Snackbar.LENGTH_LONG);
+        //if(mapPresenter.isVIIRSActive())
+        //    bar.setAction(R.string.fix, v -> mapPresenter.fixVIIRS()); //FIXME:Preserve unmodified tile overlays first
+        bar.show();
     }
 }

@@ -97,6 +97,9 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         for(Layer l: layer_stack)
             addTileOverlay(l);
         initZOffsets();
+
+        if(isLayerStartAfterCurrent(layer_stack) && getMapView() != null)
+            getMapView().warnUserAboutActiveLayers();
     }
 
     @Override
@@ -126,7 +129,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
      * Called whenever layers are to be added at startup or when selected
      * Create the tile overlays to be shown on the map.
      * If layers were added and the screen is rotated, this can get called when gMaps in null
-     * so wait until it gets called later.
+     * so wait until it gets called later. Warn user if current date is before any active layers
      * @param stack list representing current layers to be shown
      */
     @Override
@@ -141,6 +144,9 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         for(Layer l: layer_stack)
             addTileOverlay(l);
         initZOffsets();
+
+        if(isLayerStartAfterCurrent(layer_stack) && getMapView() != null)
+            getMapView().warnUserAboutActiveLayers();
     }
 
     @Override
@@ -233,6 +239,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
 
     /**
      * Change all layers to the event date and animate the camera.
+     * Also warn the user if the date change affects viewable data.
      * @param e the selected event data
      */
     @Override
@@ -256,6 +263,37 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         map.clearPolygon();
         if(getMapView() != null)
             getMapView().clearEvent();
+    }
+
+    @Override
+    public boolean isVIIRSActive() {
+        for(Layer l : layer_stack)
+            if(l.getIdentifier().equals("VIIRS_SNPP_CorrectedReflectance_TrueColor")) {
+                TileOverlay viirs = mCurrLayers.get(layer_stack.indexOf(l));
+                return viirs.isVisible();
+            }
+        return false;
+    }
+
+    /**
+     * If the VIIRS layer is active but current date is before its start date,
+     * disable it and add the Terra satellite layer.
+     */
+    @Override
+    public void fixVIIRS() {
+        for(Layer l : layer_stack)
+            if(l.getIdentifier().equals("VIIRS_SNPP_CorrectedReflectance_TrueColor")) {
+                TileOverlay viirs = mCurrLayers.get(layer_stack.indexOf(l));
+                if(viirs.isVisible()) {
+                    viirs.setVisible(false);
+                    Layer terra = new Layer("MODIS_Terra_CorrectedReflectance_TrueColor", "GoogleMapsCompatible_Level9", "jpg", "Corrected Reflectance (True Color, MODIS, Terra)", "Terra / MODIS", null, "2012-01-01", null, null, true);
+                    layer_stack.add(terra);
+                    addTileOverlay(terra);
+                    initZOffsets();
+                    if(getMapView() != null)
+                        getMapView().setLayerList(layer_stack);
+                }
+            }
     }
 
     private MapView getMapView() {
@@ -305,5 +343,13 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         for(TileOverlay t : mCurrLayers)
             t.remove();
         mCurrLayers.clear();
+    }
+
+    //Called when a layer is added or date is changed, verify if data cannot be shown
+    private boolean isLayerStartAfterCurrent(ArrayList<Layer> list) {
+        for(Layer l : list)
+            if(currentDate.compareTo(Utils.parseISODate(l.getStartDate())) < 0)
+                return true;
+        return false;
     }
 }

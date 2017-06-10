@@ -30,4 +30,6 @@ public interface MapView {
     void showEvent(Event e);
 
     void clearEvent();
+
+    void warnUserAboutActiveLayers();
 }

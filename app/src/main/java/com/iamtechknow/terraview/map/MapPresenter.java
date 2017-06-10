@@ -55,4 +55,8 @@ public interface MapPresenter extends OnMapReadyCallback {
     void presentEvent(Event e);
 
     void onClearEvent();
+
+    boolean isVIIRSActive();
+
+    void fixVIIRS();
 }

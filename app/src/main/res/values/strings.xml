@@ -58,11 +58,11 @@
             </head>
             <body>
                 <h3>Why is the Google logo shown at the bottom?</h3>
-                <pre>Simply because the app uses the Google Maps API and the logo is part of the map view. No map tiles are used from Google Maps however. Reference labels and layers from Google Maps are all disabled to improve performance of loading the tiles from GIBS.
+                <pre>Simply because the app uses the Google Maps API and the logo is part of the map view. No map tiles are used from Google Maps however.
                 </pre>
                 <h3>How does this app differ from Worldview?</h3>
                 <pre>NASA Worldview is the default client for NASA GIBS, which provides access to all available satellite imagery and data from NASA. Terraview is also a
-                    GIBS clients, and so in this respect it does not differ from Worldview because both are HTTP REST clients.
+                    GIBS client, and so in this respect it does not differ from Worldview because both are HTTP REST clients.
 
                     <br /><br />Terraview however is built for mobile devices that run Android and therefore takes advantage of the components and libraries available to the Android platform. It uses material design elements such as the toolbar,
                     but to maximize the size of the map the app menu is hidden in the left hand drawer while the layer controls are in the right hand drawer. It may also download and store data into its internal app data storage
@@ -73,7 +73,7 @@
                 </pre>
                 <h3>Why do some layers not show up?</h3>
                 <pre>All layers have a start date while some also have an end date. Choosing a date before a layer\'s start date or after a layer\'s end date will result in no data or imagery for that layer.
-                    You can check these dates at the Layer Info menu option. In particular, all AMSR-E layers are from 2002 to 2011, and AMSR2 layers start at 2015.
+                    You can check these dates at the Layer Info menu option. In particular, all AMSR-E layers are from 2002 to 2011, and VIIRS and AMSR2 layers start at 2015.
 
                     <br /><br />Some layers that do not have an end date are delayed by a day, meaning if you choose the day before today, the layer may be visible but not for today. So far this has been verified with the SMAP and GHRSST layers.
                 </pre>
@@ -82,9 +82,8 @@
                     The layers displayed in Worldview are in a different projection that does not distort objects but cannot be viewed directly with Google Maps. Not all GIBS layers support the Mercator projection such as the Fires and Thermal Anomalies layers, but a large number are.
                 </pre>
                 <h3>How does a colorbar work?</h3>
-                <pre>Layers that are not for utility and are not base satellite imagery layers are data overlays that represent a measurement. In the Layer info menu option, you can see a visual of the colorbar,
+                <pre>Many layers are data overlays that represent a measurement. In the Layer info menu option, you can see a visual of the colorbar,
                     which represents the range of values of that measurement. At both ends are text that tell you the minimum and maximum value as well as the units, if any.
-                    Future releases of Terraview will allow you to touch the colorbar to display the value for the touched portion of the colorbar.
                 </pre>
                 <h3>How does an animation work</h3>
                 <pre>Animations are done in Worldview, the dialog in here allows you to configure the animation before it opens the default web browser (or allow you to copy the URL if shared).
@@ -126,7 +125,7 @@
     <string name="tour_start">Terraview tour</string>
     <string name="tour_start_sub">Tap here to start</string>
     <string name="tour_menu">The Main Menu</string>
-    <string name="tour_menu_desc">Choose layers, see layer info, set the date, or animate</string>
+    <string name="tour_menu_desc">Choose layers, see layer info, set the date</string>
     <string name="tour_menu_ctrls_title">Right swipe for layer controls</string>
     <string name="tour_menu_ctrls_desc">Hide, swap, or swipe away layers</string>
     <string name="tour_end">You reached the end of the tour. Enjoy!</string>
@@ -141,6 +140,8 @@
     <string name="no_source">Sorry, no source available</string>
     <string name="closed_toggle">Past</string>
     <string name="open_toggle">Ongoing</string>
+    <string name="start_warning">One or more layers have no data for this date</string>
+    <string name="fix">Fix</string>
 
     <!-- Shown in the 'About' window of the app. -->
     <string name="about_ver"><![CDATA[
