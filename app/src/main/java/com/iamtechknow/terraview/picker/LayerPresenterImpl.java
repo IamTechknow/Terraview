@@ -40,7 +40,7 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     private SparseBooleanArray mSelectedPositions;
 
     //List for layers to be displayed handled as a stack
-    private ArrayList<Layer> stack;
+    private ArrayList<Layer> stack, toDelete;
 
     //HashSet to keep track of selected elements from stack
     private HashSet<String> titleSet;
@@ -48,10 +48,11 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     //Used for state restoration in config change
     private String measurement;
 
-    public LayerPresenterImpl(RxBus _bus, ArrayList<Layer> list, DataSource source, SparseBooleanArray array) {
+    public LayerPresenterImpl(RxBus _bus, ArrayList<Layer> list, ArrayList<Layer> delete, DataSource source, SparseBooleanArray array) {
         bus = _bus;
         dataSource = source;
         stack = list;
+        toDelete = delete;
         retrofit = new Retrofit.Builder().baseUrl(BASE_URL).build();
         mSelectedPositions = array;
         titleSet = new HashSet<>();
@@ -189,10 +190,12 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
         if(queue) {
             stack.add(l);
             titleSet.add(l.getTitle());
+            toDelete.remove(l);
         }
         else {
             stack.remove(l);
             titleSet.remove(l.getTitle());
+            toDelete.add(l);
         }
     }
 

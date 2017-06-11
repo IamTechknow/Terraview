@@ -41,7 +41,6 @@ public class CurrLayerAdapter extends RecyclerView.Adapter<CurrLayerAdapter.Curr
             tv = (TextView) itemView.findViewById(R.id.curr_layer_text);
             drag_handle = (ImageView) itemView.findViewById(R.id.curr_layer_drag_handle);
             vis = (ImageView) itemView.findViewById(R.id.curr_layer_visibility);
-            visible = true;
 
             itemView.setClickable(true);
             drag_handle.setOnTouchListener(this);
@@ -73,7 +72,9 @@ public class CurrLayerAdapter extends RecyclerView.Adapter<CurrLayerAdapter.Curr
 
     @Override
     public void onBindViewHolder(CurrViewHolder holder, int position) {
+        holder.visible = mLayers.get(position).isVisible();
         holder.tv.setText(mLayers.get(position).getTitle());
+        holder.vis.setImageAlpha(holder.visible ? 255 : 96);
     }
 
     @Override

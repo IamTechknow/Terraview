@@ -26,7 +26,7 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
     //Constants for RxBus events and Intent
     public static final int SELECT_MEASURE_TAB = 1, SELECT_LAYER_TAB = 2, SELECT_SUGGESTION = 4;
     private static final int PAGE_LIMIT = 2;
-    public static final String RESULT_STACK = "result", LAYER_EXTRA = "layer";
+    public static final String RESULT_STACK = "result", LAYER_EXTRA = "layer", DELETE_STACK = "delete";
 
     //UI handling
     private TabLayout mTabLayout;
@@ -34,7 +34,7 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
     private SearchView searchView;
 
     //Reference to layer stack from map
-    private ArrayList<Layer> result;
+    private ArrayList<Layer> result, delete;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +66,8 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
 
         if(result != null) //if it exists, send to data adapter in layer tab
             extra3.putParcelableArrayList(RESULT_STACK, result);
+        delete = new ArrayList<>();
+        extra3.putParcelableArrayList(DELETE_STACK, delete);
         frag3.setArguments(extra3);
 
         adapter.addFragment(frag1, getString(R.string.categories)); //Add the fragment and its tab title
@@ -175,6 +177,7 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
     private void setResult() {
         Bundle b = new Bundle();
         b.putParcelableArrayList(RESULT_STACK, result);
+        b.putParcelableArrayList(DELETE_STACK, delete);
         Intent i = new Intent().putExtras(b);
 
         setResult(RESULT_OK, i);

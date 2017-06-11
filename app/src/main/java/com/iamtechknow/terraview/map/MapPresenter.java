@@ -30,7 +30,7 @@ public interface MapPresenter extends OnMapReadyCallback {
 
     void getLocalData(LoaderManager manager, Context c);
 
-    void setLayersAndUpdateMap(ArrayList<Layer> stack);
+    void setLayersAndUpdateMap(ArrayList<Layer> stack, ArrayList<Layer> delete);
 
     void onSwapNeeded(int i, int i_new);
 

@@ -17,6 +17,9 @@ public class Layer implements Parcelable, Comparable<Layer> {
     private String identifier, tileMatrixSet, format, title, subtitle, endDate, startDate, description, palette;
     private boolean isBaseLayer;
 
+    //Unless set all layers are visible by default
+    private boolean visible;
+
     //ISO 8601 date format
     private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
@@ -33,6 +36,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
         description = _description;
         palette = _palette;
         isBaseLayer = isBase;
+        visible = true;
     }
 
     protected Layer(Parcel in) {
@@ -46,6 +50,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
         description = in.readString();
         palette = in.readString();
         isBaseLayer = in.readByte() != 0;
+        visible = in.readByte() != 0;
     }
 
     public static final Creator<Layer> CREATOR = new Creator<Layer>() {
@@ -162,6 +167,14 @@ public class Layer implements Parcelable, Comparable<Layer> {
         return endDate == null && startDate == null;
     }
 
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+
     @Override
     public int describeContents() {
         return hashCode();
@@ -179,6 +192,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
         dest.writeString(description);
         dest.writeString(palette);
         dest.writeByte((byte) (isBaseLayer ? 1 : 0));
+        dest.writeByte((byte) (visible ? 1 : 0));
     }
 
     //Layers are compared the same way as strings, the relative order depends on that of their titles

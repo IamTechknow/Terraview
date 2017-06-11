@@ -16,8 +16,8 @@ import com.iamtechknow.terraview.util.Utils;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
+import java.util.Hashtable;
 
 import static com.iamtechknow.terraview.map.WorldActivity.*;
 
@@ -33,14 +33,14 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     //Worldview data
     private MapInteractor map;
     private ArrayList<Layer> layer_stack;
-    private ArrayList<TileOverlay> mCurrLayers;
+    private Hashtable<String, TileOverlay> tileOverlays;
     private Date currentDate;
     private Event currEvent;
     private int polyOffset;
 
     public WorldPresenter(int offset) {
-        mCurrLayers = new ArrayList<>();
         layer_stack = new ArrayList<>();
+        tileOverlays = new Hashtable<>();
 
         currentDate = new Date();
         Calendar c = Calendar.getInstance();
@@ -84,7 +84,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
 
         if(isRestoring) {
             isRestoring = false;
-            setLayersAndUpdateMap(layer_stack);
+            setLayersAndUpdateMap(layer_stack, null);
             onDateChanged(currentDate);
         } else
             showDefaultTiles();
@@ -131,18 +131,26 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
      * If layers were added and the screen is rotated, this can get called when gMaps in null
      * so wait until it gets called later. Warn user if current date is before any active layers
      * @param stack list representing current layers to be shown
+     * @param delete list of layers to delete first
      */
     @Override
-    public void setLayersAndUpdateMap(ArrayList<Layer> stack) {
+    public void setLayersAndUpdateMap(ArrayList<Layer> stack, ArrayList<Layer> delete) {
         if(isRestoring)
             return;
 
         layer_stack = stack;
         if(getMapView() != null)
             getMapView().setLayerList(layer_stack);
-        removeAllTileOverlays();
-        for(Layer l: layer_stack)
-            addTileOverlay(l);
+
+        //delete layers and cached tiles
+        for(Layer l : delete)
+            if(tileOverlays.containsKey(l.getIdentifier()))
+                map.removeTile(tileOverlays.remove(l.getIdentifier()), l);
+
+        //Add layers not already on
+        for(Layer l : layer_stack)
+            if(!tileOverlays.containsKey(l.getIdentifier()))
+                addTileOverlay(l);
         initZOffsets();
 
         if(isLayerStartAfterCurrent(layer_stack) && getMapView() != null)
@@ -156,18 +164,15 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         if(!layer_stack.get(i).isBaseLayer() && !layer_stack.get(i_new).isBaseLayer()) {
             TileOverlay above, below;
             if (i > i_new) { //swapping above
-                above = mCurrLayers.get(i);
-                below = mCurrLayers.get(i_new);
-                above.setZIndex(above.getZIndex() + Z_OFFSET);
-                below.setZIndex(below.getZIndex() - Z_OFFSET);
+                above = tileOverlays.get(layer_stack.get(i).getIdentifier());
+                below = tileOverlays.get(layer_stack.get(i_new).getIdentifier());
             } else { //swapping below
-                above = mCurrLayers.get(i_new);
-                below = mCurrLayers.get(i);
-                above.setZIndex(above.getZIndex() + Z_OFFSET);
-                below.setZIndex(below.getZIndex() - Z_OFFSET);
+                above = tileOverlays.get(layer_stack.get(i_new).getIdentifier());
+                below = tileOverlays.get(layer_stack.get(i).getIdentifier());
             }
+            above.setZIndex(above.getZIndex() + Z_OFFSET);
+            below.setZIndex(below.getZIndex() - Z_OFFSET);
         }
-        Collections.swap(mCurrLayers, i, i_new);
     }
 
     /**
@@ -177,8 +182,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
      */
     @Override
     public void onToggleLayer(Layer l, boolean hide) {
-        int pos = layer_stack.indexOf(l);
-        mCurrLayers.get(pos).setVisible(hide);
+        tileOverlays.get(l.getIdentifier()).setVisible(hide);
     }
 
     /**
@@ -187,13 +191,13 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
      */
     @Override
     public void onLayerSwiped(int position, Layer l) {
-        map.removeTile(mCurrLayers.remove(position), l);
+        map.removeTile(tileOverlays.remove(l.getIdentifier()), l);
 
-        //Fix Z-Order of other overlays
+        /*//Fix Z-Order of other overlays
         for(int i = 0; i < mCurrLayers.size(); i++) {
             TileOverlay t = mCurrLayers.get(i);
             t.setZIndex(t.getZIndex() - Z_OFFSET);
-        }
+        }*/
     }
 
     @Override
@@ -267,12 +271,8 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
 
     @Override
     public boolean isVIIRSActive() {
-        for(Layer l : layer_stack)
-            if(l.getIdentifier().equals("VIIRS_SNPP_CorrectedReflectance_TrueColor")) {
-                TileOverlay viirs = mCurrLayers.get(layer_stack.indexOf(l));
-                return viirs.isVisible();
-            }
-        return false;
+        TileOverlay viirs = tileOverlays.get("VIIRS_SNPP_CorrectedReflectance_TrueColor");
+        return viirs != null && viirs.isVisible();
     }
 
     /**
@@ -281,19 +281,19 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
      */
     @Override
     public void fixVIIRS() {
-        for(Layer l : layer_stack)
-            if(l.getIdentifier().equals("VIIRS_SNPP_CorrectedReflectance_TrueColor")) {
-                TileOverlay viirs = mCurrLayers.get(layer_stack.indexOf(l));
-                if(viirs.isVisible()) {
-                    viirs.setVisible(false);
-                    Layer terra = new Layer("MODIS_Terra_CorrectedReflectance_TrueColor", "GoogleMapsCompatible_Level9", "jpg", "Corrected Reflectance (True Color, MODIS, Terra)", "Terra / MODIS", null, "2012-01-01", null, null, true);
-                    layer_stack.add(terra);
-                    addTileOverlay(terra);
-                    initZOffsets();
-                    if(getMapView() != null)
-                        getMapView().setLayerList(layer_stack);
-                }
-            }
+        for(Layer viirs_layer : layer_stack)
+            if(viirs_layer.getIdentifier().equals("VIIRS_SNPP_CorrectedReflectance_TrueColor"))
+                viirs_layer.setVisible(false);
+
+        TileOverlay viirs = tileOverlays.get("VIIRS_SNPP_CorrectedReflectance_TrueColor");
+        viirs.setVisible(false);
+
+        Layer terra = new Layer("MODIS_Terra_CorrectedReflectance_TrueColor", "GoogleMapsCompatible_Level9", "jpg", "Corrected Reflectance (True Color, MODIS, Terra)", "Terra / MODIS", null, "2012-01-01", null, null, true);
+        layer_stack.add(terra);
+        addTileOverlay(terra);
+        initZOffsets();
+        if(getMapView() != null)
+            getMapView().setLayerList(layer_stack);
     }
 
     private MapView getMapView() {
@@ -321,7 +321,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
      * @param layer Layer containing necessary data
      */
     private void addTileOverlay(Layer layer) {
-        mCurrLayers.add(map.addTile(layer, Utils.parseDate(currentDate)));
+        tileOverlays.put(layer.getIdentifier(), map.addTile(layer, Utils.parseDate(currentDate)));
     }
 
     /**
@@ -330,19 +330,18 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
      * Base layers will be not affected to avoid covering overlays
      */
     private void initZOffsets() {
-        for(int i = 0; i < mCurrLayers.size(); i++)
+        for(int i = 0; i < layer_stack.size(); i++)
             if(layer_stack.get(i).isBaseLayer())
-                mCurrLayers.get(i).setZIndex(BASE_Z_OFFSET);
+                tileOverlays.get(layer_stack.get(i).getIdentifier()).setZIndex(BASE_Z_OFFSET);
             else
-                mCurrLayers.get(i).setZIndex(Z_OFFSET * (mCurrLayers.size() - 1 - i));
+                tileOverlays.get(layer_stack.get(i).getIdentifier()).setZIndex(Z_OFFSET * (tileOverlays.size() - 1 - i));
     }
 
-    //Remove all tile overlays, used to replace with new set
-    //The default GMaps tile is always present
+    //Remove all tile overlays and cached tiles, used to replace with new set
     private void removeAllTileOverlays() {
-        for(TileOverlay t : mCurrLayers)
-            t.remove();
-        mCurrLayers.clear();
+        for(Layer l  : layer_stack)
+            map.removeTile(tileOverlays.get(l.getIdentifier()), l);
+        tileOverlays.clear();
     }
 
     //Called when a layer is added or date is changed, verify if data cannot be shown

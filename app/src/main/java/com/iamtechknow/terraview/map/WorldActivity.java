@@ -200,8 +200,9 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
                     mapPresenter.presentEvent(data.getParcelableExtra(EventActivity.EVENT_EXTRA));
                 break;
             default:
-                ArrayList<Layer> layer_stack = data.getParcelableArrayListExtra(LayerActivity.RESULT_STACK);
-                mapPresenter.setLayersAndUpdateMap(layer_stack);
+                ArrayList<Layer> layer_stack = data.getParcelableArrayListExtra(LayerActivity.RESULT_STACK),
+                        toDelete = data.getParcelableArrayListExtra(LayerActivity.DELETE_STACK);
+                mapPresenter.setLayersAndUpdateMap(layer_stack, toDelete);
         }
     }
 
@@ -345,12 +346,11 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         }
     }
 
-
     @Override
     public void warnUserAboutActiveLayers() {
         Snackbar bar = Snackbar.make(mCoordinatorLayout, R.string.start_warning, Snackbar.LENGTH_LONG);
-        //if(mapPresenter.isVIIRSActive())
-        //    bar.setAction(R.string.fix, v -> mapPresenter.fixVIIRS()); //FIXME:Preserve unmodified tile overlays first
+        if(mapPresenter.isVIIRSActive())
+            bar.setAction(R.string.fix, v -> mapPresenter.fixVIIRS());
         bar.show();
     }
 }

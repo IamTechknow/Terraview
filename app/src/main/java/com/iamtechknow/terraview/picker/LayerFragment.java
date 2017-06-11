@@ -29,8 +29,9 @@ public class LayerFragment extends Fragment implements LayerView {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(false);
 
-        ArrayList<Layer> stack = getArguments().getParcelableArrayList(LayerActivity.RESULT_STACK);
-        presenter = new LayerPresenterImpl(RxBus.getInstance(), stack, Injection.provideLocalSource(getLoaderManager(), getActivity()), new SparseBooleanArray());
+        ArrayList<Layer> stack = getArguments().getParcelableArrayList(LayerActivity.RESULT_STACK),
+                delete = getArguments().getParcelableArrayList(LayerActivity.DELETE_STACK);
+        presenter = new LayerPresenterImpl(RxBus.getInstance(), stack, delete, Injection.provideLocalSource(getLoaderManager(), getActivity()), new SparseBooleanArray());
         presenter.attachView(this);
 
         if(savedInstanceState != null)
