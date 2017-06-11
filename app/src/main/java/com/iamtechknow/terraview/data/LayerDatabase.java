@@ -89,6 +89,21 @@ public class LayerDatabase extends SQLiteOpenHelper {
     }
 
     /**
+     * Clear all database tables, used for getting data from remote source
+     */
+    public void reset() {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+
+        for(String table : new String[] {TABLE_MEASURE, TABLE_CAT, TABLE_SEARCH, TABLE_LAYER})
+            db.execSQL(String.format("DELETE FROM %s", table));
+        db.execSQL("DELETE FROM sqlite_sequence where name='search'");
+
+        db.setTransactionSuccessful();
+        db.endTransaction();
+    }
+
+    /**
      * Inserts a layer into the database
      * @param layers the Layers to store
      */

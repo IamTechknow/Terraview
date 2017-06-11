@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -48,9 +49,9 @@ import static com.iamtechknow.terraview.anim.AnimDialogActivity.*;
 
 public class WorldActivity extends AppCompatActivity implements MapView, OnMapReadyCallback,
         NavigationView.OnNavigationItemSelectedListener, DragAndHideListener {
-    public static final String RESULT_LIST = "list", PREFS_FILE = "settings", PREFS_DB_KEY = "have_db";
+    public static final String RESULT_LIST = "list", PREFS_FILE = "settings", PREFS_DB_KEY = "last_update";
     public static final String RESTORE_TIME_EXTRA = "time", RESTORE_LAYER_EXTRA = "layer";
-    public static final int LAYER_CODE = 1, EVENT_CODE = 2, SECONDS_PER_DAY = 24*60*60*1000, DEFAULT_HOME_ICON = 0;
+    public static final int LAYER_CODE = 1, EVENT_CODE = 2, SECONDS_PER_DAY = 86400000, WEEK = SECONDS_PER_DAY * 7, DEFAULT_HOME_ICON = 0;
 
     //UI fields
     private DrawerLayout mDrawerLayout;
@@ -176,7 +177,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        if(getSharedPreferences(PREFS_FILE, MODE_PRIVATE).getBoolean(PREFS_DB_KEY, false))
+        if(shouldUseLocalData(getSharedPreferences(PREFS_FILE, MODE_PRIVATE)))
             mapPresenter.getLocalData(getSupportLoaderManager(), this);
         else { //Check internet access to get layer data or set up receiver, also start tour for first timers
             if(Utils.isOnline(this)) {
@@ -254,7 +255,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION) && Utils.isOnline(context)) {
-                mapPresenter.getRemoteData(context);
+                mapPresenter.getRemoteData(WorldActivity.this);
                 Snackbar.make(mCoordinatorLayout, R.string.tour_new, Snackbar.LENGTH_INDEFINITE).setAction(R.string.start_tour, view -> mapPresenter.presentHelp()).show();
                 unregisterReceiver(this);
             }
@@ -352,5 +353,9 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         if(mapPresenter.isVIIRSActive())
             bar.setAction(R.string.fix, v -> mapPresenter.fixVIIRS());
         bar.show();
+    }
+
+    private boolean shouldUseLocalData(SharedPreferences prefs) {
+        return System.currentTimeMillis() - prefs.getLong(PREFS_DB_KEY, 0) < WEEK;
     }
 }

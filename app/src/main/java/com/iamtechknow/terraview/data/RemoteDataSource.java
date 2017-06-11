@@ -32,7 +32,7 @@ import okhttp3.Response;
 public class RemoteDataSource implements DataSource {
     private static final String XML_METADATA = "https://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml",
                                 JSON_METADATA = "https://worldview.earthdata.nasa.gov/config/wv.json",
-                                PREFS_FILE = "settings", PREFS_DB_KEY = "have_db";
+                                PREFS_FILE = "settings", PREFS_DB_KEY = "last_update";
 
     //Data
     private LayerDatabase db;
@@ -43,6 +43,7 @@ public class RemoteDataSource implements DataSource {
 
     public RemoteDataSource(Context c) {
         db = LayerDatabase.getInstance(c);
+        db.reset();
         prefs = c.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE);
     }
 
@@ -127,7 +128,7 @@ public class RemoteDataSource implements DataSource {
         db.insertLayers(data);
         db.insertCategories(cats);
         db.insertMeasurements(measures);
-        prefs.edit().putBoolean(PREFS_DB_KEY, true).apply();
+        prefs.edit().putLong(PREFS_DB_KEY, System.currentTimeMillis()).apply();
         db.close();
     }
 }
