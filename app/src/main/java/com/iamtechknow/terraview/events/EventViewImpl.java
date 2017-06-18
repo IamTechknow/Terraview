@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.adapter.EventAdapter;
 import com.iamtechknow.terraview.model.Event;
+import com.iamtechknow.terraview.model.TapEvent;
 import com.iamtechknow.terraview.picker.RxBus;
 import com.iamtechknow.terraview.util.Utils;
 
@@ -25,6 +26,8 @@ import java.util.ArrayList;
 
 public class EventViewImpl extends Fragment implements EventView {
     private static final int EVENT_INTERVAL = 30, EVENT_LIMIT = 300;
+    private static final String RESTORE_CAT = "cat", RESTORE_CLOSED = "closed",
+                                RESTORE_LIMIT = "limit";
 
     private EventPresenter presenter;
     private EventAdapter adapter;
@@ -39,19 +42,47 @@ public class EventViewImpl extends Fragment implements EventView {
     //How many events to show
     private int eventLimit = EVENT_INTERVAL;
 
+    //Hold saved state until view is created
+    private Bundle savedState;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
+        savedState = savedInstanceState;
         presenter = new EventPresenterImpl(RxBus.getInstance(), this);
+
+        if(savedInstanceState != null) {
+            showingClosed = savedInstanceState.getBoolean(RESTORE_CLOSED);
+            eventLimit = savedInstanceState.getInt(RESTORE_LIMIT);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(RESTORE_CAT, presenter.getCurrCategory());
+        outState.putBoolean(RESTORE_CLOSED, showingClosed);
+        outState.putInt(RESTORE_LIMIT, eventLimit);
     }
 
     @Override
     public void onStart() {
         super.onStart();
+
+        //Either load open events or if config change happened load prior category
         if(Utils.isOnline(getActivity()))
-            presenter.loadEvents(true);
+            if(savedState != null) { //Load saved category
+                presenter.restoreConfig(showingClosed, savedState.getInt(RESTORE_CAT));
+
+                if(showingClosed)
+                    presenter.presentClosed(eventLimit);
+                else
+                    presenter.handleEvent(new TapEvent(EventActivity.SELECT_EVENT_TAB, savedState.getInt(RESTORE_CAT)));
+                savedState = null;
+            } else
+                presenter.loadEvents(true);
     }
 
     @Override

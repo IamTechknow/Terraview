@@ -26,6 +26,8 @@ public interface MapPresenter extends OnMapReadyCallback {
 
     Date getCurrDate();
 
+    Event getCurrEvent();
+
     void getRemoteData(Context c);
 
     void getLocalData(LoaderManager manager, Context c);

@@ -14,4 +14,8 @@ public interface EventPresenter {
     void presentEvent(Event e);
 
     void presentClosed(int num);
+
+    void restoreConfig(boolean showClosed, int cat);
+
+    int getCurrCategory();
 }

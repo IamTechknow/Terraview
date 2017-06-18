@@ -101,6 +101,17 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
     }
 
     @Override
+    public void restoreConfig(boolean showClosed, int cat) {
+        showingClosed = showClosed;
+        currCat = cat;
+    }
+
+    @Override
+    public int getCurrCategory() {
+        return currCat;
+    }
+
+    @Override
     public void onEventsLoaded(ArrayList<Event> data) {
         view.insertList(data);
     }

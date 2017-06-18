@@ -70,11 +70,11 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         isRestoring = true;
 
         layer_stack = savedInstanceState.getParcelableArrayList(RESTORE_LAYER_EXTRA);
-        Long l = savedInstanceState.getLong(RESTORE_TIME_EXTRA);
-        currentDate = new Date(l);
+        currentDate = new Date(savedInstanceState.getLong(RESTORE_TIME_EXTRA));
+        currEvent = savedInstanceState.getParcelable(RESTORE_EVENT_EXTRA);
 
         if(getMapView() != null)
-            getMapView().updateDateDialog(l);
+            getMapView().updateDateDialog(currentDate.getTime());
     }
 
     //If needed, restore map tiles or set default
@@ -86,6 +86,9 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
             isRestoring = false;
             setLayersAndUpdateMap(layer_stack, null);
             onDateChanged(currentDate);
+
+            if(currEvent != null)
+                presentEvent(currEvent);
         } else
             showDefaultTiles();
     }
@@ -105,6 +108,11 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     @Override
     public Date getCurrDate() {
         return currentDate;
+    }
+
+    @Override
+    public Event getCurrEvent() {
+        return currEvent;
     }
 
     @Override
@@ -143,9 +151,10 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
             getMapView().setLayerList(layer_stack);
 
         //delete layers and cached tiles
-        for(Layer l : delete)
-            if(tileOverlays.containsKey(l.getIdentifier()))
-                map.removeTile(tileOverlays.remove(l.getIdentifier()), l);
+        if(delete != null)
+            for(Layer l : delete)
+                if(tileOverlays.containsKey(l.getIdentifier()))
+                    map.removeTile(tileOverlays.remove(l.getIdentifier()), l);
 
         //Add layers not already on
         for(Layer l : layer_stack)
@@ -265,6 +274,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     @Override
     public void onClearEvent() {
         map.clearPolygon();
+        currEvent = null;
         if(getMapView() != null)
             getMapView().clearEvent();
     }
