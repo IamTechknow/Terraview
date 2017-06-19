@@ -123,6 +123,8 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         mapPresenter.onRestoreInstanceState(savedInstanceState);
+        //HACK: The last item from the app tour gets re-checked upon config change, un-check it.
+        ((NavigationView) findViewById(R.id.nav_menu)).getMenu().getItem(3).setChecked(false);
     }
 
     @Override
