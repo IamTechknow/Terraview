@@ -22,7 +22,7 @@ import java.util.Hashtable;
 import static com.iamtechknow.terraview.map.WorldActivity.*;
 
 public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
-    private static final float Z_OFFSET = 5.0f, BASE_Z_OFFSET = -50.0f; //base layers cannot cover overlays
+    private static final float Z_OFFSET = 5.0f, BASE_Z_OFFSET = -100.0f; //base layers cannot cover overlays
 
     private WeakReference<MapView> mapViewRef;
     private DataSource dataSource;
@@ -168,16 +168,16 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
 
     @Override
     public void onSwapNeeded(int i, int i_new) {
-        //Swap the objects in the underlying data and change the Z-order
+        //Get the tile overlays and change the z-indices.
         //If one of the tile overlays is a base layer, neither Z-order changes
         if(!layer_stack.get(i).isBaseLayer() && !layer_stack.get(i_new).isBaseLayer()) {
             TileOverlay above, below;
-            if (i > i_new) { //swapping above
-                above = tileOverlays.get(layer_stack.get(i).getIdentifier());
-                below = tileOverlays.get(layer_stack.get(i_new).getIdentifier());
-            } else { //swapping below
+            if (i > i_new) { //swapping above, above layer is the one going up
                 above = tileOverlays.get(layer_stack.get(i_new).getIdentifier());
                 below = tileOverlays.get(layer_stack.get(i).getIdentifier());
+            } else { //swapping below, below layer is the one going down
+                above = tileOverlays.get(layer_stack.get(i).getIdentifier());
+                below = tileOverlays.get(layer_stack.get(i_new).getIdentifier());
             }
             above.setZIndex(above.getZIndex() + Z_OFFSET);
             below.setZIndex(below.getZIndex() - Z_OFFSET);
@@ -340,11 +340,12 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
      * Base layers will be not affected to avoid covering overlays
      */
     private void initZOffsets() {
+        int z_index_mod = 0; //need separate index for overlays
         for(int i = 0; i < layer_stack.size(); i++)
             if(layer_stack.get(i).isBaseLayer())
                 tileOverlays.get(layer_stack.get(i).getIdentifier()).setZIndex(BASE_Z_OFFSET);
             else
-                tileOverlays.get(layer_stack.get(i).getIdentifier()).setZIndex(Z_OFFSET * (tileOverlays.size() - 1 - i));
+                tileOverlays.get(layer_stack.get(i).getIdentifier()).setZIndex(Z_OFFSET * (tileOverlays.size() - 1 - z_index_mod++));
     }
 
     //Remove all tile overlays and cached tiles, used to replace with new set
