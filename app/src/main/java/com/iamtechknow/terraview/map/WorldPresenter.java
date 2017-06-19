@@ -143,10 +143,10 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
      */
     @Override
     public void setLayersAndUpdateMap(ArrayList<Layer> stack, ArrayList<Layer> delete) {
+        layer_stack = stack;
         if(isRestoring)
             return;
 
-        layer_stack = stack;
         if(getMapView() != null)
             getMapView().setLayerList(layer_stack);
 
