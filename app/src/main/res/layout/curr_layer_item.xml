@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:paddingStart="8dp"
+        android:paddingStart="@dimen/list_horizontal_margin"
         android:src="@drawable/ic_visibility_white_24px" />
     <TextView
         android:id="@+id/curr_layer_text"
@@ -19,7 +19,7 @@
         android:layout_centerVertical="true"
         android:layout_toEndOf="@id/curr_layer_visibility"
         android:layout_toStartOf="@+id/curr_layer_drag_handle"
-        android:paddingStart="8dp"
+        android:paddingStart="@dimen/list_horizontal_margin"
         android:textAppearance="@style/TextAppearance.AppCompat.Small" />
     <ImageView
         android:id="@+id/curr_layer_drag_handle"

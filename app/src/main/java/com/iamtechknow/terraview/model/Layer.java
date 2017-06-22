@@ -13,12 +13,14 @@ import java.util.Locale;
  * POGO (Plain old Java object) that represents the XML structure for a layer in WMTSCapabilities.xml
  */
 public class Layer implements Parcelable, Comparable<Layer> {
+    public static final int VISIBLE = 0, TRANSPARENT = 1, INVISIBLE = 2;
+
     //Fields for XML tags that are stored to database
     private String identifier, tileMatrixSet, format, title, subtitle, endDate, startDate, description, palette;
     private boolean isBaseLayer;
 
     //Unless set all layers are visible by default
-    private boolean visible;
+    private int visibility;
 
     //ISO 8601 date format
     private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
@@ -36,7 +38,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
         description = _description;
         palette = _palette;
         isBaseLayer = isBase;
-        visible = true;
+        visibility = VISIBLE;
     }
 
     protected Layer(Parcel in) {
@@ -50,7 +52,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
         description = in.readString();
         palette = in.readString();
         isBaseLayer = in.readByte() != 0;
-        visible = in.readByte() != 0;
+        visibility = in.readInt();
     }
 
     public static final Creator<Layer> CREATOR = new Creator<Layer>() {
@@ -167,12 +169,12 @@ public class Layer implements Parcelable, Comparable<Layer> {
         return endDate == null && startDate == null;
     }
 
-    public boolean isVisible() {
-        return visible;
+    public int getVisibility() {
+        return visibility;
     }
 
-    public void setVisible(boolean visible) {
-        this.visible = visible;
+    public void setVisible(int visibility) {
+        this.visibility = visibility;
     }
 
     @Override
@@ -192,7 +194,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
         dest.writeString(description);
         dest.writeString(palette);
         dest.writeByte((byte) (isBaseLayer ? 1 : 0));
-        dest.writeByte((byte) (visible ? 1 : 0));
+        dest.writeInt(visibility);
     }
 
     //Layers are compared the same way as strings, the relative order depends on that of their titles

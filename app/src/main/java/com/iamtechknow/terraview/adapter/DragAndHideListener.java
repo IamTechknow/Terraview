@@ -16,9 +16,9 @@ public interface DragAndHideListener {
      * Called when the visibility image is toggled
      *
      * @param l The layer to hide
-     * @param hide To hide or show the layer
+     * @param visibility To hide, make transparent, or show the layer
      */
-    void onToggleLayer(Layer l, boolean hide);
+    void onToggleLayer(Layer l, int visibility);
 
     /**
      * Called when the tile overlays need to be swapped, and maybe the layer stack too

@@ -36,7 +36,7 @@ public interface MapPresenter extends OnMapReadyCallback {
 
     void onSwapNeeded(int i, int i_new);
 
-    void onToggleLayer(Layer l, boolean hide);
+    void onToggleLayer(Layer l, int visibility);
 
     void onLayerSwiped(int position, Layer l);
 

@@ -236,8 +236,8 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     }
 
     @Override
-    public void onToggleLayer(Layer l, boolean hide) {
-        mapPresenter.onToggleLayer(l, hide);
+    public void onToggleLayer(Layer l, int visibility) {
+        mapPresenter.onToggleLayer(l, visibility);
     }
 
     @Override

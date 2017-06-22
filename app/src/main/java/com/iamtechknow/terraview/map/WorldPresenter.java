@@ -187,11 +187,21 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     /**
      * Access the tile overlay to change its visibility
      * @param l The layer corresponding to the tile overlay
-     * @param hide Visibility of the tile overlay
+     * @param visibility Invisible, visible, 50% transparent
      */
     @Override
-    public void onToggleLayer(Layer l, boolean hide) {
-        tileOverlays.get(l.getIdentifier()).setVisible(hide);
+    public void onToggleLayer(Layer l, int visibility) {
+        switch(visibility) {
+            case Layer.VISIBLE:
+                tileOverlays.get(l.getIdentifier()).setVisible(true);
+                tileOverlays.get(l.getIdentifier()).setTransparency(0.0f);
+                break;
+            case Layer.INVISIBLE:
+                tileOverlays.get(l.getIdentifier()).setVisible(false);
+                break;
+            default: //Transparent
+                tileOverlays.get(l.getIdentifier()).setTransparency(0.5f);
+        }
     }
 
     /**
@@ -293,7 +303,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     public void fixVIIRS() {
         for(Layer viirs_layer : layer_stack)
             if(viirs_layer.getIdentifier().equals("VIIRS_SNPP_CorrectedReflectance_TrueColor"))
-                viirs_layer.setVisible(false);
+                viirs_layer.setVisible(Layer.INVISIBLE);
 
         TileOverlay viirs = tileOverlays.get("VIIRS_SNPP_CorrectedReflectance_TrueColor");
         viirs.setVisible(false);

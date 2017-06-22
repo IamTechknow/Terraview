@@ -33,7 +33,7 @@ public class CurrLayerAdapter extends RecyclerView.Adapter<CurrLayerAdapter.Curr
     public class CurrViewHolder extends RecyclerView.ViewHolder implements View.OnTouchListener, View.OnClickListener {
         TextView tv;
         ImageView drag_handle, vis;
-        boolean visible;
+        int visibility;
 
         public CurrViewHolder(View itemView) {
             super(itemView);
@@ -58,9 +58,13 @@ public class CurrLayerAdapter extends RecyclerView.Adapter<CurrLayerAdapter.Curr
         //For visibility button, notify map to hide layer
         @Override
         public void onClick(View v) {
-            visible = !visible;
-            vis.setImageAlpha(visible ? 255 : 96);
-            mDragListener.onToggleLayer(mLayers.get(getAdapterPosition()), visible);
+            visibility = getNewVisibility();
+            vis.setImageAlpha(visibility == Layer.VISIBLE ? 255 : (visibility == Layer.TRANSPARENT ? 160 : 60));
+            mDragListener.onToggleLayer(mLayers.get(getAdapterPosition()), visibility);
+        }
+
+        private int getNewVisibility() {
+            return visibility == Layer.VISIBLE ? Layer.TRANSPARENT : (visibility == Layer.TRANSPARENT ? Layer.INVISIBLE : Layer.VISIBLE);
         }
     }
 
@@ -72,9 +76,9 @@ public class CurrLayerAdapter extends RecyclerView.Adapter<CurrLayerAdapter.Curr
 
     @Override
     public void onBindViewHolder(CurrViewHolder holder, int position) {
-        holder.visible = mLayers.get(position).isVisible();
+        holder.visibility = mLayers.get(position).getVisibility();
         holder.tv.setText(mLayers.get(position).getTitle());
-        holder.vis.setImageAlpha(holder.visible ? 255 : 96);
+        holder.vis.setImageAlpha(holder.visibility == Layer.VISIBLE ? 255 : (holder.visibility == Layer.TRANSPARENT ? 160 : 60));
     }
 
     @Override
