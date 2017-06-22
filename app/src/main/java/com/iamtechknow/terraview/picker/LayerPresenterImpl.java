@@ -211,7 +211,8 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
 
         for(String id: id_list) {
             Layer temp = searchLayerById(id);
-            _layerlist.add(temp != null ? temp.getTitle() : id);
+            if(temp != null) //Don't show items that aren't in GIBS XML
+                _layerlist.add(temp.getTitle());
         }
 
         updateSelectedItems(_layerlist);

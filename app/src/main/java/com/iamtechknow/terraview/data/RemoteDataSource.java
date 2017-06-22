@@ -68,10 +68,10 @@ public class RemoteDataSource implements DataSource {
                 reader.run(xmlResponse.body().byteStream());
                 WVJsonParser parser = new WVJsonParser(jsonResponse.body().byteStream());
                 layers = reader.getResult();
-                parser.parse(layers);
+                layerTable = Utils.getLayerTable(layers);
+                parser.parse(layers, layerTable);
                 measurements = parser.getMeasurementMap();
                 categories = parser.getCategoryMap();
-                layerTable = Utils.getLayerTable(layers);
 
                 saveToDB(layers, measurements, categories);
             } catch (IOException | ParserConfigurationException | SAXException e) {

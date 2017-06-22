@@ -34,7 +34,7 @@ public class WVJsonParser {
      * We can use the key to access the metadata for that layer
      * @param list The list that currently has the layer endpoint data
      */
-    public void parse(ArrayList<Layer> list) {
+    public void parse(ArrayList<Layer> list, Hashtable<String, Layer> table) {
         JsonObject root, layers_json, measurement, cat, hazard_cat, sci_cat;
 
         root = new JsonParser().parse(b).getAsJsonObject();
@@ -49,7 +49,7 @@ public class WVJsonParser {
             e.printStackTrace();
         }
 
-        fillMeasurements(measurement_map, measurement); //Populate measurements
+        fillMeasurements(measurement_map, table, measurement); //Populate measurements
 
         fillCategories(category_map, hazard_cat); //Populate category hashtable
         fillCategories(category_map, sci_cat);
@@ -58,7 +58,7 @@ public class WVJsonParser {
         fillLayers(list, layers_json);
     }
 
-    private void fillMeasurements(TreeMap<String, ArrayList<String>> measurements, JsonObject m_json) {
+    private void fillMeasurements(TreeMap<String, ArrayList<String>> measurements, Hashtable<String, Layer> table, JsonObject m_json) {
         //Parse measurement categories, first get the keys by getting the entry set
         ArrayList<String> measurement_keys = getKeys(m_json);
 
@@ -67,41 +67,45 @@ public class WVJsonParser {
             JsonObject measureObj = m_json.getAsJsonObject(measure),
                     measureSources = measureObj.getAsJsonObject("sources");
 
-            //Get each key for the sources
             ArrayList<String> sources = getKeys(measureSources), measurement_layers = new ArrayList<>();
 
             for(String source_name : sources) { //iterate thru each source (GPM/GPI, MODIS, etc)
                 JsonObject source = measureSources.getAsJsonObject(source_name);
                 for(JsonElement e : source.getAsJsonArray("settings")) { //Now we can access the layer names to put in the list and map
-                    measurement_layers.add(e.getAsString());
+                    if(table.containsKey(e.getAsString())) { //Avoid adding non-Mercator layers like orbit or SEDAC
+                        measurement_layers.add(e.getAsString());
 
-                    JsonElement desc = source.get("description");
-                    if(desc != null && !desc.getAsString().isEmpty()) //may be blank or null
-                        desc_map.put(e.getAsString(), desc.getAsString());
+                        JsonElement desc = source.get("description");
+                        if(desc != null && !desc.getAsString().isEmpty()) //may be blank or null
+                            desc_map.put(e.getAsString(), desc.getAsString());
+                    }
                 }
             }
-            Collections.sort(measurement_layers); //To display measurements in order
-            measurements.put(measure, measurement_layers); //List is complete here
+            Collections.sort(measurement_layers); //Display measurements in order
+            if(!measurement_layers.isEmpty())
+                measurements.put(measure, measurement_layers);
         }
     }
 
     private void fillCategories(TreeMap<String, ArrayList<String>> categories, JsonObject cat_json) {
         //Get keys, fill category measurements list
-        for(String s : getKeys(cat_json)) {
+        for(String cat : getKeys(cat_json)) {
             ArrayList<String> cat_measurements = new ArrayList<>();
-            JsonObject categoryObj = cat_json.getAsJsonObject(s);
+            JsonObject categoryObj = cat_json.getAsJsonObject(cat);
             JsonArray catArray = categoryObj.getAsJsonArray("measurements");
 
             for(JsonElement e : catArray)
-                cat_measurements.add(e.getAsString());
+                if(measurement_map.containsKey(e.getAsString())) //Only add parsed measurements
+                    cat_measurements.add(e.getAsString());
 
             Collections.sort(cat_measurements);
-            categories.put(s, cat_measurements);
+            if(!cat_measurements.isEmpty())
+                categories.put(cat, cat_measurements);
         }
     }
 
     private void fillLayers(ArrayList<Layer> list, JsonObject layer_json) {
-        //By now we have the identifiers for all the Layers we could use to display on Google Maps
+        //By now we have the identifiers for all the Layers we could use to display
         //Layers not found in both XML and JSON metadata are deleted for now
         ArrayList<Layer> toDelete = new ArrayList<>();
 
@@ -112,9 +116,8 @@ public class WVJsonParser {
                 JsonObject jsonLayer = element.getAsJsonObject(), palObj;
                 JsonPrimitive subPrimitive, startPrimitive, endPrimitive;
                 String subtitle = null, endDate = null, startDate = null, palette = null;
-                boolean isBaseLayer;
 
-                isBaseLayer = jsonLayer.getAsJsonPrimitive("group").getAsString().equals("baselayers");
+                boolean isBaseLayer = jsonLayer.getAsJsonPrimitive("group").getAsString().equals("baselayers");
 
                 //These may not exist in the metadata
                 subPrimitive = jsonLayer.getAsJsonPrimitive("subtitle");
@@ -139,10 +142,8 @@ public class WVJsonParser {
 
                 if(desc_map.containsKey(layer.getIdentifier()))
                     layer.setDescription(desc_map.get(layer.getIdentifier()));
-            } else {
-                //Log.i(getClass().getSimpleName(), layer.getIdentifier() + " not found, deleting");
+            } else
                 toDelete.add(layer);
-            }
         }
         list.removeAll(toDelete);
         Collections.sort(list);
