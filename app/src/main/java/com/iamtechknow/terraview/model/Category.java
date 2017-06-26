@@ -1,5 +1,7 @@
 package com.iamtechknow.terraview.model;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.Locale;
 
 /**
@@ -9,7 +11,10 @@ import java.util.Locale;
 public class Category {
     private static final String CATEGORY_FMT = "https://eonet.sci.gsfc.nasa.gov/api/v2.1/categories/%d";
 
+    @SerializedName("id")
     private int id;
+
+    @SerializedName("title")
     private String title;
 
     public Category(int id, String title) {

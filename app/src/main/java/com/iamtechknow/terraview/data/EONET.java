@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.iamtechknow.terraview.api.CategoryAPI;
 import com.iamtechknow.terraview.model.Category;
 import com.iamtechknow.terraview.model.Event;
 
@@ -20,6 +21,9 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * API Client to access events and categories from EONET. This client is Async,
@@ -34,7 +38,7 @@ public class EONET {
 
     private static final String EVENTS_ENDPOINT = "https://eonet.sci.gsfc.nasa.gov/api/v2.1/events",
         CATEGORIES_ENDPOINT = "https://eonet.sci.gsfc.nasa.gov/api/v2.1/categories",
-        CLOSED_LIMIT = "?status=closed&limit=%d", CAT_FILTER = "/%d";
+        BASE = "https://eonet.sci.gsfc.nasa.gov", CLOSED_LIMIT = "?status=closed&limit=%d", CAT_FILTER = "/%d";
 
     private static final String EVENTS = "events", ID = "id", TITLE = "title", CAT = "categories",
             SOURCE = "sources", GEOMETRY = "geometries", GEO_TYPE = "type", POINT = "Point",
@@ -135,28 +139,15 @@ public class EONET {
      * Get all known categories used in EONET.
      */
     public Disposable getCategories() {
-        Request r = new Request.Builder().url(CATEGORIES_ENDPOINT).build();
-        return Observable.just(r).map(request -> {
-            ArrayList<Category> result = new ArrayList<>();
+        Retrofit retrofit = new Retrofit.Builder()
+            .baseUrl(BASE)
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .build();
 
-            //Put "All" category at top of list
-            result.add(Category.getAll());
-
-            try (Response response = client.newCall(r).execute()) {
-                JsonObject root = new JsonParser().parse(response.body().string()).getAsJsonObject();
-                JsonArray catArray = root.getAsJsonArray(CAT);
-
-                //Get all categories from the array
-                for (JsonElement e : catArray) {
-                    JsonObject obj = e.getAsJsonObject();
-                    result.add(new Category(obj.get(ID).getAsInt(), obj.get(TITLE).getAsString()));
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return result;
-        }).subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(categories -> callback.onCategoriesLoaded(categories));
+        return retrofit.create(CategoryAPI.class).fetchCategories()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(categoryList -> callback.onCategoriesLoaded(categoryList.list));
     }
 }

@@ -46,6 +46,7 @@ public class CategoryPresenterImpl implements CategoryPresenter, EONET.LoadCallb
     @Override
     public void onCategoriesLoaded(ArrayList<Category> data) {
         loadedCategories = true;
+        data.add(0, Category.getAll()); //Add missing "all" category
         view.insertList(data);
     }
 }
