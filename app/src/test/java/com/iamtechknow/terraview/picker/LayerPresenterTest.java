@@ -5,7 +5,6 @@ import android.util.SparseBooleanArray;
 import com.iamtechknow.terraview.data.DataSource;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -38,16 +37,13 @@ public class LayerPresenterTest {
 
     private LayerPresenterImpl presenter;
 
-    @BeforeClass
-    public void setupClass() {
-        //Allow AndroidSchedulers.mainThread() to be overridden
-        RxAndroidPlugins.setInitMainThreadSchedulerHandler(__ -> Schedulers.trampoline());
-    }
-
     @Before
     public void setupPresenter() {
+        //Allow AndroidSchedulers.mainThread() to be overridden
+        RxAndroidPlugins.setInitMainThreadSchedulerHandler(__ -> Schedulers.trampoline());
+
         MockitoAnnotations.initMocks(this);
-        presenter = new LayerPresenterImpl(RxBus.getInstance(), new ArrayList<>(), data, array);
+        presenter = new LayerPresenterImpl(RxBus.getInstance(), new ArrayList<>(), new ArrayList<>(), data, array);
         presenter.attachView(view);
     }
 

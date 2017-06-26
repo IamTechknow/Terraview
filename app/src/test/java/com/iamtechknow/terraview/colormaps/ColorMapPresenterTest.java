@@ -5,21 +5,22 @@ import com.iamtechknow.terraview.model.ColorMap;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import io.reactivex.android.plugins.RxAndroidPlugins;
 import io.reactivex.schedulers.Schedulers;
 
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
 public class ColorMapPresenterTest {
     @Mock
     private ColorMapView view;
+
+    @Captor
+    private ArgumentCaptor<ColorMap> argument;
 
     private ColorMapPresenterImpl presenter;
 
@@ -42,7 +43,6 @@ public class ColorMapPresenterTest {
         presenter.parseColorMap("MODIS_Combined_Value_Added_AOD");
 
         //View has received colormap data to draw canvas
-        ArgumentCaptor<ColorMap> argument = ArgumentCaptor.forClass(ColorMap.class);
         verify(view).setColorMapData(argument.capture());
         presenter.detachView();
     }

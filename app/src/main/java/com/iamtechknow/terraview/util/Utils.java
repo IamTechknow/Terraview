@@ -28,6 +28,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 public class Utils {
     private static final String HTML_EXTRA = "html", ABOUT_TAG = "dialog_about", ISO_FMT = "yyyy-MM-dd", DIALOG_FMT = "EEE, MMM dd, yyyy";
@@ -111,11 +112,16 @@ public class Utils {
     }
 
     /**
-     * Do some preprocessing by converting the DP dimension to pixels based on device's DPI value
+     * Do some pre-processing by converting the DP dimension to pixels based on device's DPI value
      * @return pixel size of the DP
      */
     public static float dPToPixel(Resources r, int dimen) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, r.getDimension(dimen), r.getDisplayMetrics());
+    }
+
+    public static Pattern getURLPattern() {
+        //From: https://stackoverflow.com/questions/163360/regular-expression-to-match-urls-in-java
+        return Pattern.compile("^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
     }
 
     /**
