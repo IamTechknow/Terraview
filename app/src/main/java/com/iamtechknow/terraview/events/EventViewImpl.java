@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 
 import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.adapter.EventAdapter;
+import com.iamtechknow.terraview.data.EONET;
 import com.iamtechknow.terraview.model.Event;
 import com.iamtechknow.terraview.model.TapEvent;
 import com.iamtechknow.terraview.picker.RxBus;
@@ -51,7 +52,7 @@ public class EventViewImpl extends Fragment implements EventView {
         setHasOptionsMenu(true);
 
         savedState = savedInstanceState;
-        presenter = new EventPresenterImpl(RxBus.getInstance(), this);
+        presenter = new EventPresenterImpl(RxBus.getInstance(), this, new EONET());
 
         if(savedInstanceState != null) {
             showingClosed = savedInstanceState.getBoolean(RESTORE_CLOSED);

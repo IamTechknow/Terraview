@@ -36,18 +36,17 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     private Hashtable<String, TileOverlay> tileOverlays;
     private Date currentDate;
     private Event currEvent;
-    private int polyOffset;
 
-    public WorldPresenter(int offset) {
+    public WorldPresenter(MapInteractor maps) {
         layer_stack = new ArrayList<>();
         tileOverlays = new Hashtable<>();
+        map = maps;
 
         currentDate = new Date();
         Calendar c = Calendar.getInstance();
         c.setTime(currentDate);
         Utils.getCalendarMidnightTime(c);
         currentDate = c.getTime();
-        polyOffset = offset;
     }
 
     @Override
@@ -80,7 +79,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     //If needed, restore map tiles or set default
     @Override
     public void onMapReady(GoogleMap gMaps) {
-        map = new MapInteractorImpl(gMaps, polyOffset);
+        map.onMapReady(gMaps);
 
         if(isRestoring) {
             isRestoring = false;
@@ -211,12 +210,6 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     @Override
     public void onLayerSwiped(int position, Layer l) {
         map.removeTile(tileOverlays.remove(l.getIdentifier()), l);
-
-        /*//Fix Z-Order of other overlays
-        for(int i = 0; i < mCurrLayers.size(); i++) {
-            TileOverlay t = mCurrLayers.get(i);
-            t.setZIndex(t.getZIndex() - Z_OFFSET);
-        }*/
     }
 
     @Override

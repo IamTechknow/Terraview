@@ -1,12 +1,11 @@
 package com.iamtechknow.terraview.events;
 
-import android.util.Patterns;
-
 import com.iamtechknow.terraview.data.EONET;
 import com.iamtechknow.terraview.model.Category;
 import com.iamtechknow.terraview.model.Event;
 import com.iamtechknow.terraview.model.TapEvent;
 import com.iamtechknow.terraview.picker.RxBus;
+import com.iamtechknow.terraview.util.Utils;
 
 import java.util.ArrayList;
 
@@ -24,9 +23,9 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
     //Current category used for loading closed events
     private int currCat;
 
-    public EventPresenterImpl(RxBus _bus, EventView v) {
+    public EventPresenterImpl(RxBus _bus, EventView v, EONET e) {
         view = v;
-        client = new EONET();
+        client = e;
         client.setCallback(this);
         bus = _bus;
         sub = _bus.toObserverable().subscribe(this::handleEvent);
@@ -87,7 +86,7 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
      */
     @Override
     public void presentSource(String url) {
-        if(Patterns.WEB_URL.matcher(url).matches())
+        if(Utils.getURLPattern().matcher(url).matches())
             view.showSource(url);
         else
             view.warnNoSource();

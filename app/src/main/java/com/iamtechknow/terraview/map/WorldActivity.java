@@ -70,7 +70,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mapPresenter = new WorldPresenter((int) Utils.dPToPixel(getResources(), R.dimen.poly_padding));
+        mapPresenter = new WorldPresenter(new MapInteractorImpl((int) Utils.dPToPixel(getResources(), R.dimen.poly_padding)));
         mapPresenter.attachView(this);
 
         //Setup UI

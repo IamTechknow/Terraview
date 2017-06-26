@@ -1,5 +1,6 @@
 package com.iamtechknow.terraview.map;
 
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.TileOverlay;
@@ -10,7 +11,7 @@ import com.iamtechknow.terraview.model.Layer;
  * because it is declared as a final class which limits unit testing.
  * Also encapsulates the caching of tiles.
  */
-public interface MapInteractor {
+public interface MapInteractor extends OnMapReadyCallback {
     TileOverlay addTile(Layer l, String date);
 
     void removeTile(TileOverlay tile, Layer l);

@@ -40,11 +40,8 @@ public class MapInteractorImpl implements MapInteractor {
     //Padding value for showing polygon bounds
     private int polyOffset;
 
-    public MapInteractorImpl(GoogleMap map, int offset) {
+    public MapInteractorImpl(int offset) {
         polyOffset = offset;
-        gMaps = map;
-        gMaps.setMaxZoomPreference(MAX_ZOOM);
-        gMaps.setMapType(GoogleMap.MAP_TYPE_NONE);
 
         Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL).build();
         api = retrofit.create(ImageAPI.class);
@@ -57,6 +54,14 @@ public class MapInteractorImpl implements MapInteractor {
                 return array.length / 1024;
             }
         };
+    }
+
+    //First interface method to be called, when Gmaps is acquired
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        gMaps = googleMap;
+        gMaps.setMaxZoomPreference(MAX_ZOOM);
+        gMaps.setMapType(GoogleMap.MAP_TYPE_NONE);
     }
 
     @Override
