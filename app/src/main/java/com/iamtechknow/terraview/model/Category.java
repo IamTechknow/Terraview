@@ -9,8 +9,6 @@ import java.util.Locale;
  * Contains a link to access events based on its category.
  */
 public class Category {
-    private static final String CATEGORY_FMT = "https://eonet.sci.gsfc.nasa.gov/api/v2.1/categories/%d";
-
     @SerializedName("id")
     private int id;
 
@@ -28,10 +26,6 @@ public class Category {
 
     public String getTitle() {
         return title;
-    }
-
-    public String getLink() {
-        return String.format(Locale.US, CATEGORY_FMT, id);
     }
 
     /**

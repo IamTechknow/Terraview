@@ -1,26 +1,18 @@
 package com.iamtechknow.terraview.data;
 
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.PolygonOptions;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.GsonBuilder;
 import com.iamtechknow.terraview.api.CategoryAPI;
+import com.iamtechknow.terraview.api.EventAPI;
 import com.iamtechknow.terraview.model.Category;
 import com.iamtechknow.terraview.model.Event;
+import com.iamtechknow.terraview.model.EventList;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Locale;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -36,27 +28,27 @@ public class EONET {
         void onCategoriesLoaded(ArrayList<Category> data);
     }
 
-    private static final String EVENTS_ENDPOINT = "https://eonet.sci.gsfc.nasa.gov/api/v2.1/events",
-        CATEGORIES_ENDPOINT = "https://eonet.sci.gsfc.nasa.gov/api/v2.1/categories",
-        BASE = "https://eonet.sci.gsfc.nasa.gov", CLOSED_LIMIT = "?status=closed&limit=%d", CAT_FILTER = "/%d";
+    private static final String BASE = "https://eonet.sci.gsfc.nasa.gov";
 
-    private static final String EVENTS = "events", ID = "id", TITLE = "title", CAT = "categories",
-            SOURCE = "sources", GEOMETRY = "geometries", GEO_TYPE = "type", POINT = "Point",
-            COORD = "coordinates", URL = "url", GEO_DATE = "date", CLOSED = "closed";
-
-    private OkHttpClient client;
+    private Retrofit retrofit;
 
     private LoadCallback callback;
 
     public EONET() {
-        client = new OkHttpClient();
+        retrofit = new Retrofit.Builder().baseUrl(BASE)
+            .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().registerTypeAdapter(EventList.class, new EventDeserializer()).create()))
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .build();
     }
 
     /**
      * Get events from the default endpoint, which returns all open events.
      */
     public Disposable getOpenEvents() {
-        return getEvents(EVENTS_ENDPOINT);
+        return retrofit.create(EventAPI.class).getOpenEvents()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(eventList -> callback.onEventsLoaded(eventList.list));
     }
 
     /**
@@ -64,7 +56,10 @@ public class EONET {
      * @param catID desired Category ID
      */
     public Disposable getEventsByCategory(int catID) {
-        return getEvents(String.format(Locale.US, CATEGORIES_ENDPOINT + CAT_FILTER, catID));
+        return retrofit.create(EventAPI.class).getEventsByCategory(catID)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(eventList -> callback.onEventsLoaded(eventList.list));
     }
 
     /**
@@ -72,79 +67,22 @@ public class EONET {
      * @param limit Number of events to get
      */
     public Disposable getClosedEvents(int catID, int limit) {
-        return catID == 0 ? getEvents(String.format(Locale.US, EVENTS_ENDPOINT + CLOSED_LIMIT, limit))
-            : getEvents(String.format(Locale.US, CATEGORIES_ENDPOINT + CAT_FILTER + CLOSED_LIMIT, catID, limit));
+        Observable<EventList> o = catID == 0 ? retrofit.create(EventAPI.class).getClosedEvents(limit) :
+           retrofit.create(EventAPI.class).getClosedEventsByCategory(catID, limit);
+
+        return o.subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(eventList -> callback.onEventsLoaded(eventList.list));
     }
 
     public void setCallback(LoadCallback callback) {
         this.callback = callback;
     }
 
-    private Disposable getEvents(String endpoint) {
-        Request r = new Request.Builder().url(endpoint).build();
-
-        return Observable.just(r).map(request -> {
-            ArrayList<Event> result = new ArrayList<>();
-            try (Response response = client.newCall(r).execute()) {
-                JsonObject root = new JsonParser().parse(response.body().string()).getAsJsonObject();
-                JsonArray eventArray = root.getAsJsonArray(EVENTS);
-
-                //Parse each event element
-                for(JsonElement e : eventArray) {
-                    JsonObject obj = e.getAsJsonObject(), geo_obj, source_obj;
-                    JsonArray geo = obj.getAsJsonArray(GEOMETRY), coord_array, src_array;
-                    String id = obj.get(ID).getAsString(), title = obj.get(TITLE).getAsString(),
-                            source = "", date;
-
-                    //Rarely an event won't have a source, check for that.
-                    src_array = obj.get(SOURCE).getAsJsonArray();
-                    if(src_array.size() > 0)
-                        source = src_array.get(0).getAsJsonObject().get(URL).getAsString();
-
-                    int c = obj.get(CAT).getAsJsonArray().get(0).getAsJsonObject().get(ID).getAsInt();
-                    Event event;
-
-                    //Get geometry object first before getting the points
-                    geo_obj = geo.get(0).getAsJsonObject();
-                    date = geo_obj.get(GEO_DATE).getAsString();
-                    coord_array = geo_obj.get(COORD).getAsJsonArray();
-                    if(geo_obj.get(GEO_TYPE).getAsString().equals(POINT)) {
-                        LatLng coord = new LatLng(coord_array.get(1).getAsDouble(), coord_array.get(0).getAsDouble());
-                        event = new Event(id, title, source, date, c, coord);
-                    } else {
-                        ArrayList<LatLng> coords = new ArrayList<>();
-                        for(JsonElement poly_e : coord_array.get(0).getAsJsonArray()) {
-                            JsonArray poly_coord = poly_e.getAsJsonArray();
-                            coords.add(new LatLng(poly_coord.get(1).getAsDouble(), poly_coord.get(0).getAsDouble()));
-                        }
-                        event = new Event(id, title, source, date, c, new PolygonOptions().addAll(coords));
-                    }
-
-                    //Set closed date if any
-                    if(obj.has(CLOSED))
-                        event.setClosedDate(obj.get(CLOSED).getAsString());
-
-                    result.add(event);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return result;
-        }).subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(events -> callback.onEventsLoaded(events));
-    }
-
     /**
      * Get all known categories used in EONET.
      */
     public Disposable getCategories() {
-        Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl(BASE)
-            .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .build();
-
         return retrofit.create(CategoryAPI.class).fetchCategories()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
