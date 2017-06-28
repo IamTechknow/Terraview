@@ -262,7 +262,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     @Override
     public void presentEvent(Event e) {
         currEvent = e;
-        onDateChanged(Utils.parseISODate(e.getDate()));
+        onDateChanged(Utils.parseISODate(e.getDates().get(0)));
         if(getMapView() != null) {
             getMapView().updateDateDialog(currentDate.getTime());
             getMapView().showEvent(e);
@@ -272,7 +272,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
 
         map.clearPolygon();
         if(e.hasPoint())
-            map.moveCamera(e.getPoint());
+            map.moveCamera(e.getPoints().get(0));
         else
             map.drawPolygon(e.getPolygon());
     }

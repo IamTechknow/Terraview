@@ -14,6 +14,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 
 import static org.mockito.Mockito.*;
@@ -98,7 +99,7 @@ public class MapPresenterTest {
     @Test
     public void testEvents() {
         //Act
-        Event pointEvent = new Event("EONET_2856", "Seven Fire, NEW MEXICO", "https://inciweb.nwcg.gov/incident/5271/", "2017-06-22T13:15:00Z", 8, new LatLng(33.514166666667,-108.46277777778)),
+        Event pointEvent = new Event("EONET_2856", "Seven Fire, NEW MEXICO", "https://inciweb.nwcg.gov/incident/5271/", new ArrayList<>(Collections.singletonList("2017-06-22T13:15:00Z")), 8, Collections.singletonList(new LatLng(33.514166666667,-108.46277777778))),
                 polyEvent = new Event("EONET_2851", "Southwest U.S. Heat Wave", "https://earthobservatory…/IOTD/view.php?id=90443", "2017-06-21T00:00:00Z", 18,
                         new PolygonOptions().add(new LatLng(30.726902912103963, -117.392578125), new LatLng(38.15804159576718, -117.392578125), new LatLng(38.15804159576718, -102.75390625), new LatLng(30.726902912103963, -102.75390625), new LatLng(30.726902912103963, -117.392578125)));
         presenter.presentEvent(pointEvent);
@@ -106,7 +107,7 @@ public class MapPresenterTest {
         presenter.onClearEvent();
 
         //Assert events shown and proper objects used
-        verify(map).moveCamera(pointEvent.getPoint());
+        verify(map).moveCamera(pointEvent.getPoints().get(0));
         verify(map).drawPolygon(polyEvent.getPolygon());
         verify(view).clearEvent();
         presenter.detachView();

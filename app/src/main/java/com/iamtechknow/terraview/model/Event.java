@@ -6,6 +6,10 @@ import android.os.Parcelable;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolygonOptions;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Representation of an curated event from the EONET API.
  */
@@ -25,27 +29,27 @@ public class Event implements Parcelable {
     //Category of the event
     private int categoryId;
 
-    //Date for the first geometry object
-    private String date;
+    //Date for the geometry objects
+    private List<String> dates;
 
-    //An event has either a point or polygon - only the first geometry object is used
-    private LatLng point;
+    //An event has either points or polygon - only the first geometry object is used
+    private List<LatLng> points;
     private PolygonOptions polygon;
 
-    public Event(String id, String title, String source, String date, int category, LatLng point) {
+    public Event(String id, String title, String source, List<String> rawDates, int category, List<LatLng> points) {
         this.id = id;
         this.title = title;
         this.source = source;
-        this.date = parseDate(date);
+        this.dates = parseDates(rawDates);
         this.categoryId = category;
-        this.point = point;
+        this.points = points;
     }
 
-    public Event(String id, String title, String source, String date, int category, PolygonOptions polygon) {
+    public Event(String id, String title, String source, String rawDate, int category, PolygonOptions polygon) {
         this.id = id;
         this.title = title;
         this.source = source;
-        this.date = parseDate(date);
+        this.dates = Collections.singletonList(parseDate(rawDate));
         this.categoryId = category;
         this.polygon = polygon;
 
@@ -54,13 +58,19 @@ public class Event implements Parcelable {
     }
 
     protected Event(Parcel in) {
+        dates = new ArrayList<>();
         id = in.readString();
         title = in.readString();
         source = in.readString();
-        date = in.readString();
+        in.readList(dates, String.class.getClassLoader());
         categoryId = in.readInt();
-        point = in.readParcelable(LatLng.class.getClassLoader());
         polygon = in.readParcelable(PolygonOptions.class.getClassLoader());
+
+        //Check if points were saved
+        if(in.readInt() == 1) {
+            points = new ArrayList<>();
+            in.readTypedList(points, LatLng.CREATOR);
+        }
     }
 
     public static final Creator<Event> CREATOR = new Creator<Event>() {
@@ -92,11 +102,11 @@ public class Event implements Parcelable {
     }
 
     public boolean hasPoint() {
-        return point != null;
+        return points != null;
     }
 
-    public LatLng getPoint() {
-        return point;
+    public List<LatLng> getPoints() {
+        return points;
     }
 
     public PolygonOptions getPolygon() {
@@ -107,8 +117,8 @@ public class Event implements Parcelable {
         return closed == null;
     }
 
-    public String getDate() {
-        return date;
+    public List<String> getDates() {
+        return dates;
     }
 
     public String getClosedDate() {
@@ -129,10 +139,14 @@ public class Event implements Parcelable {
         dest.writeString(id);
         dest.writeString(title);
         dest.writeString(source);
-        dest.writeString(date);
+        dest.writeList(dates);
         dest.writeInt(categoryId);
-        dest.writeParcelable(point, flags);
         dest.writeParcelable(polygon, flags);
+
+        //Write a value to indicate if there are points (and not a polygon), then write the points
+        dest.writeInt(points != null ? 1 : 0);
+        if(points != null)
+            dest.writeTypedList(points);
     }
 
     /**
@@ -141,5 +155,11 @@ public class Event implements Parcelable {
      */
     private String parseDate(String isoDate) {
         return isoDate.substring(0, isoDate.indexOf('T'));
+    }
+
+    private List<String> parseDates(List<String> rawDates) {
+        for (int i = 0; i < rawDates.size(); i++)
+            rawDates.set(i, parseDate(rawDates.get(i)));
+        return rawDates;
     }
 }

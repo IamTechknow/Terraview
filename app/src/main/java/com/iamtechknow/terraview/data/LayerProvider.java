@@ -8,6 +8,9 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
+/**
+ * A mechanism to provide autocomplete functionality for built-in searching to select layers.
+ */
 public class LayerProvider extends ContentProvider {
     public static final String AUTHORITY = "com.iamtechknow.terraview.LayerProvider";
     private static final int SEARCH_SUGGEST = 0;
@@ -39,7 +42,6 @@ public class LayerProvider extends ContentProvider {
     }
 
     //Required but unused operations for searching
-
     @Override
     public Uri insert(@NonNull Uri uri, ContentValues values) {
         throw new UnsupportedOperationException();

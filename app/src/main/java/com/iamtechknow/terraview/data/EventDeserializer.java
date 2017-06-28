@@ -30,10 +30,10 @@ public class EventDeserializer implements JsonDeserializer<EventList> {
 
         //Parse each event element
         for(JsonElement e : eventArray) {
-            JsonObject obj = e.getAsJsonObject(), geo_obj, source_obj;
+            JsonObject obj = e.getAsJsonObject(), geo_obj;
             JsonArray geo = obj.getAsJsonArray(GEOMETRY), coord_array, src_array;
             String id = obj.get(ID).getAsString(), title = obj.get(TITLE).getAsString(),
-                    source = "", date;
+                    source = "", poly_date;
 
             //Rarely an event won't have a source, check for that.
             src_array = obj.get(SOURCE).getAsJsonArray();
@@ -43,20 +43,26 @@ public class EventDeserializer implements JsonDeserializer<EventList> {
             int c = obj.get(CAT).getAsJsonArray().get(0).getAsJsonObject().get(ID).getAsInt();
             Event event;
 
-            //Get geometry object first before getting the points
+            //ID geometry object first before parsing points or a polygon
             geo_obj = geo.get(0).getAsJsonObject();
-            date = geo_obj.get(GEO_DATE).getAsString();
+            poly_date = geo_obj.get(GEO_DATE).getAsString();
             coord_array = geo_obj.get(COORD).getAsJsonArray();
+            ArrayList<LatLng> coords = new ArrayList<>();
             if(geo_obj.get(GEO_TYPE).getAsString().equals(POINT)) {
-                LatLng coord = new LatLng(coord_array.get(1).getAsDouble(), coord_array.get(0).getAsDouble());
-                event = new Event(id, title, source, date, c, coord);
+                ArrayList<String> dates = new ArrayList<>();
+                for(JsonElement point_e : geo) {
+                    geo_obj = point_e.getAsJsonObject();
+                    dates.add(geo_obj.get(GEO_DATE).getAsString());
+                    JsonArray poly_coord = geo_obj.getAsJsonArray(COORD);
+                    coords.add(new LatLng(poly_coord.get(1).getAsDouble(), poly_coord.get(0).getAsDouble()));
+                }
+                event = new Event(id, title, source, dates, c, coords);
             } else {
-                ArrayList<LatLng> coords = new ArrayList<>();
                 for(JsonElement poly_e : coord_array.get(0).getAsJsonArray()) {
                     JsonArray poly_coord = poly_e.getAsJsonArray();
                     coords.add(new LatLng(poly_coord.get(1).getAsDouble(), poly_coord.get(0).getAsDouble()));
                 }
-                event = new Event(id, title, source, date, c, new PolygonOptions().addAll(coords));
+                event = new Event(id, title, source, poly_date, c, new PolygonOptions().addAll(coords));
             }
 
             //Set closed date if any
