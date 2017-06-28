@@ -190,6 +190,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
      */
     @Override
     public void onToggleLayer(Layer l, int visibility) {
+        l.setVisible(visibility);
         switch(visibility) {
             case Layer.VISIBLE:
                 tileOverlays.get(l.getIdentifier()).setVisible(true);
@@ -330,11 +331,12 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     }
 
     /**
-     * Set up the tile provider for the specified layer by allowing giving the necessary endpoint
+     * Add the tile to the map, and set visibility
      * @param layer Layer containing necessary data
      */
     private void addTileOverlay(Layer layer) {
         tileOverlays.put(layer.getIdentifier(), map.addTile(layer, Utils.parseDate(currentDate)));
+        onToggleLayer(layer, layer.getVisibility());
     }
 
     /**
