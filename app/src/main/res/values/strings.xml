@@ -142,6 +142,7 @@
     <string name="open_toggle">Ongoing</string>
     <string name="start_warning">One or more layers have no data for this date</string>
     <string name="fix">Fix</string>
+    <string name="event_date" formatted="false">Changed date to %s</string>
 
     <!-- Shown in the 'About' window of the app. -->
     <string name="about_ver"><![CDATA[

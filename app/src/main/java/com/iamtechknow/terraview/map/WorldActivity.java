@@ -358,6 +358,12 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         bar.show();
     }
 
+    @Override
+    public void showChangedEventDate(String date) {
+        Snackbar.make(mCoordinatorLayout, getString(R.string.event_date, date), Snackbar.LENGTH_LONG).show();
+    }
+
+    //Has it been a week since layer data was last downloaded?
     private boolean shouldUseLocalData(SharedPreferences prefs) {
         return System.currentTimeMillis() - prefs.getLong(PREFS_DB_KEY, 0) < WEEK;
     }

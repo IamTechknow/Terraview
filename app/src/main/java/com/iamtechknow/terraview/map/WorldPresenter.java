@@ -266,6 +266,8 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         if(getMapView() != null) {
             getMapView().updateDateDialog(currentDate.getTime());
             getMapView().showEvent(e);
+            if(!isLayerStartAfterCurrent(layer_stack))
+                getMapView().showChangedEventDate(Utils.parseDateForDialog(currentDate));
         }
 
         map.clearPolygon();
