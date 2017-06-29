@@ -27,6 +27,7 @@
 #Tell Proguard to keep OkHttp3 and retrofit
 -keep class okhttp3.** { *; }
 -dontwarn okhttp3.**
+-dontnote io.reactivex.**
 
 -keep class retrofit2.** { *; }
 -dontwarn retrofit2.**
@@ -36,7 +37,5 @@
 
 -keep class com.iamtechknow.terraview.** { *; }
 
-#Some classes used don't exist in the Android runtime, get rid of warning messages
--keep class org.simpleframework.xml.Serializer { *; }
--keep class org.simpleframework.xml.stream.InputNode { *; }
+-keep class org.simpleframework.xml.** { *; }
 -dontwarn org.simpleframework.xml.stream.**
