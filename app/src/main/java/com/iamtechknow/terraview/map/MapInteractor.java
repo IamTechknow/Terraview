@@ -14,7 +14,7 @@ import com.iamtechknow.terraview.model.Layer;
 public interface MapInteractor extends OnMapReadyCallback {
     TileOverlay addTile(Layer l, String date);
 
-    void removeTile(TileOverlay tile, Layer l);
+    void removeTile(TileOverlay tile, Layer l, boolean isDateChange);
 
     byte[] getMapTile(Layer l, String date, int zoom, int y, int x);
 

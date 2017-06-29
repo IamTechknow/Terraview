@@ -71,12 +71,15 @@ public class MapInteractorImpl implements MapInteractor {
     }
 
     @Override
-    public void removeTile(TileOverlay tile, Layer l) {
+    public void removeTile(TileOverlay tile, Layer l, boolean isDateChange) {
         //Get all keys and remove all entries that start with the identifier
-        Set<String> keys =  byteCache.snapshot().keySet();
-        for(String key : keys)
-            if(key.startsWith(l.getIdentifier()))
-                byteCache.remove(key);
+        //But preserve tiles upon date changes
+        if(!isDateChange) {
+            Set<String> keys = byteCache.snapshot().keySet();
+            for (String key : keys)
+                if (key.startsWith(l.getIdentifier()))
+                    byteCache.remove(key);
+        }
         tile.remove();
     }
 
@@ -108,7 +111,7 @@ public class MapInteractorImpl implements MapInteractor {
      */
     @Override
     public void moveCamera(LatLng point) {
-        gMaps.animateCamera(CameraUpdateFactory.newLatLngZoom(point, MAX_ZOOM - 1));
+        gMaps.animateCamera(CameraUpdateFactory.newLatLngZoom(point, MAX_ZOOM - 2));
     }
 
     /**
