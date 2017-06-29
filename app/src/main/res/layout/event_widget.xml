@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:background="@android:color/white">
+    <TextView
+        android:id="@+id/event_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/list_horizontal_margin"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+    <SeekBar
+        android:id="@+id/event_stepper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:progress="0"
+        android:layout_below="@id/event_date"
+        android:layout_marginBottom="@dimen/anim_header_margin" />
+</RelativeLayout>

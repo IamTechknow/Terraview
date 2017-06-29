@@ -36,6 +36,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     private Hashtable<String, TileOverlay> tileOverlays;
     private Date currentDate;
     private Event currEvent;
+    private int currEventPoint;
 
     public WorldPresenter(MapInteractor maps) {
         layer_stack = new ArrayList<>();
@@ -100,7 +101,8 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
             addTileOverlay(l);
         initZOffsets();
 
-        if(isLayerStartAfterCurrent(layer_stack) && getMapView() != null)
+        //Warn unless event widget is active to prevent spamming
+        if(isLayerStartAfterCurrent(layer_stack) && currEventPoint == 0 && getMapView() != null)
             getMapView().warnUserAboutActiveLayers();
     }
 
@@ -153,7 +155,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         if(delete != null)
             for(Layer l : delete)
                 if(tileOverlays.containsKey(l.getIdentifier()))
-                    map.removeTile(tileOverlays.remove(l.getIdentifier()), l);
+                    map.removeTile(tileOverlays.remove(l.getIdentifier()), l, false);
 
         //Add layers not already on
         for(Layer l : layer_stack)
@@ -210,7 +212,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
      */
     @Override
     public void onLayerSwiped(int position, Layer l) {
-        map.removeTile(tileOverlays.remove(l.getIdentifier()), l);
+        map.removeTile(tileOverlays.remove(l.getIdentifier()), l, false);
     }
 
     @Override
@@ -281,6 +283,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     public void onClearEvent() {
         map.clearPolygon();
         currEvent = null;
+        currEventPoint = 0;
         if(getMapView() != null)
             getMapView().clearEvent();
     }
@@ -310,6 +313,23 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         initZOffsets();
         if(getMapView() != null)
             getMapView().setLayerList(layer_stack);
+    }
+
+    @Override
+    public void onEventProgressChanged(int progress) {
+        if(getMapView() != null)
+            getMapView().updateEventDateText(Utils.parseDateForDialog(Utils.parseISODate(currEvent.getDates().get(progress))));
+    }
+
+    @Override
+    public void onEventProgressSelected(int progress) {
+        if(progress != currEventPoint) { //Don't reload layers if same date
+            currEventPoint = progress;
+            onDateChanged(Utils.parseISODate(currEvent.getDates().get(progress)));
+            if (getMapView() != null)
+                getMapView().updateDateDialog(currentDate.getTime());
+            map.moveCamera(currEvent.getPoints().get(progress));
+        }
     }
 
     private MapView getMapView() {
@@ -358,7 +378,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     //Remove all tile overlays and cached tiles, used to replace with new set
     private void removeAllTileOverlays() {
         for(Layer l  : layer_stack)
-            map.removeTile(tileOverlays.get(l.getIdentifier()), l);
+            map.removeTile(tileOverlays.get(l.getIdentifier()), l, true);
         tileOverlays.clear();
     }
 

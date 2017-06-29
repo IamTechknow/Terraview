@@ -23,7 +23,10 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.DatePicker;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -48,7 +51,7 @@ import java.util.Calendar;
 import static com.iamtechknow.terraview.anim.AnimDialogActivity.*;
 
 public class WorldActivity extends AppCompatActivity implements MapView, OnMapReadyCallback,
-        NavigationView.OnNavigationItemSelectedListener, DragAndHideListener {
+        NavigationView.OnNavigationItemSelectedListener, DragAndHideListener, SeekBar.OnSeekBarChangeListener {
     public static final String RESULT_LIST = "list", PREFS_FILE = "settings", PREFS_DB_KEY = "last_update";
     public static final String RESTORE_TIME_EXTRA = "time", RESTORE_LAYER_EXTRA = "layer", RESTORE_EVENT_EXTRA = "event";
     public static final int LAYER_CODE = 1, EVENT_CODE = 2, SECONDS_PER_DAY = 86400000, WEEK = SECONDS_PER_DAY * 7, DEFAULT_HOME_ICON = 0;
@@ -59,6 +62,10 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     private DatePickerDialog mDateDialog;
     private CurrLayerAdapter mItemAdapter;
     private ItemTouchHelper mDragHelper;
+
+    private View event_widget;
+    private TextView event_date;
+    private SeekBar event_stepper;
 
     //Presenters
     private MapPresenter mapPresenter;
@@ -282,6 +289,19 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     }
 
     @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        mapPresenter.onEventProgressChanged(progress);
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {}
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        mapPresenter.onEventProgressSelected(seekBar.getProgress());
+    }
+
+    @Override
     public void setLayerList(ArrayList<Layer> stack) {
         mItemAdapter.insertList(stack);
     }
@@ -338,6 +358,23 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
             actionBar.setHomeAsUpIndicator(DEFAULT_HOME_ICON);
             actionBar.setTitle(e.getTitle());
         }
+
+        //Inflate, set up, and animate in event widget
+        if(e.getDates().size() > 1) {
+            if (event_widget == null) {
+                event_widget = getLayoutInflater().inflate(R.layout.event_widget, mCoordinatorLayout, false);
+                event_widget.setTranslationY(event_widget.getHeight());
+                event_date = (TextView) event_widget.findViewById(R.id.event_date);
+                event_stepper = (SeekBar) event_widget.findViewById(R.id.event_stepper);
+                event_stepper.setOnSeekBarChangeListener(this);
+                mCoordinatorLayout.addView(event_widget);
+            }
+
+            event_date.setText(Utils.parseDateForDialog(Utils.parseISODate(e.getDates().get(0))));
+            event_stepper.setMax(e.getDates().size() - 1);
+            event_stepper.setProgress(0);
+            event_widget.animate().translationY(0).setDuration(250).start();
+        }
     }
 
     @Override
@@ -348,6 +385,15 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
             actionBar.setTitle(R.string.app_name);
         }
+
+        //Animate out event widget
+        if(event_widget != null)
+            event_widget.animate().translationY(event_widget.getHeight()).setDuration(250).start();
+    }
+
+    @Override
+    public void updateEventDateText(String date) {
+        event_date.setText(date);
     }
 
     @Override

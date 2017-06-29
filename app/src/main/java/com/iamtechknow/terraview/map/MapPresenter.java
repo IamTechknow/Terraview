@@ -61,4 +61,8 @@ public interface MapPresenter extends OnMapReadyCallback {
     boolean isVIIRSActive();
 
     void fixVIIRS();
+
+    void onEventProgressChanged(int progress);
+
+    void onEventProgressSelected(int progress);
 }

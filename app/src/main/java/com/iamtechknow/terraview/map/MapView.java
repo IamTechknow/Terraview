@@ -31,6 +31,8 @@ public interface MapView {
 
     void clearEvent();
 
+    void updateEventDateText(String date);
+
     void warnUserAboutActiveLayers();
 
     void showChangedEventDate(String date);
