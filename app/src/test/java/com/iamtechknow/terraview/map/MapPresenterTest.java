@@ -80,7 +80,7 @@ public class MapPresenterTest {
         //Verify empty list is sent to layer list adapter, no map tiles added
         verify(view).setLayerList(stack);
         verify(map, times(DEFAULT_ADD_TILE_CALLS)).addTile(any(Layer.class), any(String.class));
-        verify(map, times(DEFAULT_ADD_TILE_CALLS)).removeTile(any(TileOverlay.class), any(Layer.class));
+        verify(map, times(DEFAULT_ADD_TILE_CALLS)).removeTile(any(TileOverlay.class), any(Layer.class), eq(false));
         presenter.detachView();
     }
 
