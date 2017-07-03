@@ -36,7 +36,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     private Hashtable<String, TileOverlay> tileOverlays;
     private Date currentDate;
     private Event currEvent;
-    private int currEventPoint;
+    private int currEventPoint, topLayer;
 
     public WorldPresenter(MapInteractor maps) {
         layer_stack = new ArrayList<>();
@@ -176,12 +176,27 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
             if (i > i_new) { //swapping above, above layer is the one going up
                 above = tileOverlays.get(layer_stack.get(i_new).getIdentifier());
                 below = tileOverlays.get(layer_stack.get(i).getIdentifier());
+
+                if(topLayer == i) { //Swapping with top overlay?
+                    topLayer = i_new;
+                    map.setTopLayer(layer_stack.get(i_new));
+                }
             } else { //swapping below, below layer is the one going down
                 above = tileOverlays.get(layer_stack.get(i).getIdentifier());
                 below = tileOverlays.get(layer_stack.get(i_new).getIdentifier());
+
+                if(topLayer == i_new) { //Swapping with top overlay?
+                    topLayer = i;
+                    map.setTopLayer(layer_stack.get(i));
+                }
             }
             above.setZIndex(above.getZIndex() + Z_OFFSET);
             below.setZIndex(below.getZIndex() - Z_OFFSET);
+        } else { //Change the topLayer index if swapping with base layer
+            if (topLayer == i && !layer_stack.get(i).isBaseLayer()) //Swapping below
+                topLayer = i_new;
+            else if(topLayer == i_new && !layer_stack.get(i_new).isBaseLayer())
+                topLayer = i;
         }
     }
 
@@ -367,12 +382,17 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
      * Base layers will be not affected to avoid covering overlays
      */
     private void initZOffsets() {
-        int z_index_mod = 0; //need separate index for overlays
+        int z_index_mod = 0, first_overlay = -1; //need separate index for overlays
         for(int i = 0; i < layer_stack.size(); i++)
             if(layer_stack.get(i).isBaseLayer())
                 tileOverlays.get(layer_stack.get(i).getIdentifier()).setZIndex(BASE_Z_OFFSET);
-            else
+            else {
+                if(first_overlay == -1)
+                    first_overlay = i;
                 tileOverlays.get(layer_stack.get(i).getIdentifier()).setZIndex(Z_OFFSET * (tileOverlays.size() - 1 - z_index_mod++));
+            }
+        topLayer = first_overlay;
+        map.setTopLayer(layer_stack.get(first_overlay));
     }
 
     //Remove all tile overlays and cached tiles, used to replace with new set
