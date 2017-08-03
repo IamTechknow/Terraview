@@ -1,8 +1,5 @@
 package com.iamtechknow.terraview.map;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.support.v4.util.LruCache;
 import android.util.Log;
 
@@ -28,7 +25,6 @@ import retrofit2.Retrofit;
 
 public class MapInteractorImpl implements MapInteractor {
     private static final float MAX_ZOOM = 9.0f;
-    private static final int SIZE = 256;
     private static final String BASE_URL = "https://gibs.earthdata.nasa.gov";
 
     private GoogleMap gMaps;
@@ -43,15 +39,6 @@ public class MapInteractorImpl implements MapInteractor {
 
     //Padding value for showing polygon bounds
     private int polyOffset;
-
-    //Used to access tiles from cache
-    private String currDate;
-
-    //Keep track of top most overlay layer
-    private Layer topLayer;
-
-    //Pixel coordinates for touch location
-    private int pixelX, pixelY;
 
     public MapInteractorImpl(int offset) {
         polyOffset = offset;
@@ -80,29 +67,12 @@ public class MapInteractorImpl implements MapInteractor {
 
     @Override
     public void onMapLongClick(LatLng latLng) {
-        //Get the tile coordinates
-        int zoom = (int) gMaps.getCameraPosition().zoom,
-                tileY = getTileY(latLng.latitude, zoom),
-            tileX = getTileX(latLng.longitude, zoom);
-        Log.d("Terraview", String.format("Zoom %f, (%f, %f) -> (%d, %d)", gMaps.getCameraPosition().zoom, latLng.latitude, latLng.longitude, tileX, tileY));
-        Log.d("Terraview", String.format("(X, Y) = %d, %d", pixelX, pixelY));
+        //TODO: If top tile is colormap, then show colormap widget, add interface to this for presenter
 
-        //Access the tile TODO Get colormaps
-        if(topLayer != null && topLayer.hasColorMap()) {
-            byte[] tile = byteCache.get(getCacheKey(topLayer, currDate, zoom, tileY, tileX));
-            if(tile != null) {
-                Bitmap map = BitmapFactory.decodeByteArray(tile, 0, tile.length);
-                int pixel = map.getPixel(pixelX, pixelY), r = Color.red(pixel), g = Color.green(pixel), b = Color.blue(pixel);
-                Log.d("Terraview", String.format("(%d, %d, %d)", r, g, b));
-            }
-        }
     }
 
     @Override
     public TileOverlay addTile(Layer layer, String date) {
-        //Keep track of latest date
-        currDate = date;
-
         CacheTileProvider provider = new CacheTileProvider(layer, date,this);
         return gMaps.addTileOverlay(new TileOverlayOptions().tileProvider(provider).fadeIn(false));
     }
@@ -167,11 +137,6 @@ public class MapInteractorImpl implements MapInteractor {
             currPolygon.remove();
     }
 
-    @Override
-    public void setTopLayer(Layer l) {
-        topLayer = l;
-    }
-
     /**
      * Return a key to be used in the cache based on given arguments.
      * Done by concatenating the parameters between slashes to allow parsing if needed
@@ -207,54 +172,5 @@ public class MapInteractorImpl implements MapInteractor {
         for(LatLng coord : poly.getPoints())
             builder.include(coord);
         return builder.build();
-    }
-
-    /**
-     * Apply a formula to convert the Y geographic coordinate into one in the tile coordinate system.
-     * Uses the floor of the camera's zoom level to account for zooming by user without getting new tiles.
-     * General formula: X = 2 ^ ( floor(Zoom) - 1) - (lat / (90 / 2^( floor(Zoom) - 1))
-     * where lat is first converted to a multiple of (90 / 2^( floor(Zoom) - 1)
-     * @param lat latitude geographic coordinate
-     * @param zoom zoom level of camera
-     * @return The Y-axis value of the tile in its coordinate system
-     */
-    private int getTileY(double lat, int zoom) {
-        double y_factor = (90 / Math.pow(2, zoom - 1));
-        double y = Math.ceil( lat / y_factor ) * y_factor;
-
-        pixelY = getPixelY(y_factor, lat);
-        return (int) (Math.pow(2, zoom - 1) - (y / y_factor) );
-    }
-
-    /**
-     * Apply a formula to convert the X geographic coordinate into one in the tile coordinate system.
-     * General formula: X = 2 ^ ( floor(Zoom) - 1) + (_long / (180 / 2^( floor(Zoom) - 1))
-     * where _long is first converted to a multiple of (180 / 2^( floor(Zoom) - 1)
-     * @param _long longitude geographic coordinate
-     * @param zoom zoom level of camera
-     * @return The X-axis value of the tile in its coordinate system
-     */
-    private int getTileX(double _long, int zoom) {
-        double x_factor = (180 / Math.pow(2, zoom - 1));
-        double x = Math.floor(_long / x_factor ) * x_factor;
-
-        pixelX = getPixelX(x_factor, _long);
-        return (int) (Math.pow(2, zoom - 1) + (x / x_factor) );
-    }
-
-    //FIXME: Account for negative inputs
-    //Get the percentage of the coordinate relative to the left corner to get the pixel location
-    private int getPixelX(double x_factor, double _long) {
-        double percentage = (_long % x_factor) / x_factor;
-        if(_long < 0)
-            percentage = 1 + percentage;
-        return (int) (SIZE * percentage);
-    }
-
-    private int getPixelY(double y_factor, double lat) {
-        double percentage = (lat % y_factor) / y_factor;
-        if(lat > 0) //positive percentage need to be for pixel from top
-            percentage = 1 - percentage;
-        return (int) Math.abs(SIZE * percentage); //account for neg values
     }
 }

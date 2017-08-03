@@ -24,6 +24,4 @@ public interface MapInteractor extends OnMapReadyCallback, GoogleMap.OnMapLongCl
     void drawPolygon(PolygonOptions poly);
 
     void clearPolygon();
-
-    void setTopLayer(Layer l);
 }

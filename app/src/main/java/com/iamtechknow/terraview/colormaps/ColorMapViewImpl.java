@@ -1,11 +1,9 @@
 package com.iamtechknow.terraview.colormaps;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
-import android.util.TypedValue;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
