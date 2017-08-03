@@ -83,12 +83,4 @@
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
     </RelativeLayout>
-    <SeekBar
-        android:id="@+id/color_map_picker"
-        android:layout_marginTop="@dimen/anim_header_margin"
-        android:layout_marginBottom="@dimen/anim_header_margin"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:progress="50"
-        android:visibility="gone" />
 </LinearLayout>
