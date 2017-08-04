@@ -8,10 +8,13 @@ import com.iamtechknow.terraview.picker.RxBus;
 
 import java.util.ArrayList;
 
+import io.reactivex.disposables.Disposable;
+
 public class CategoryPresenterImpl implements CategoryPresenter, EONET.LoadCallback {
     private CategoryView view;
     private RxBus bus;
     private EONET client;
+    private Disposable dataSub;
 
     private boolean loadedCategories;
 
@@ -24,6 +27,10 @@ public class CategoryPresenterImpl implements CategoryPresenter, EONET.LoadCallb
 
     @Override
     public void detachView() {
+        if(dataSub != null) {
+            dataSub.dispose();
+            dataSub = null;
+        }
         view = null;
         bus = null;
     }
@@ -31,7 +38,7 @@ public class CategoryPresenterImpl implements CategoryPresenter, EONET.LoadCallb
     @Override
     public void loadCategories() {
         if(!loadedCategories)
-            client.getCategories();
+            dataSub = client.getCategories();
     }
 
     //Send an event to the event bus when a category has been passed

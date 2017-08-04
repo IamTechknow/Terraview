@@ -6,6 +6,7 @@ import com.iamtechknow.terraview.util.Utils;
 import java.lang.ref.WeakReference;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
@@ -16,6 +17,8 @@ public class ColorMapPresenterImpl implements ColorMapPresenter {
 
     private WeakReference<ColorMapView> viewRef;
 
+    private Disposable dataSub;
+
     @Override
     public void attachView(ColorMapView v) {
         viewRef = new WeakReference<>(v);
@@ -23,6 +26,11 @@ public class ColorMapPresenterImpl implements ColorMapPresenter {
 
     @Override
     public void detachView() {
+        if(dataSub != null) {
+            dataSub.dispose();
+            dataSub = null;
+        }
+
         if(viewRef != null) {
             viewRef.clear();
             viewRef = null;
@@ -41,7 +49,7 @@ public class ColorMapPresenterImpl implements ColorMapPresenter {
             .addConverterFactory(SimpleXmlConverterFactory.create())
             .build();
 
-        retrofit.create(ColorMapAPI.class).fetchData(id)
+        dataSub = retrofit.create(ColorMapAPI.class).fetchData(id)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(colorMap -> {
