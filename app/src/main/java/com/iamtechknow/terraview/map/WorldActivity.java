@@ -59,7 +59,7 @@ import static com.iamtechknow.terraview.anim.AnimDialogActivity.*;
 public class WorldActivity extends AppCompatActivity implements MapView, OnMapReadyCallback,
         NavigationView.OnNavigationItemSelectedListener, DragAndHideListener, SeekBar.OnSeekBarChangeListener {
     public static final String RESULT_LIST = "list", PREFS_FILE = "settings", PREFS_DB_KEY = "last_update";
-    public static final String RESTORE_TIME_EXTRA = "time", RESTORE_LAYER_EXTRA = "layer", RESTORE_EVENT_EXTRA = "event";
+    public static final String RESTORE_TIME_EXTRA = "time", RESTORE_LAYER_EXTRA = "layer", RESTORE_EVENT_EXTRA = "event", RESTORE_SHOW_EXTRA = "show";
     public static final int LAYER_CODE = 1, EVENT_CODE = 2, SECONDS_PER_DAY = 86400000, WEEK = SECONDS_PER_DAY * 7, DEFAULT_HOME_ICON = 0,
                             ANIM_DURATION_MILLS = 250;
 

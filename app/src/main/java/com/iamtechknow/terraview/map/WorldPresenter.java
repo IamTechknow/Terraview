@@ -294,6 +294,11 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         currEvent = e;
         onDateChanged(Utils.parseISODate(e.getDates().get(0)));
         if(getMapView() != null) {
+            if(e.getDates().size() > 1 && showColormap) { //hide colormap if event widget shown
+                onToggleColorMap(false);
+                map.setToggleState(false);
+            }
+
             getMapView().updateDateDialog(currentDate.getTime());
             getMapView().showEvent(e);
             if(!isLayerStartAfterCurrent(layer_stack))
@@ -364,14 +369,17 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     public void onToggleColorMap(boolean show) {
         showColormap = show;
         if(getMapView() != null) {
-            if(!show)
+            if( (currEvent != null && currEvent.getDates().size() > 1) || !show) {
                 getMapView().showColorMap(null);
-            else {
+                map.setToggleState(false);
+            } else {
                 Layer l = findTopColorMap();
                 if(l != null && colorMaps.get(l.getIdentifier()) != null)
                     getMapView().showColorMap(colorMaps.get(l.getIdentifier()));
-                else
+                else {
                     getMapView().showColorMap(null);
+                    map.setToggleState(false);
+                }
             }
         }
     }
@@ -434,6 +442,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         return false;
     }
 
+    //Find the first layer with a colormap.
     private Layer findTopColorMap() {
         for(Layer l : layer_stack)
             if(l.hasColorMap())
@@ -441,6 +450,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         return null;
     }
 
+    //Download and parse the colormap if not already found in the hash table.
     private void getColorMapForId(String id) {
         if(colorMaps.get(id) == null) {
             Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL)

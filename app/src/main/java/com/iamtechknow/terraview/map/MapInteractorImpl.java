@@ -78,6 +78,12 @@ public class MapInteractorImpl implements MapInteractor {
         }
     }
 
+    //Needed to set the toggle state in other UI events
+    @Override
+    public void setToggleState(boolean show) {
+        toggleColormap = show;
+    }
+
     @Override
     public TileOverlay addTile(Layer layer, String date) {
         CacheTileProvider provider = new CacheTileProvider(layer, date,this);

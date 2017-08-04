@@ -32,4 +32,6 @@ public interface MapInteractor extends OnMapReadyCallback, GoogleMap.OnMapLongCl
     void clearPolygon();
 
     void setToggleListener(ToggleListener l);
+
+    void setToggleState(boolean show);
 }
