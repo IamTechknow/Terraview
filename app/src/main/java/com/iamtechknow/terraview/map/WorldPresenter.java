@@ -340,7 +340,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         TileOverlay viirs = tileOverlays.get("VIIRS_SNPP_CorrectedReflectance_TrueColor");
         viirs.setVisible(false);
 
-        Layer terra = new Layer("MODIS_Terra_CorrectedReflectance_TrueColor", "GoogleMapsCompatible_Level9", "jpg", "Corrected Reflectance (True Color, MODIS, Terra)", "Terra / MODIS", null, "2012-01-01", null, null, true);
+        Layer terra = new Layer("MODIS_Terra_CorrectedReflectance_TrueColor", "GoogleMapsCompatible_Level9", "jpg", "Corrected Reflectance (True Color, MODIS, Terra)", "Terra / MODIS", null, "2009-01-01", null, null, true);
         layer_stack.add(terra);
         addTileOverlay(terra);
         initZOffsets();
