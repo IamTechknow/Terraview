@@ -56,9 +56,6 @@ public class ColorMapViewImpl extends View implements ColorMapView {
 
     @Override
     public void setLayerId(String id) {
-        val = (TextView) getRootView().findViewById(R.id.color_map_val);
-        val.setVisibility(View.VISIBLE);
-
         presenter = new ColorMapPresenterImpl();
         presenter.attachView(this);
         presenter.parseColorMap(id);
@@ -73,6 +70,8 @@ public class ColorMapViewImpl extends View implements ColorMapView {
 
         View parent = (View) getParent();
         parent.findViewById(R.id.empty_view).setVisibility(View.GONE);
+        val = (TextView) ((View) getParent()).findViewById(R.id.color_map_val);
+        val.setVisibility(View.VISIBLE);
 
         invalidate(); //will call onDraw()
     }

@@ -14,7 +14,7 @@ import java.util.Date;
 /**
  * Presenter portion of the Map contract, exposes all methods needed by the map view.
  */
-public interface MapPresenter extends OnMapReadyCallback {
+public interface MapPresenter extends OnMapReadyCallback, MapInteractor.ToggleListener {
 
     void attachView(MapView v);
 

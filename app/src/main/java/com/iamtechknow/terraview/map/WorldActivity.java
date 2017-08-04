@@ -34,7 +34,9 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.iamtechknow.terraview.about.AboutActivity;
 import com.iamtechknow.terraview.anim.AnimDialogActivity;
 import com.iamtechknow.terraview.colormaps.ColorMapFragment;
+import com.iamtechknow.terraview.colormaps.ColorMapView;
 import com.iamtechknow.terraview.events.EventActivity;
+import com.iamtechknow.terraview.model.ColorMap;
 import com.iamtechknow.terraview.model.Event;
 import com.iamtechknow.terraview.picker.LayerActivity;
 import com.iamtechknow.terraview.R;
@@ -47,6 +49,10 @@ import com.iamtechknow.terraview.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 
 import static com.iamtechknow.terraview.anim.AnimDialogActivity.*;
 
@@ -54,7 +60,8 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         NavigationView.OnNavigationItemSelectedListener, DragAndHideListener, SeekBar.OnSeekBarChangeListener {
     public static final String RESULT_LIST = "list", PREFS_FILE = "settings", PREFS_DB_KEY = "last_update";
     public static final String RESTORE_TIME_EXTRA = "time", RESTORE_LAYER_EXTRA = "layer", RESTORE_EVENT_EXTRA = "event";
-    public static final int LAYER_CODE = 1, EVENT_CODE = 2, SECONDS_PER_DAY = 86400000, WEEK = SECONDS_PER_DAY * 7, DEFAULT_HOME_ICON = 0;
+    public static final int LAYER_CODE = 1, EVENT_CODE = 2, SECONDS_PER_DAY = 86400000, WEEK = SECONDS_PER_DAY * 7, DEFAULT_HOME_ICON = 0,
+                            ANIM_DURATION_MILLS = 250;
 
     //UI fields
     private DrawerLayout mDrawerLayout;
@@ -63,9 +70,14 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     private CurrLayerAdapter mItemAdapter;
     private ItemTouchHelper mDragHelper;
 
+    //Event widget
     private View event_widget;
     private TextView event_date;
     private SeekBar event_stepper;
+
+    //Colormap Widget;
+    private View colormap_widget;
+    private ColorMapView colormap;
 
     //Presenters
     private MapPresenter mapPresenter;
@@ -373,7 +385,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
             event_date.setText(Utils.parseDateForDialog(Utils.parseISODate(e.getDates().get(0))));
             event_stepper.setMax(e.getDates().size() - 1);
             event_stepper.setProgress(0);
-            event_widget.animate().translationY(0).setDuration(250).start();
+            event_widget.animate().translationY(0).setDuration(ANIM_DURATION_MILLS).start();
         }
     }
 
@@ -388,7 +400,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
 
         //Animate out event widget
         if(event_widget != null)
-            event_widget.animate().translationY(event_widget.getHeight()).setDuration(250).start();
+            event_widget.animate().translationY(event_widget.getHeight()).setDuration(ANIM_DURATION_MILLS).start();
     }
 
     @Override
@@ -407,6 +419,28 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     @Override
     public void showChangedEventDate(String date) {
         Snackbar.make(mCoordinatorLayout, getString(R.string.event_date, date), Snackbar.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void showColorMap(ColorMap show) {
+        if(show == null && colormap_widget != null) //hide UI
+            colormap_widget.animate().translationY(colormap_widget.getHeight()).setDuration(ANIM_DURATION_MILLS).start();
+        else {
+            if(colormap_widget == null) {
+                colormap_widget = getLayoutInflater().inflate(R.layout.color_map_widget, mCoordinatorLayout, false);
+                colormap = (ColorMapView) colormap_widget.findViewById(R.id.color_map_palette);
+                mCoordinatorLayout.addView(colormap_widget);
+
+                //HACK: Need to invalidate it again to make the canvas appear.
+                //There is an abrupt translation when animating for the first time
+                Observable.intervalRange(0, 1, 0, 20, TimeUnit.MILLISECONDS)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(aLong -> colormap.setColorMapData(show));
+            }
+
+            colormap.setColorMapData(show);
+            colormap_widget.animate().translationY(0).setDuration(ANIM_DURATION_MILLS).start();
+        }
     }
 
     //Has it been a week since layer data was last downloaded?

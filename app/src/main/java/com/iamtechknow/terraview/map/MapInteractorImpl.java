@@ -40,6 +40,11 @@ public class MapInteractorImpl implements MapInteractor {
     //Padding value for showing polygon bounds
     private int polyOffset;
 
+    private ToggleListener callback;
+
+    //Whether to show colormap UI
+    private boolean toggleColormap;
+
     public MapInteractorImpl(int offset) {
         polyOffset = offset;
 
@@ -67,8 +72,10 @@ public class MapInteractorImpl implements MapInteractor {
 
     @Override
     public void onMapLongClick(LatLng latLng) {
-        //TODO: If top tile is colormap, then show colormap widget, add interface to this for presenter
-
+        if(callback != null) {
+            toggleColormap = !toggleColormap;
+            callback.onToggleColorMap(toggleColormap);
+        }
     }
 
     @Override
@@ -135,6 +142,11 @@ public class MapInteractorImpl implements MapInteractor {
     public void clearPolygon() {
         if(currPolygon != null)
             currPolygon.remove();
+    }
+
+    @Override
+    public void setToggleListener(ToggleListener l) {
+        callback = l;
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.iamtechknow.terraview.map;
 
+import com.iamtechknow.terraview.model.ColorMap;
 import com.iamtechknow.terraview.model.Event;
 import com.iamtechknow.terraview.model.Layer;
 
@@ -36,4 +37,6 @@ public interface MapView {
     void warnUserAboutActiveLayers();
 
     void showChangedEventDate(String date);
+
+    void showColorMap(ColorMap show);
 }

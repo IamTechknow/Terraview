@@ -13,6 +13,12 @@ import com.iamtechknow.terraview.model.Layer;
  * Also encapsulates the caching of tiles.
  */
 public interface MapInteractor extends OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
+
+    //Callback for toggling colormap UI
+    interface ToggleListener {
+        void onToggleColorMap(boolean show);
+    }
+
     TileOverlay addTile(Layer l, String date);
 
     void removeTile(TileOverlay tile, Layer l, boolean isDateChange);
@@ -24,4 +30,6 @@ public interface MapInteractor extends OnMapReadyCallback, GoogleMap.OnMapLongCl
     void drawPolygon(PolygonOptions poly);
 
     void clearPolygon();
+
+    void setToggleListener(ToggleListener l);
 }
