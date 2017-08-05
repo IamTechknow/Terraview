@@ -19,6 +19,8 @@ import android.view.View;
 import android.webkit.WebView;
 
 import com.iamtechknow.terraview.R;
+import com.iamtechknow.terraview.model.ColorMap;
+import com.iamtechknow.terraview.model.ColorMapEntry;
 import com.iamtechknow.terraview.model.Layer;
 
 import java.text.ParseException;
@@ -26,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -136,6 +139,19 @@ public class Utils {
     }
 
     /**
+     * A few entries are considered invalid, find and delete them
+     * @param map ColorMap that was parsed
+     */
+    public static void cleanColorMap(ColorMap map) {
+        HashSet<ColorMapEntry> set = new HashSet<>();
+
+        for(ColorMapEntry e : map.getList())
+            if(e.isInvalid())
+                set.add(e);
+        map.getList().removeAll(set);
+    }
+
+    /**
      * Create and show the given HTML, essentially a formatted web page
      * @param activity The activity in which to display the fragment in
      */
@@ -152,7 +168,6 @@ public class Utils {
         extra1.putString(TITLE_EXTRA, title);
         if (prev != null)
             ft.remove(prev);
-
         ft.addToBackStack(null);
 
         AboutDialog about = new AboutDialog();
@@ -161,7 +176,7 @@ public class Utils {
     }
 
     public static class AboutDialog extends DialogFragment {
-        public static final String MIME_TYPE = "text/html";
+        private static final String MIME_TYPE = "text/html";
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {

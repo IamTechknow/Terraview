@@ -13,7 +13,7 @@ import io.reactivex.disposables.Disposable;
 
 public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
     private EventView view;
-    private Disposable sub;
+    private Disposable sub, dataSub;
     private RxBus bus;
     private EONET client;
 
@@ -33,6 +33,10 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
 
     @Override
     public void detachView() {
+        if(dataSub != null) {
+            dataSub.dispose();
+            dataSub = null;
+        }
         sub.dispose();
         sub = null;
         view = null;
@@ -49,10 +53,7 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
         loadedEvents = true;
         showingClosed = false;
         view.clearList();
-        if(currCat == 0)
-            client.getOpenEvents();
-        else
-            client.getEventsByCategory(currCat);
+        dataSub = currCat == 0 ? client.getOpenEvents() : client.getEventsByCategory(currCat);
     }
 
     //Handle the event passed when a category is tapped
@@ -65,11 +66,11 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
                 currCat = e.getArg();
                 view.clearList();
                 if(showingClosed)
-                    client.getClosedEvents(currCat, view.getEventLimit());
+                    dataSub = client.getClosedEvents(currCat, view.getEventLimit());
                 else if(currCat == 0)
-                    client.getOpenEvents();
+                    dataSub = client.getOpenEvents();
                 else
-                    client.getEventsByCategory(currCat);
+                    dataSub = client.getEventsByCategory(currCat);
             }
         }
     }
@@ -96,7 +97,7 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
     public void presentClosed(int num) {
         showingClosed = true;
         view.clearList();
-        client.getClosedEvents(currCat, num);
+        dataSub = client.getClosedEvents(currCat, num);
     }
 
     @Override

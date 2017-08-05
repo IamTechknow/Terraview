@@ -7,8 +7,10 @@ import android.support.v4.app.LoaderManager;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.iamtechknow.terraview.Injection;
+import com.iamtechknow.terraview.api.ColorMapAPI;
 import com.iamtechknow.terraview.data.DataSource;
 import com.iamtechknow.terraview.data.LocalDataSource;
+import com.iamtechknow.terraview.model.ColorMap;
 import com.iamtechknow.terraview.model.Event;
 import com.iamtechknow.terraview.model.Layer;
 import com.iamtechknow.terraview.util.Utils;
@@ -19,9 +21,16 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Hashtable;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
+
 import static com.iamtechknow.terraview.map.WorldActivity.*;
 
 public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
+    private static final String BASE_URL = "https://gibs.earthdata.nasa.gov";
     private static final float Z_OFFSET = 5.0f, BASE_Z_OFFSET = -100.0f; //base layers cannot cover overlays
 
     private WeakReference<MapView> mapViewRef;
@@ -30,10 +39,14 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     //Used to let presenter know to restore state after map loads
     private boolean isRestoring;
 
+    //Needed to update colormap if layers get swapped/deleted
+    private boolean showColormap;
+
     //Worldview data
     private MapInteractor map;
     private ArrayList<Layer> layer_stack;
     private Hashtable<String, TileOverlay> tileOverlays;
+    private Hashtable<String, ColorMap> colorMaps;
     private Date currentDate;
     private Event currEvent;
     private int currEventPoint;
@@ -41,7 +54,9 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     public WorldPresenter(MapInteractor maps) {
         layer_stack = new ArrayList<>();
         tileOverlays = new Hashtable<>();
+        colorMaps = new Hashtable<>();
         map = maps;
+        map.setToggleListener(this);
 
         currentDate = new Date();
         Calendar c = Calendar.getInstance();
@@ -157,10 +172,13 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
                 if(tileOverlays.containsKey(l.getIdentifier()))
                     map.removeTile(tileOverlays.remove(l.getIdentifier()), l, false);
 
-        //Add layers not already on
+        //Add layers not already on and download colormap if they have one
         for(Layer l : layer_stack)
-            if(!tileOverlays.containsKey(l.getIdentifier()))
+            if(!tileOverlays.containsKey(l.getIdentifier())) {
                 addTileOverlay(l);
+                if(l.hasColorMap())
+                    getColorMapForId(l.getIdentifier());
+            }
         initZOffsets();
 
         if(isLayerStartAfterCurrent(layer_stack) && getMapView() != null)
@@ -182,6 +200,9 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
             }
             above.setZIndex(above.getZIndex() + Z_OFFSET);
             below.setZIndex(below.getZIndex() - Z_OFFSET);
+
+            if(showColormap)
+                onToggleColorMap(true);
         }
     }
 
@@ -212,6 +233,13 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
      */
     @Override
     public void onLayerSwiped(int position, Layer l) {
+        //If deleted layer was only layer with colormap, hide UI
+        if(showColormap && findTopColorMap() == null) {
+            showColormap = false;
+            onToggleColorMap(false);
+        } else if(showColormap)
+            onToggleColorMap(showColormap);
+
         map.removeTile(tileOverlays.remove(l.getIdentifier()), l, false);
     }
 
@@ -266,6 +294,11 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         currEvent = e;
         onDateChanged(Utils.parseISODate(e.getDates().get(0)));
         if(getMapView() != null) {
+            if(e.getDates().size() > 1 && showColormap) { //hide colormap if event widget shown
+                onToggleColorMap(false);
+                map.setToggleState(false);
+            }
+
             getMapView().updateDateDialog(currentDate.getTime());
             getMapView().showEvent(e);
             if(!isLayerStartAfterCurrent(layer_stack))
@@ -307,7 +340,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         TileOverlay viirs = tileOverlays.get("VIIRS_SNPP_CorrectedReflectance_TrueColor");
         viirs.setVisible(false);
 
-        Layer terra = new Layer("MODIS_Terra_CorrectedReflectance_TrueColor", "GoogleMapsCompatible_Level9", "jpg", "Corrected Reflectance (True Color, MODIS, Terra)", "Terra / MODIS", null, "2012-01-01", null, null, true);
+        Layer terra = new Layer("MODIS_Terra_CorrectedReflectance_TrueColor", "GoogleMapsCompatible_Level9", "jpg", "Corrected Reflectance (True Color, MODIS, Terra)", "Terra / MODIS", null, "2009-01-01", null, null, true);
         layer_stack.add(terra);
         addTileOverlay(terra);
         initZOffsets();
@@ -329,6 +362,25 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
             if (getMapView() != null)
                 getMapView().updateDateDialog(currentDate.getTime());
             map.moveCamera(currEvent.getPoints().get(progress));
+        }
+    }
+
+    @Override
+    public void onToggleColorMap(boolean show) {
+        showColormap = show;
+        if(getMapView() != null) {
+            if( (currEvent != null && currEvent.getDates().size() > 1) || !show) {
+                getMapView().showColorMap(null);
+                map.setToggleState(false);
+            } else {
+                Layer l = findTopColorMap();
+                if(l != null && colorMaps.get(l.getIdentifier()) != null)
+                    getMapView().showColorMap(colorMaps.get(l.getIdentifier()));
+                else {
+                    getMapView().showColorMap(null);
+                    map.setToggleState(false);
+                }
+            }
         }
     }
 
@@ -388,5 +440,31 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
             if(currentDate.compareTo(Utils.parseISODate(l.getStartDate())) < 0)
                 return true;
         return false;
+    }
+
+    //Find the first layer with a colormap.
+    private Layer findTopColorMap() {
+        for(Layer l : layer_stack)
+            if(l.hasColorMap())
+                return l;
+        return null;
+    }
+
+    //Download and parse the colormap if not already found in the hash table.
+    private void getColorMapForId(String id) {
+        if(colorMaps.get(id) == null) {
+            Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL)
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .addConverterFactory(SimpleXmlConverterFactory.create())
+                .build();
+
+            retrofit.create(ColorMapAPI.class).fetchData(id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(colorMap -> {
+                    Utils.cleanColorMap(colorMap);
+                    colorMaps.put(id, colorMap);
+                });
+        }
     }
 }

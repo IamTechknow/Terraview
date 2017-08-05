@@ -3,7 +3,7 @@ package com.iamtechknow.terraview.model;
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Root;
 
-@Root(name="ColorMapEntry")
+@Root(name="ColorMapEntry", strict = false)
 public class ColorMapEntry {
 
     @Attribute(name="rgb")
@@ -15,19 +15,15 @@ public class ColorMapEntry {
     @Attribute(name="label")
     private String label;
 
-    @Attribute(name="transparent")
-    private boolean transparent;
-
     private final int r, g, b;
 
     private final boolean isInvalid;
 
     public ColorMapEntry(@Attribute(name="rgb") String rgb, @Attribute(name="value", required=false) String val,
-                         @Attribute(name="label") String label, @Attribute(name="transparent") boolean transparent) {
+                         @Attribute(name="label") String label) {
         this.rgb = rgb;
         this.val = val;
         this.label = label;
-        this.transparent = transparent;
 
         //Get RGB values
         String[] temp = rgb.split(",");

@@ -15,7 +15,7 @@ import java.util.Locale;
 public class Layer implements Parcelable, Comparable<Layer> {
     public static final int VISIBLE = 0, TRANSPARENT = 1, INVISIBLE = 2;
 
-    //Fields for XML tags that are stored to database
+    //Fields for XML/JSON tags that are stored to database
     private String identifier, tileMatrixSet, format, title, subtitle, endDate, startDate, description, palette;
     private boolean isBaseLayer;
 

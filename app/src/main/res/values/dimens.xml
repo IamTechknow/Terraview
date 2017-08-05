@@ -5,7 +5,7 @@
     <dimen name="text_padding_left">16dp</dimen>
     <dimen name="item_height">48dp</dimen>
     <dimen name="item_sub_height">72dp</dimen>
-    <dimen name="colormap_margin">4dp</dimen>
+    <dimen name="colormap_margin">8dp</dimen>
     <dimen name="colormap_title_margin">8dp</dimen>
     <dimen name="anim_margin">8dp</dimen>
     <dimen name="dialog_text_width">192dp</dimen>

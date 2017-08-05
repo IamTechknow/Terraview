@@ -1,5 +1,6 @@
 package com.iamtechknow.terraview.map;
 
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolygonOptions;
@@ -11,7 +12,13 @@ import com.iamtechknow.terraview.model.Layer;
  * because it is declared as a final class which limits unit testing.
  * Also encapsulates the caching of tiles.
  */
-public interface MapInteractor extends OnMapReadyCallback {
+public interface MapInteractor extends OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
+
+    //Callback for toggling colormap UI
+    interface ToggleListener {
+        void onToggleColorMap(boolean show);
+    }
+
     TileOverlay addTile(Layer l, String date);
 
     void removeTile(TileOverlay tile, Layer l, boolean isDateChange);
@@ -23,4 +30,8 @@ public interface MapInteractor extends OnMapReadyCallback {
     void drawPolygon(PolygonOptions poly);
 
     void clearPolygon();
+
+    void setToggleListener(ToggleListener l);
+
+    void setToggleState(boolean show);
 }

@@ -1,13 +1,11 @@
 package com.iamtechknow.terraview.colormaps;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
-import android.util.TypedValue;
+import android.view.MotionEvent;
 import android.view.View;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.iamtechknow.terraview.R;
@@ -21,7 +19,7 @@ import java.util.ArrayList;
  * View implementation for the color map list item. Needs a reference to the presenter
  * to prevent it from being GCed, and to allow it to be called to draw the color map
  */
-public class ColorMapViewImpl extends View implements ColorMapView, SeekBar.OnSeekBarChangeListener {
+public class ColorMapViewImpl extends View implements ColorMapView {
     private float RECT_HEIGHT = Utils.dPToPixel(getResources(), R.dimen.md_keylines);
 
     //Controls the color for drawing the color map
@@ -58,9 +56,6 @@ public class ColorMapViewImpl extends View implements ColorMapView, SeekBar.OnSe
 
     @Override
     public void setLayerId(String id) {
-        val = (TextView) getRootView().findViewById(R.id.color_map_val);
-        val.setVisibility(View.VISIBLE);
-
         presenter = new ColorMapPresenterImpl();
         presenter.attachView(this);
         presenter.parseColorMap(id);
@@ -74,10 +69,9 @@ public class ColorMapViewImpl extends View implements ColorMapView, SeekBar.OnSe
         rectLength = (float) getWidth() / (float) colorMap.size();
 
         View parent = (View) getParent();
-        SeekBar bar = (SeekBar) parent.findViewById(R.id.color_map_picker);
         parent.findViewById(R.id.empty_view).setVisibility(View.GONE);
-        bar.setVisibility(View.VISIBLE);
-        bar.setOnSeekBarChangeListener(this);
+        val = (TextView) ((View) getParent()).findViewById(R.id.color_map_val);
+        val.setVisibility(View.VISIBLE);
 
         invalidate(); //will call onDraw()
     }
@@ -108,18 +102,17 @@ public class ColorMapViewImpl extends View implements ColorMapView, SeekBar.OnSe
     }
 
     /**
-     * Slider value has been changed, update the current value text by calculating
-     * the index being mapped by the new progress percentage.
+     * Colorbar is tapped or swiped, determine the color map entry tapped and show its value
      */
     @Override
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        float index = ((float) progress) / 100 * (colorMap.size() - 1); //percentage x size
-        val.setText(colorMap.get((int) index).getLabel());
+    public boolean onTouchEvent(MotionEvent event) {
+        switch(event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_MOVE:
+                int index = (int) (event.getX() / getWidth() * colorMap.size());
+                if(index >= 0 && index < colorMap.size())
+                    val.setText(colorMap.get(index).getLabel());
+        }
+        return true;
     }
-
-    @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {}
-
-    @Override
-    public void onStopTrackingTouch(SeekBar seekBar) {}
 }

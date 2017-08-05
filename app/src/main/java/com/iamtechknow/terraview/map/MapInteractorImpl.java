@@ -40,6 +40,11 @@ public class MapInteractorImpl implements MapInteractor {
     //Padding value for showing polygon bounds
     private int polyOffset;
 
+    private ToggleListener callback;
+
+    //Whether to show colormap UI
+    private boolean toggleColormap;
+
     public MapInteractorImpl(int offset) {
         polyOffset = offset;
 
@@ -62,6 +67,21 @@ public class MapInteractorImpl implements MapInteractor {
         gMaps = googleMap;
         gMaps.setMaxZoomPreference(MAX_ZOOM);
         gMaps.setMapType(GoogleMap.MAP_TYPE_NONE);
+        gMaps.setOnMapLongClickListener(this);
+    }
+
+    @Override
+    public void onMapLongClick(LatLng latLng) {
+        if(callback != null) {
+            toggleColormap = !toggleColormap;
+            callback.onToggleColorMap(toggleColormap);
+        }
+    }
+
+    //Needed to set the toggle state in other UI events
+    @Override
+    public void setToggleState(boolean show) {
+        toggleColormap = show;
     }
 
     @Override
@@ -89,8 +109,7 @@ public class MapInteractorImpl implements MapInteractor {
      * If not then go download them all via Retrofit and store them into its image cache.
      *
      * This method isn't executed when invisible tile overlays are created, only when they
-     * become visible. Therefore the tiles for animation overlays are downloaded when shown during
-     * an overlay's animation frame, so we can get the date on real-time.
+     * become visible
      */
     @Override
     public byte[] getMapTile(Layer l, String date, int zoom, int y, int x) {
@@ -131,6 +150,11 @@ public class MapInteractorImpl implements MapInteractor {
             currPolygon.remove();
     }
 
+    @Override
+    public void setToggleListener(ToggleListener l) {
+        callback = l;
+    }
+
     /**
      * Return a key to be used in the cache based on given arguments.
      * Done by concatenating the parameters between slashes to allow parsing if needed
@@ -142,8 +166,7 @@ public class MapInteractorImpl implements MapInteractor {
 
     /**
      * Fetch the image from GIBS to put onto the cache with Retrofit. This method is
-     * executed in a GMaps background thread so RxJava is not necessary. Do account for
-     * 404 error codes if no tile exists (can happen if zoomed in too far).
+     * executed in a GMaps background thread so RxJava is not necessary.
      * @return byte array of the image
      */
     private byte[] fetchImage(Layer l, String date, int zoom, int y, int x) {
