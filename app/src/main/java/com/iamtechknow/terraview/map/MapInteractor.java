@@ -12,7 +12,8 @@ import com.iamtechknow.terraview.model.Layer;
  * because it is declared as a final class which limits unit testing.
  * Also encapsulates the caching of tiles.
  */
-public interface MapInteractor extends OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
+public interface MapInteractor extends OnMapReadyCallback, GoogleMap.OnMapLongClickListener,
+            GoogleMap.OnMapClickListener {
 
     //Callback for toggling colormap UI
     interface ToggleListener {

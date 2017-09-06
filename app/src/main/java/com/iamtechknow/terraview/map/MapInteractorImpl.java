@@ -68,14 +68,17 @@ public class MapInteractorImpl implements MapInteractor {
         gMaps.setMaxZoomPreference(MAX_ZOOM);
         gMaps.setMapType(GoogleMap.MAP_TYPE_NONE);
         gMaps.setOnMapLongClickListener(this);
+        gMaps.setOnMapClickListener(this);
     }
 
     @Override
     public void onMapLongClick(LatLng latLng) {
-        if(callback != null) {
-            toggleColormap = !toggleColormap;
-            callback.onToggleColorMap(toggleColormap);
-        }
+        onMapClick();
+    }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+        onMapClick();
     }
 
     //Needed to set the toggle state in other UI events
@@ -153,6 +156,13 @@ public class MapInteractorImpl implements MapInteractor {
     @Override
     public void setToggleListener(ToggleListener l) {
         callback = l;
+    }
+
+    private void onMapClick() {
+        if(callback != null) {
+            toggleColormap = !toggleColormap;
+            callback.onToggleColorMap(toggleColormap);
+        }
     }
 
     /**
