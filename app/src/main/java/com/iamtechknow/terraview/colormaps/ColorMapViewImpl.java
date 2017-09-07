@@ -9,17 +9,24 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.iamtechknow.terraview.R;
+import com.iamtechknow.terraview.api.ColorMapAPI;
 import com.iamtechknow.terraview.model.ColorMap;
 import com.iamtechknow.terraview.model.ColorMapEntry;
 import com.iamtechknow.terraview.util.Utils;
 
 import java.util.ArrayList;
 
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
+
 /**
  * View implementation for the color map list item. Needs a reference to the presenter
  * to prevent it from being GCed, and to allow it to be called to draw the color map
  */
 public class ColorMapViewImpl extends View implements ColorMapView {
+    private static final String BASE_URL = "https://gibs.earthdata.nasa.gov";
+
     private float RECT_HEIGHT = Utils.dPToPixel(getResources(), R.dimen.md_keylines);
 
     //Controls the color for drawing the color map
@@ -56,7 +63,13 @@ public class ColorMapViewImpl extends View implements ColorMapView {
 
     @Override
     public void setLayerId(String id) {
-        presenter = new ColorMapPresenterImpl();
+        //Dependency injection
+        Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL)
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .addConverterFactory(SimpleXmlConverterFactory.create())
+                .build();
+
+        presenter = new ColorMapPresenterImpl(retrofit.create(ColorMapAPI.class));
         presenter.attachView(this);
         presenter.parseColorMap(id);
     }

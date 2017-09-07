@@ -8,16 +8,17 @@ import java.lang.ref.WeakReference;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
-import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 
 public class ColorMapPresenterImpl implements ColorMapPresenter {
-    private static final String BASE_URL = "https://gibs.earthdata.nasa.gov";
-
     private WeakReference<ColorMapView> viewRef;
 
     private Disposable dataSub;
+
+    private ColorMapAPI api;
+
+    public ColorMapPresenterImpl(ColorMapAPI service) {
+        api = service;
+    }
 
     @Override
     public void attachView(ColorMapView v) {
@@ -44,12 +45,7 @@ public class ColorMapPresenterImpl implements ColorMapPresenter {
      */
     @Override
     public void parseColorMap(String id) {
-        Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL)
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .addConverterFactory(SimpleXmlConverterFactory.create())
-            .build();
-
-        dataSub = retrofit.create(ColorMapAPI.class).fetchData(id)
+        dataSub = api.fetchData(id)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(colorMap -> {
