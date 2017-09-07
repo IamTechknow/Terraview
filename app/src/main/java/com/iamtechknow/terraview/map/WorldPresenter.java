@@ -280,8 +280,12 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
 
     @Override
     public void presentAnimDialog() {
-        if(getMapView() != null)
-            getMapView().showAnimDialog();
+        if(getMapView() != null) {
+            if(layer_stack.isEmpty())
+                getMapView().warnNoLayersToAnim();
+            else
+                getMapView().showAnimDialog();
+        }
     }
 
     /**

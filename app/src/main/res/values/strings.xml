@@ -112,6 +112,7 @@
     <string name="make_animation">New Animation</string>
     <string name="anim_warning">Start and end cannot be empty</string>
     <string name="anim_warning_before">Start must come before end</string>
+    <string name="anim_warning_open">No layers to animate, add some layers!</string>
     <string name="end_hint">Set end date</string>
     <string name="feedback">Send Feedback</string>
     <string name="email" translatable="false">edmondlee.dev@gmail.com</string>

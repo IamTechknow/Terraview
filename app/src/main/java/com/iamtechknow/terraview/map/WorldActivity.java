@@ -417,6 +417,11 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
     }
 
     @Override
+    public void warnNoLayersToAnim() {
+        Snackbar.make(mCoordinatorLayout, getString(R.string.anim_warning_open), Snackbar.LENGTH_LONG).show();
+    }
+
+    @Override
     public void showChangedEventDate(String date) {
         Snackbar.make(mCoordinatorLayout, getString(R.string.event_date, date), Snackbar.LENGTH_LONG).show();
     }

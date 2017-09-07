@@ -36,6 +36,8 @@ public interface MapView {
 
     void warnUserAboutActiveLayers();
 
+    void warnNoLayersToAnim();
+
     void showChangedEventDate(String date);
 
     void showColorMap(ColorMap show);
