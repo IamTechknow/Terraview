@@ -113,9 +113,9 @@ public class WVJsonParser {
             JsonElement element = layer_json.get(layer.getIdentifier());
 
             if(element != null) {
-                JsonObject jsonLayer = element.getAsJsonObject(), palObj;
+                JsonObject jsonLayer = element.getAsJsonObject();
                 JsonPrimitive subPrimitive, startPrimitive, endPrimitive;
-                String subtitle = null, endDate = null, startDate = null, palette = null;
+                String subtitle = null, endDate = null, startDate = null;
 
                 boolean isBaseLayer = jsonLayer.getAsJsonPrimitive("group").getAsString().equals("baselayers");
 
@@ -123,7 +123,6 @@ public class WVJsonParser {
                 subPrimitive = jsonLayer.getAsJsonPrimitive("subtitle");
                 startPrimitive = jsonLayer.getAsJsonPrimitive("startDate");
                 endPrimitive = jsonLayer.getAsJsonPrimitive("endDate");
-                palObj = jsonLayer.getAsJsonObject("palette");
 
                 if(subPrimitive != null)
                     subtitle = subPrimitive.getAsString();
@@ -131,14 +130,11 @@ public class WVJsonParser {
                     startDate = startPrimitive.getAsString();
                 if(endPrimitive != null)
                     endDate = endPrimitive.getAsString();
-                if(palObj != null)
-                    palette = palObj.getAsJsonPrimitive("id").getAsString();
 
                 layer.setBaseLayer(isBaseLayer);
                 layer.setSubtitle(subtitle);
                 layer.setStartDate(startDate);
                 layer.setEndDate(endDate);
-                layer.setPalette(palette);
 
                 if(desc_map.containsKey(layer.getIdentifier()))
                     layer.setDescription(desc_map.get(layer.getIdentifier()));

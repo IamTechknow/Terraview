@@ -12,6 +12,8 @@ import java.util.ArrayList;
  * Parses WMTSCapabilities.xml to obtain layer data. Uses the online version which is the most up-to-date.
  */
 public class WMTSHandler extends DefaultHandler {
+    private static final int ROLE_IDX = 1, HREF_IDX = 2;
+
     //Container for layers
     private ArrayList<Layer> contents;
 
@@ -57,6 +59,9 @@ public class WMTSHandler extends DefaultHandler {
                     break;
                 case "TileMatrixSetLink":
                     inTileMatrixSetLink = true;
+                    break;
+                case "Metadata":
+                    parsePalette(currLayer, attributes);
             }
     }
 
@@ -119,5 +124,16 @@ public class WMTSHandler extends DefaultHandler {
 
     public ArrayList<Layer> getResult() {
         return contents;
+    }
+
+    /**
+     * Parse a metadata tag by looking for an exact string and then setting the palette to avoid doing it four times
+     */
+    private void parsePalette(Layer curr, Attributes attrs) {
+        String role = attrs.getValue(ROLE_IDX);
+        if(role.equals("http://earthdata.nasa.gov/gibs/metadata-type/colormap")) {
+            String val = attrs.getValue(HREF_IDX);
+            curr.setPalette(val.substring(val.lastIndexOf('/') + 1, val.lastIndexOf('.')));
+        }
     }
 }

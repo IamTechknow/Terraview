@@ -177,7 +177,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
             if(!tileOverlays.containsKey(l.getIdentifier())) {
                 addTileOverlay(l);
                 if(l.hasColorMap())
-                    getColorMapForId(l.getIdentifier());
+                    getColorMapForId(l.getIdentifier(), l.getPalette());
             }
         initZOffsets();
 
@@ -451,14 +451,15 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     }
 
     //Download and parse the colormap if not already found in the hash table.
-    private void getColorMapForId(String id) {
+    //In rare exceptions, the palette may differ from the id
+    private void getColorMapForId(String id, String palette) {
         if(colorMaps.get(id) == null) {
             Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL)
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(SimpleXmlConverterFactory.create())
                 .build();
 
-            retrofit.create(ColorMapAPI.class).fetchData(id)
+            retrofit.create(ColorMapAPI.class).fetchData(palette)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(colorMap -> {
