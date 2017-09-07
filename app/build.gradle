@@ -77,7 +77,7 @@ dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
 
     testApi 'junit:junit:4.12'
-    testApi 'org.mockito:mockito-core:2.8.9'
+    testApi 'org.mockito:mockito-core:2.9.0'
     androidTestApi 'junit:junit:4.12'
     androidTestApi 'com.android.support.test.espresso:espresso-core:3.0.1'
     androidTestApi 'com.android.support.test.espresso:espresso-intents:3.0.1'

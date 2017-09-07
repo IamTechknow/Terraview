@@ -14,6 +14,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 
 import io.reactivex.android.plugins.RxAndroidPlugins;
+import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
 
 import static org.mockito.Mockito.times;
@@ -39,8 +40,9 @@ public class LayerPresenterTest {
 
     @Before
     public void setupPresenter() {
-        //Allow AndroidSchedulers.mainThread() to be overridden
-        RxAndroidPlugins.setInitMainThreadSchedulerHandler(__ -> Schedulers.trampoline());
+        //Override default schedulers to be able to run the test on a JVM
+        RxJavaPlugins.setIoSchedulerHandler(schedulerCallable -> Schedulers.trampoline());
+        RxAndroidPlugins.setInitMainThreadSchedulerHandler(scheduler -> Schedulers.trampoline());
 
         MockitoAnnotations.initMocks(this);
         presenter = new LayerPresenterImpl(RxBus.getInstance(), new ArrayList<>(), new ArrayList<>(), data, array);
