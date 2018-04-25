@@ -3,8 +3,10 @@ package com.iamtechknow.terraview.data;
 import android.support.annotation.NonNull;
 
 import com.iamtechknow.terraview.model.Layer;
+import com.iamtechknow.terraview.util.Utils;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.TreeMap;
 
 public class FakeRemoteDataSource implements DataSource {
@@ -63,5 +65,10 @@ public class FakeRemoteDataSource implements DataSource {
     @Override
     public TreeMap<String, ArrayList<String>> getCategories() {
         return categories;
+    }
+
+    @Override
+    public Hashtable<String, Layer> getLayerTable() {
+        return Utils.getLayerTable(layers);
     }
 }
