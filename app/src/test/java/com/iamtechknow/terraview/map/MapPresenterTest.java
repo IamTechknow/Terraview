@@ -50,7 +50,7 @@ public class MapPresenterTest {
     private void prepMap() {
         //Mock creating a new tile overlay and mock getting the GoogleMap
         //This method may break upon changes to the GMaps library
-        when(map.addTile(any(Layer.class), any(String.class))).thenReturn(new TileOverlay(new FakeZZW()));
+        when(map.addTile(any(Layer.class), any(String.class))).thenReturn(new TileOverlay(new FakeZZAC()));
         presenter.onMapReady(null);
     }
 

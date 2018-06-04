@@ -1,6 +1,7 @@
 package com.iamtechknow.terraview.events;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,6 +12,7 @@ import android.view.ViewGroup;
 
 import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.adapter.CategoryAdapter;
+import com.iamtechknow.terraview.data.EONET;
 import com.iamtechknow.terraview.model.Category;
 import com.iamtechknow.terraview.picker.RxBus;
 import com.iamtechknow.terraview.util.Utils;
@@ -29,7 +31,7 @@ public class CategoryViewImpl extends Fragment implements CategoryView {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        presenter = new CategoryPresenterImpl(RxBus.getInstance(), this);
+        presenter = new CategoryPresenterImpl(RxBus.getInstance(), this, new EONET());
     }
 
     @Override
@@ -50,11 +52,11 @@ public class CategoryViewImpl extends Fragment implements CategoryView {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_tabs, container, false);
 
         empty_view = rootView.findViewById(R.id.empty_view);
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
+        mRecyclerView = rootView.findViewById(R.id.recycler_view);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         adapter = new CategoryAdapter(presenter);

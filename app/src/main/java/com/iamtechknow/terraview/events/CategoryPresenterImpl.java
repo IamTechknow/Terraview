@@ -18,10 +18,10 @@ public class CategoryPresenterImpl implements CategoryPresenter, EONET.LoadCallb
 
     private boolean loadedCategories;
 
-    public CategoryPresenterImpl(RxBus _bus, CategoryView v) {
+    public CategoryPresenterImpl(RxBus _bus, CategoryView v, EONET eonet) {
         bus = _bus;
         view = v;
-        client = new EONET();
+        client = eonet;
         client.setCallback(this);
     }
 

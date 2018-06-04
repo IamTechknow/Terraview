@@ -9,7 +9,7 @@ import com.iamtechknow.terraview.model.EventList;
 
 import java.util.ArrayList;
 
-import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -32,6 +32,8 @@ public class EONET {
 
     private Retrofit retrofit;
 
+    private EventAPI api;
+
     private LoadCallback callback;
 
     public EONET() {
@@ -39,13 +41,14 @@ public class EONET {
             .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().registerTypeAdapter(EventList.class, new EventDeserializer()).create()))
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .build();
+        api = retrofit.create(EventAPI.class);
     }
 
     /**
      * Get events from the default endpoint, which returns all open events.
      */
     public Disposable getOpenEvents() {
-        return retrofit.create(EventAPI.class).getOpenEvents()
+        return api.getOpenEvents()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(eventList -> callback.onEventsLoaded(eventList.list));
@@ -56,7 +59,7 @@ public class EONET {
      * @param catID desired Category ID
      */
     public Disposable getEventsByCategory(int catID) {
-        return retrofit.create(EventAPI.class).getEventsByCategory(catID)
+        return api.getEventsByCategory(catID)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(eventList -> callback.onEventsLoaded(eventList.list));
@@ -67,8 +70,7 @@ public class EONET {
      * @param limit Number of events to get
      */
     public Disposable getClosedEvents(int catID, int limit) {
-        Observable<EventList> o = catID == 0 ? retrofit.create(EventAPI.class).getClosedEvents(limit) :
-           retrofit.create(EventAPI.class).getClosedEventsByCategory(catID, limit);
+        Single<EventList> o = catID == 0 ? api.getClosedEvents(limit) : api.getClosedEventsByCategory(catID, limit);
 
         return o.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
