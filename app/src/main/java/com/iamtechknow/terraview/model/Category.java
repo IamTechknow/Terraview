@@ -1,38 +1,20 @@
 package com.iamtechknow.terraview.model;
 
-import com.google.gson.annotations.SerializedName;
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
 
-import java.util.Locale;
-
-/**
- * Representation of a category from the EONET API.
- * Contains a link to access events based on its category.
- */
+@Entity(tableName = "category")
 public class Category {
-    @SerializedName("id")
-    private int id;
+    @PrimaryKey
+    @ColumnInfo(name = "name")
+    private final String categoryName;
 
-    @SerializedName("title")
-    private String title;
-
-    public Category(int id, String title) {
-        this.id = id;
-        this.title = title;
+    public Category(String categoryName) {
+        this.categoryName = categoryName;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    /**
-     * Tell the EONET client to get all events.
-     * @return A category encompassing all events.
-     */
-    public static Category getAll() {
-        return new Category(0, "All");
+    public String getCategoryName() {
+        return categoryName;
     }
 }

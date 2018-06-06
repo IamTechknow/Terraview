@@ -1,5 +1,10 @@
 package com.iamtechknow.terraview.model;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.ForeignKey;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
@@ -9,17 +14,53 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import static android.arch.persistence.room.ForeignKey.CASCADE;
+
 /**
  * POGO (Plain old Java object) that represents the XML structure for a layer in WMTSCapabilities.xml
+ * Also defines a one-to-many relationship of measurements with layers.
  */
+@Entity(foreignKeys = @ForeignKey(entity = Measurement.class, parentColumns = "name", childColumns = "category", onDelete = CASCADE), tableName = "layer")
 public class Layer implements Parcelable, Comparable<Layer> {
     public static final int VISIBLE = 0, TRANSPARENT = 1, INVISIBLE = 2;
 
     //Fields for XML/JSON tags that are stored to database
-    private String identifier, tileMatrixSet, format, title, subtitle, endDate, startDate, description, palette;
+    @PrimaryKey
+    @ColumnInfo(name = "identifier")
+    private String identifier;
+
+    @ColumnInfo(name = "matrix")
+    private String tileMatrixSet;
+
+    @ColumnInfo(name = "format")
+    private String format;
+
+    @ColumnInfo(name = "title")
+    private String title;
+
+    @ColumnInfo(name = "subtitle")
+    private String subtitle;
+
+    @ColumnInfo(name = "endDate")
+    private String endDate;
+
+    @ColumnInfo(name = "start")
+    private String startDate;
+
+    @ColumnInfo(name = "meta")
+    private String description;
+
+    @ColumnInfo(name = "palette")
+    private String palette;
+
+    @ColumnInfo(name = "isbase")
     private boolean isBaseLayer;
 
+    @ColumnInfo(name = "measurement")
+    private String measurement;
+
     //Unless set all layers are visible by default
+    @Ignore
     private int visibility;
 
     //ISO 8601 date format
@@ -27,7 +68,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
 
     public Layer() {}
 
-    public Layer(String _identifier, String matrixSet, String _format, String _title, String sub, String end, String start, String _description, String _palette, boolean isBase) {
+    public Layer(String _identifier, String matrixSet, String _format, String _title, String sub, String end, String start, String _description, String _palette, boolean isBase, String _measure) {
         identifier = _identifier;
         tileMatrixSet = matrixSet;
         format = _format;
@@ -39,6 +80,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
         palette = _palette;
         isBaseLayer = isBase;
         visibility = VISIBLE;
+        measurement = _measure;
     }
 
     protected Layer(Parcel in) {
@@ -53,6 +95,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
         palette = in.readString();
         isBaseLayer = in.readByte() != 0;
         visibility = in.readInt();
+        measurement = in.readString();
     }
 
     public static final Creator<Layer> CREATOR = new Creator<Layer>() {
@@ -155,6 +198,14 @@ public class Layer implements Parcelable, Comparable<Layer> {
         return palette;
     }
 
+    public String getMeasurement() {
+        return measurement;
+    }
+
+    public void setMeasurement(String measurement) {
+        this.measurement = measurement;
+    }
+
     /**
      * Determines if the layer is an overlay that contains a colormap
      */
@@ -179,7 +230,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
 
     @Override
     public int describeContents() {
-        return hashCode();
+        return 0;
     }
 
     @Override
@@ -195,6 +246,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
         dest.writeString(palette);
         dest.writeByte((byte) (isBaseLayer ? 1 : 0));
         dest.writeInt(visibility);
+        dest.writeString(measurement);
     }
 
     //Layers are compared the same way as strings, the relative order depends on that of their titles
