@@ -3,7 +3,7 @@ package com.iamtechknow.terraview.data;
 import com.google.gson.GsonBuilder;
 import com.iamtechknow.terraview.api.CategoryAPI;
 import com.iamtechknow.terraview.api.EventAPI;
-import com.iamtechknow.terraview.model.Category;
+import com.iamtechknow.terraview.model.EventCategory;
 import com.iamtechknow.terraview.model.Event;
 import com.iamtechknow.terraview.model.EventList;
 
@@ -25,7 +25,7 @@ public class EONET {
     public interface LoadCallback {
         void onEventsLoaded(ArrayList<Event> data);
 
-        void onCategoriesLoaded(ArrayList<Category> data);
+        void onCategoriesLoaded(ArrayList<EventCategory> data);
     }
 
     private static final String BASE = "https://eonet.sci.gsfc.nasa.gov";

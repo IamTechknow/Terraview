@@ -1,7 +1,7 @@
 package com.iamtechknow.terraview.events;
 
 import com.iamtechknow.terraview.data.EONET;
-import com.iamtechknow.terraview.model.Category;
+import com.iamtechknow.terraview.model.EventCategory;
 import com.iamtechknow.terraview.model.Event;
 import com.iamtechknow.terraview.model.TapEvent;
 import com.iamtechknow.terraview.picker.RxBus;
@@ -51,9 +51,9 @@ public class CategoryPresenterImpl implements CategoryPresenter, EONET.LoadCallb
     public void onEventsLoaded(ArrayList<Event> data) {}
 
     @Override
-    public void onCategoriesLoaded(ArrayList<Category> data) {
+    public void onCategoriesLoaded(ArrayList<EventCategory> data) {
         loadedCategories = true;
-        data.add(0, Category.getAll()); //Add missing "all" category
+        data.add(0, EventCategory.getAll()); //Add missing "all" category
         view.insertList(data);
     }
 }

@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.adapter.CategoryAdapter;
 import com.iamtechknow.terraview.data.EONET;
-import com.iamtechknow.terraview.model.Category;
+import com.iamtechknow.terraview.model.EventCategory;
 import com.iamtechknow.terraview.picker.RxBus;
 import com.iamtechknow.terraview.util.Utils;
 
@@ -65,7 +65,7 @@ public class CategoryViewImpl extends Fragment implements CategoryView {
     }
 
     @Override
-    public void insertList(ArrayList<Category> list) {
+    public void insertList(ArrayList<EventCategory> list) {
         empty_view.setVisibility(View.GONE);
         mRecyclerView.setVisibility(View.VISIBLE);
         adapter.insertList(list);

@@ -1,7 +1,7 @@
 package com.iamtechknow.terraview.events;
 
 import com.iamtechknow.terraview.data.EONET;
-import com.iamtechknow.terraview.model.Category;
+import com.iamtechknow.terraview.model.EventCategory;
 import com.iamtechknow.terraview.model.Event;
 import com.iamtechknow.terraview.model.TapEvent;
 import com.iamtechknow.terraview.picker.RxBus;
@@ -117,5 +117,5 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
     }
 
     @Override
-    public void onCategoriesLoaded(ArrayList<Category> data) {}
+    public void onCategoriesLoaded(ArrayList<EventCategory> data) {}
 }

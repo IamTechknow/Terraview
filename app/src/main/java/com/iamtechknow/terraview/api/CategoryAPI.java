@@ -1,6 +1,6 @@
 package com.iamtechknow.terraview.api;
 
-import com.iamtechknow.terraview.model.CategoryList;
+import com.iamtechknow.terraview.model.EventCategoryList;
 
 import io.reactivex.Single;
 import retrofit2.http.GET;
@@ -10,5 +10,5 @@ import retrofit2.http.GET;
  */
 public interface CategoryAPI {
     @GET("/api/v2.1/categories")
-    Single<CategoryList> fetchCategories();
+    Single<EventCategoryList> fetchCategories();
 }
