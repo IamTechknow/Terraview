@@ -2,15 +2,15 @@ package com.iamtechknow.terraview.events;
 
 import com.iamtechknow.terraview.data.EONET;
 import com.iamtechknow.terraview.model.EventCategory;
-import com.iamtechknow.terraview.model.Event;
+import com.iamtechknow.terraview.model.EventCategoryList;
 import com.iamtechknow.terraview.model.TapEvent;
 import com.iamtechknow.terraview.picker.RxBus;
 
-import java.util.ArrayList;
-
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
-public class CategoryPresenterImpl implements CategoryPresenter, EONET.LoadCallback {
+public class CategoryPresenterImpl implements CategoryPresenter {
     private CategoryView view;
     private RxBus bus;
     private EONET client;
@@ -22,7 +22,6 @@ public class CategoryPresenterImpl implements CategoryPresenter, EONET.LoadCallb
         bus = _bus;
         view = v;
         client = eonet;
-        client.setCallback(this);
     }
 
     @Override
@@ -38,7 +37,10 @@ public class CategoryPresenterImpl implements CategoryPresenter, EONET.LoadCallb
     @Override
     public void loadCategories() {
         if(!loadedCategories)
-            dataSub = client.getCategories();
+            dataSub = client.getCategories()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onCategoriesLoaded);
     }
 
     //Send an event to the event bus when a category has been passed
@@ -47,13 +49,9 @@ public class CategoryPresenterImpl implements CategoryPresenter, EONET.LoadCallb
         bus.send(new TapEvent(EventActivity.SELECT_EVENT_TAB, catId));
     }
 
-    @Override
-    public void onEventsLoaded(ArrayList<Event> data) {}
-
-    @Override
-    public void onCategoriesLoaded(ArrayList<EventCategory> data) {
+    private void onCategoriesLoaded(EventCategoryList data) {
         loadedCategories = true;
-        data.add(0, EventCategory.getAll()); //Add missing "all" category
-        view.insertList(data);
+        data.list.add(0, EventCategory.getAll()); //Add missing "all" category
+        view.insertList(data.list);
     }
 }

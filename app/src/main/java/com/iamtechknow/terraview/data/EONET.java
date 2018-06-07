@@ -3,16 +3,10 @@ package com.iamtechknow.terraview.data;
 import com.google.gson.GsonBuilder;
 import com.iamtechknow.terraview.api.CategoryAPI;
 import com.iamtechknow.terraview.api.EventAPI;
-import com.iamtechknow.terraview.model.EventCategory;
-import com.iamtechknow.terraview.model.Event;
+import com.iamtechknow.terraview.model.EventCategoryList;
 import com.iamtechknow.terraview.model.EventList;
 
-import java.util.ArrayList;
-
 import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -22,19 +16,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * data comes from callbacks after they are loaded in the background.
  */
 public class EONET {
-    public interface LoadCallback {
-        void onEventsLoaded(ArrayList<Event> data);
-
-        void onCategoriesLoaded(ArrayList<EventCategory> data);
-    }
-
     private static final String BASE = "https://eonet.sci.gsfc.nasa.gov";
 
     private Retrofit retrofit;
-
     private EventAPI api;
-
-    private LoadCallback callback;
 
     public EONET() {
         retrofit = new Retrofit.Builder().baseUrl(BASE)
@@ -47,47 +32,30 @@ public class EONET {
     /**
      * Get events from the default endpoint, which returns all open events.
      */
-    public Disposable getOpenEvents() {
-        return api.getOpenEvents()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(eventList -> callback.onEventsLoaded(eventList.list));
+    public Single<EventList> getOpenEvents() {
+        return api.getOpenEvents();
     }
 
     /**
      * Filter open events by category
      * @param catID desired Category ID
      */
-    public Disposable getEventsByCategory(int catID) {
-        return api.getEventsByCategory(catID)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(eventList -> callback.onEventsLoaded(eventList.list));
+    public Single<EventList> getEventsByCategory(int catID) {
+        return api.getEventsByCategory(catID);
     }
 
     /**
      * Get events with a query to request closed events up to a limit.
      * @param limit Number of events to get
      */
-    public Disposable getClosedEvents(int catID, int limit) {
-        Single<EventList> o = catID == 0 ? api.getClosedEvents(limit) : api.getClosedEventsByCategory(catID, limit);
-
-        return o.subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(eventList -> callback.onEventsLoaded(eventList.list));
-    }
-
-    public void setCallback(LoadCallback callback) {
-        this.callback = callback;
+    public Single<EventList> getClosedEvents(int catID, int limit) {
+        return catID == 0 ? api.getClosedEvents(limit) : api.getClosedEventsByCategory(catID, limit);
     }
 
     /**
      * Get all known categories used in EONET.
      */
-    public Disposable getCategories() {
-        return retrofit.create(CategoryAPI.class).fetchCategories()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(categoryList -> callback.onCategoriesLoaded(categoryList.list));
+    public Single<EventCategoryList> getCategories() {
+        return retrofit.create(CategoryAPI.class).fetchCategories();
     }
 }
