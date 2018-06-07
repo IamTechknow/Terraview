@@ -9,6 +9,8 @@ import com.iamtechknow.terraview.model.Measurement;
 import java.util.HashMap;
 import java.util.List;
 
+import io.reactivex.Single;
+
 /**
  * Contract that defines required APIs for a layer data source,
  * including the local database and XML/JSON parsers (remote source)
@@ -26,9 +28,9 @@ public interface DataSource {
 
     List<Layer> getLayers();
 
-    List<Layer> getLayersForMeasurement(String m);
+    Single<List<Layer>> getLayersForMeasurement(String m);
 
-    List<Measurement> getMeasurementsForCategory(String c);
+    Single<List<Measurement>> getMeasurementsForCategory(String c);
 
     List<Category> getCategories();
 

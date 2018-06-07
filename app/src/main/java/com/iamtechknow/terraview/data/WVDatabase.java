@@ -12,7 +12,7 @@ import com.iamtechknow.terraview.model.MeasureLayerJoin;
 import com.iamtechknow.terraview.model.Measurement;
 import com.iamtechknow.terraview.model.SearchQuery;
 
-@Database(entities = {Layer.class, Measurement.class, Category.class, SearchQuery.class, CatMeasureJoin.class, MeasureLayerJoin.class}, version = 1)
+@Database(entities = {Layer.class, Measurement.class, Category.class, SearchQuery.class, CatMeasureJoin.class, MeasureLayerJoin.class}, version = 1, exportSchema = false)
 public abstract class WVDatabase extends RoomDatabase {
     private static WVDatabase INSTANCE;
 

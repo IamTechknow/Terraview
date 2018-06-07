@@ -6,6 +6,7 @@ import com.iamtechknow.terraview.model.Category;
 import com.iamtechknow.terraview.model.Layer;
 import com.iamtechknow.terraview.model.MeasureLayerJoin;
 import com.iamtechknow.terraview.model.Measurement;
+import com.iamtechknow.terraview.model.SearchQuery;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,9 +28,10 @@ public class WVJsonParser {
     private HashSet<String> measurements;
     private HashMap<String, String> desc_map;
 
-    //Join Lists
+    //Join Lists and search queries
     private ArrayList<CatMeasureJoin> catJoins;
     private ArrayList<MeasureLayerJoin> measureJoins;
+    private ArrayList<SearchQuery> queries;
 
     public WVJsonParser(InputStream is) {
         b = new BufferedReader(new InputStreamReader(is));
@@ -37,6 +39,7 @@ public class WVJsonParser {
         measurements = new HashSet<>();
         catJoins = new ArrayList<>();
         measureJoins = new ArrayList<>();
+        queries = new ArrayList<>();
         desc_map = new HashMap<>();
     }
 
@@ -59,7 +62,7 @@ public class WVJsonParser {
         fillMeasurements(measurements, measureJoins, table, root.get("measurements").getAsJsonObject());
         fillCategories(categories, catJoins, cat.get("hazards and disasters").getAsJsonObject());
         fillCategories(categories, catJoins, cat.get("scientific").getAsJsonObject());
-        fillLayers(list, layers_json);
+        fillLayers(list, queries, layers_json);
     }
 
     //For each measurement, iterate through all "sources" or layers
@@ -102,7 +105,7 @@ public class WVJsonParser {
         }
     }
 
-    private void fillLayers(List<Layer> list, JsonObject layer_json) {
+    private void fillLayers(List<Layer> list, List<SearchQuery> queries, JsonObject layer_json) {
         //By now we have the identifiers for all the Layers we could use to display
         //Layers not found in both XML and JSON metadata are deleted for now
         ArrayList<Layer> toDelete = new ArrayList<>();
@@ -130,6 +133,7 @@ public class WVJsonParser {
                     layer.setEndDate(endPrimitive.getAsString());
                 if(desc_map.containsKey(layer.getIdentifier()))
                     layer.setDescription(desc_map.get(layer.getIdentifier()));
+                queries.add(new SearchQuery(layer.getTitle(), layer.getIdentifier()));
             } else
                 toDelete.add(layer);
         }
@@ -166,5 +170,9 @@ public class WVJsonParser {
 
     public ArrayList<MeasureLayerJoin> getMeasureJoins() {
         return measureJoins;
+    }
+
+    public ArrayList<SearchQuery> getQueries() {
+        return queries;
     }
 }

@@ -10,14 +10,16 @@ import com.iamtechknow.terraview.model.Measurement;
 
 import java.util.List;
 
+import io.reactivex.Single;
+
 @Dao
 public interface MeasureLayerJoinDAO {
     @Insert
     void insert(List<MeasureLayerJoin> join);
 
-    @Query("SELECT * FROM measurement INNER JOIN measure_layer_join ON measurement.name=measure_layer_join.measurement WHERE measure_layer_join.layer=:layer")
+    @Query("SELECT measurement.* FROM measurement INNER JOIN measure_layer_join ON measurement.name=measure_layer_join.measurement WHERE measure_layer_join.layer=:layer")
     List<Measurement> getMeasurementsForLayer(String layer);
 
-    @Query("SELECT * FROM layer INNER JOIN measure_layer_join ON layer.identifier=measure_layer_join.layer WHERE measure_layer_join.measurement=:measurement")
-    List<Layer> getLayersForMeasurement(String measurement);
+    @Query("SELECT layer.* FROM layer INNER JOIN measure_layer_join ON layer.identifier=measure_layer_join.layer WHERE measure_layer_join.measurement=:measurement")
+    Single<List<Layer>> getLayersForMeasurement(String measurement);
 }

@@ -10,6 +10,7 @@ import com.iamtechknow.terraview.model.Category;
 import com.iamtechknow.terraview.model.Layer;
 import com.iamtechknow.terraview.model.MeasureLayerJoin;
 import com.iamtechknow.terraview.model.Measurement;
+import com.iamtechknow.terraview.model.SearchQuery;
 import com.iamtechknow.terraview.util.Utils;
 
 import org.xml.sax.SAXException;
@@ -21,6 +22,7 @@ import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
@@ -75,7 +77,7 @@ public class RemoteDataSource implements DataSource {
                 measurements = parser.getMeasurements();
                 categories = parser.getCategories();
 
-                saveToDB(layers, measurements, categories, parser.getMeasureJoins(), parser.getCatJoins());
+                saveToDB(layers, measurements, categories, parser.getMeasureJoins(), parser.getCatJoins(), parser.getQueries());
             } catch (IOException | ParserConfigurationException | SAXException e) {
                 e.printStackTrace();
             }
@@ -91,12 +93,12 @@ public class RemoteDataSource implements DataSource {
     }
 
     @Override
-    public List<Layer> getLayersForMeasurement(String m) {
+    public Single<List<Layer>> getLayersForMeasurement(String m) {
         return db.getMeasureLayerJoinDao().getLayersForMeasurement(m);
     }
 
     @Override
-    public List<Measurement> getMeasurementsForCategory(String c) {
+    public Single<List<Measurement>> getMeasurementsForCategory(String c) {
         return db.getCatMeasureJoinDao().getMeasurementsforCategory(c);
     }
 
@@ -114,12 +116,13 @@ public class RemoteDataSource implements DataSource {
      * Helper function to save layer data to local database
      */
     private void saveToDB(List<Layer> data, List<Measurement> measures, List<Category> cats,
-                          List<MeasureLayerJoin> measureJoins, List<CatMeasureJoin> catJoins) {
+                          List<MeasureLayerJoin> measureJoins, List<CatMeasureJoin> catJoins, List<SearchQuery> queries) {
         db.getLayerDao().insert(data);
         db.getCategoryDao().insert(cats);
         db.getMeasurementDao().insert(measures);
         db.getMeasureLayerJoinDao().insert(measureJoins);
         db.getCatMeasureJoinDao().insert(catJoins);
+        db.getSearchQueryDao().insert(queries);
         prefs.edit().putLong(PREFS_DB_KEY, System.currentTimeMillis()).apply();
         db.close();
     }

@@ -23,6 +23,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
 
     //Fields for XML/JSON tags that are stored to database
     @PrimaryKey
+    @NonNull
     @ColumnInfo(name = "identifier")
     private String identifier;
 
@@ -60,22 +61,24 @@ public class Layer implements Parcelable, Comparable<Layer> {
     //ISO 8601 date format
     private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
+    @Ignore
     public Layer() {}
 
-    public Layer(String _identifier, String matrixSet, String _format, String _title, String sub, String end, String start, String _description, String _palette, boolean isBase) {
-        identifier = _identifier;
-        tileMatrixSet = matrixSet;
-        format = _format;
-        title = _title;
-        subtitle = sub;
-        endDate = end;
-        startDate = start;
-        description = _description;
-        palette = _palette;
-        isBaseLayer = isBase;
+    public Layer(@NonNull String identifier, String tileMatrixSet, String format, String title, String subtitle, String endDate, String startDate, String description, String palette, boolean isBaseLayer) {
+        this.identifier = identifier;
+        this.tileMatrixSet = tileMatrixSet;
+        this.format = format;
+        this.title = title;
+        this.subtitle = subtitle;
+        this.endDate = endDate;
+        this.startDate = startDate;
+        this.description = description;
+        this.palette = palette;
+        this.isBaseLayer = isBaseLayer;
         visibility = VISIBLE;
     }
 
+    @Ignore
     protected Layer(Parcel in) {
         identifier = in.readString();
         tileMatrixSet = in.readString();
@@ -102,11 +105,12 @@ public class Layer implements Parcelable, Comparable<Layer> {
         }
     };
 
+    @NonNull
     public String getIdentifier() {
         return identifier;
     }
 
-    public void setIdentifier(String identifier) {
+    public void setIdentifier(@NonNull String identifier) {
         this.identifier = identifier;
     }
 

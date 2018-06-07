@@ -1,6 +1,5 @@
 package com.iamtechknow.terraview.picker;
 
-import android.util.Log;
 import android.util.SparseBooleanArray;
 
 import com.iamtechknow.terraview.api.MetadataAPI;
@@ -15,7 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import io.reactivex.Observable;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -33,7 +31,7 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     private WeakReference<LayerView> viewRef;
     private Retrofit retrofit;
     private RxBus bus;
-    private Disposable busSub;
+    private Disposable busSub, dataSub;
 
     private DataSource dataSource;
 
@@ -78,8 +76,7 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     public void handleEvent(Object event) {
         TapEvent tap = (TapEvent) event;
         if(tap != null && getView() != null && tap.getTab() == SELECT_LAYER_TAB) {
-            List<Layer> layerTitles = getLayerTitlesForMeasurement(tap.getMeasurement());
-            getView().updateLayerList(layerTitles);
+            getLayerTitlesForMeasurement(tap.getMeasurement());
         } else if(tap != null && getView() != null && tap.getTab() == SELECT_SUGGESTION) {
             Layer l = searchLayerById(tap.getMeasurement());
             if(!titleSet.contains(l.getTitle())) { //check if not already selected first
@@ -111,26 +108,12 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
             return r;
         }).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(new Observer<Response<ResponseBody>>() {
-                @Override
-                public void onSubscribe(Disposable disposable) {}
-
-                @Override
-                public void onComplete() {}
-
-                @Override
-                public void onError(Throwable e) {
-                    Log.w(getClass().getSimpleName(), e);
-                }
-
-                @Override
-                public void onNext(Response<ResponseBody> r) {
-                    try {
-                        if(getView() != null)
-                            getView().showInfo(r.body().string());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+            .subscribe(r -> {
+                try {
+                    if(getView() != null)
+                        getView().showInfo(r.body().string());
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             });
     }
@@ -200,19 +183,6 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
         }
     }
 
-    /**
-     * Get a list of the identifiers from the measurement and return all titles of corresponding layers
-     * @param measurement String of the measurement that was tapped
-     * @return A list of all titles of the layers belonging to the measurement
-     */
-    @Override
-    public List<Layer> getLayerTitlesForMeasurement(String measurement) {
-        this.measurement = measurement;
-        List<Layer> _layerlist = dataSource.getLayersForMeasurement(measurement);
-        updateSelectedItems(_layerlist);
-        return _layerlist;
-    }
-
     @Override
     public void setMeasurement(String str) {
         measurement = str;
@@ -241,10 +211,10 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
         return viewRef == null ? null : viewRef.get();
     }
 
-    private void updateListView() {
+    private void updateListView() { //Get all layers are those for the current measurement
         if(getView() != null) {
             if (measurement != null)
-                getView().updateLayerList(getLayerTitlesForMeasurement(measurement));
+                getLayerTitlesForMeasurement(measurement); //async call
             else {
                 List<Layer> layer_list = dataSource.getLayers();
                 getView().populateList(layer_list);
@@ -265,6 +235,23 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     private void cleanUp() {
         busSub.dispose();
         busSub = null;
+        dataSub.dispose();
+        dataSub = null;
         bus = null;
+    }
+
+    /**
+     * Get a list of the identifiers from the measurement and return all titles of corresponding layers
+     * @param measurement String of the measurement that was tapped
+     */
+    private void getLayerTitlesForMeasurement(String measurement) {
+        this.measurement = measurement;
+        dataSub = dataSource.getLayersForMeasurement(measurement)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(layers -> {
+                updateSelectedItems(layers);
+                getView().updateLayerList(layers);
+            });
     }
 }

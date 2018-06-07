@@ -30,7 +30,8 @@ public class LayerProvider extends ContentProvider {
     public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         switch(matcher.match(uri)) {
             case SEARCH_SUGGEST:
-                return dao.searchQuery(selectionArgs[0]);
+                String arg = "\'" + selectionArgs[0] + "%\'";
+                return dao.searchQuery(arg);
             default:
                 return null;
         }

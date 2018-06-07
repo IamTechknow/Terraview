@@ -14,6 +14,8 @@ import com.iamtechknow.terraview.model.Measurement;
 import java.util.List;
 import java.util.HashMap;
 
+import io.reactivex.Single;
+
 /**
  * Implementation of a local data source by using loaders to access a SQLite database in the background.
  */
@@ -50,12 +52,12 @@ public class LocalDataSource implements DataSource, LoaderManager.LoaderCallback
 
     //TODO:When this is working, replace it with querying just title column
     @Override
-    public List<Layer> getLayersForMeasurement(String m) {
+    public Single<List<Layer>> getLayersForMeasurement(String m) {
         return db.getMeasureLayerJoinDao().getLayersForMeasurement(m);
     }
 
     @Override
-    public List<Measurement> getMeasurementsForCategory(String c) {
+    public Single<List<Measurement>> getMeasurementsForCategory(String c) {
         return db.getCatMeasureJoinDao().getMeasurementsforCategory(c);
     }
 

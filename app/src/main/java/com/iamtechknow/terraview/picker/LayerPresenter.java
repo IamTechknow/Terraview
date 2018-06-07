@@ -33,6 +33,4 @@ public interface LayerPresenter {
     void setMeasurement(String str);
 
     String getMeasurement();
-
-    List<Layer> getLayerTitlesForMeasurement(String measurement);
 }

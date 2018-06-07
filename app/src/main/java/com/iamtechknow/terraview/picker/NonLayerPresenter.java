@@ -1,9 +1,5 @@
 package com.iamtechknow.terraview.picker;
 
-import com.iamtechknow.terraview.model.Measurement;
-
-import java.util.List;
-
 /**
  * Presenter for the tabs that represent categories and measurements
  * Distinguishes between either view by having views send data type when requesting data
@@ -18,8 +14,6 @@ public interface NonLayerPresenter {
     void emitEvent(String data);
 
     void handleEvent(Object event);
-
-    List<Measurement> getMeasurementList(String category);
 
     void getData();
 

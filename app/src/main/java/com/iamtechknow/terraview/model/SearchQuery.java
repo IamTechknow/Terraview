@@ -2,26 +2,35 @@ package com.iamtechknow.terraview.model;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
 
 import static android.app.SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA;
 import static android.app.SearchManager.SUGGEST_COLUMN_TEXT_1;
 
 @Entity(tableName = "search")
 public class SearchQuery {
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
+    @NonNull
     @ColumnInfo(name = "_id")
-    private final int id;
+    private int id;
 
     @ColumnInfo(name = SUGGEST_COLUMN_TEXT_1)
-    private final String suggestion;
+    private String title;
 
     @ColumnInfo(name = SUGGEST_COLUMN_INTENT_EXTRA_DATA)
-    private final String layerId;
+    private String layerId;
 
-    public SearchQuery(int id, String suggestion, String layerId) {
+    @Ignore
+    public SearchQuery(String title, String layerId) {
+        this.title = title;
+        this.layerId = layerId;
+    }
+
+    public SearchQuery(int id, String title, String layerId) {
         this.id = id;
-        this.suggestion = suggestion;
+        this.title = title;
         this.layerId = layerId;
     }
 
@@ -29,8 +38,8 @@ public class SearchQuery {
         return id;
     }
 
-    public String getSuggestion() {
-        return suggestion;
+    public String getTitle() {
+        return title;
     }
 
     public String getLayerId() {

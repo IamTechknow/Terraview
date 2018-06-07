@@ -10,15 +10,17 @@ import com.iamtechknow.terraview.model.Measurement;
 
 import java.util.List;
 
+import io.reactivex.Single;
+
 //Interface to allow obtaining measurements for a given category (and vice versa, but not used here)
 @Dao
 public interface CatMeasureJoinDAO {
     @Insert
     void insert(List<CatMeasureJoin> join);
 
-    @Query("SELECT * FROM category INNER JOIN cat_measure_join ON category.name=cat_measure_join.category WHERE cat_measure_join.measurement=:measurement")
+    @Query("SELECT category.* FROM category INNER JOIN cat_measure_join ON category.name=cat_measure_join.category WHERE cat_measure_join.measurement=:measurement")
     List<Category> getCategoriesforMeasurement(String measurement);
 
-    @Query("SELECT * FROM measurement INNER JOIN cat_measure_join ON measurement.name=cat_measure_join.measurement WHERE cat_measure_join.category=:category")
-    List<Measurement> getMeasurementsforCategory(String category);
+    @Query("SELECT measurement.* FROM measurement INNER JOIN cat_measure_join ON measurement.name=cat_measure_join.measurement WHERE cat_measure_join.category=:category")
+    Single<List<Measurement>> getMeasurementsforCategory(String category);
 }
