@@ -15,4 +15,8 @@ public class Category {
     public String getName() {
         return name;
     }
+
+    public static Category getAllCategory() {
+        return new Category("All");
+    }
 }

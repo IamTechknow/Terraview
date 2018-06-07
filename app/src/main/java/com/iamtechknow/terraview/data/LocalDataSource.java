@@ -6,12 +6,13 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 
+import com.iamtechknow.terraview.model.Category;
 import com.iamtechknow.terraview.model.DataWrapper;
 import com.iamtechknow.terraview.model.Layer;
+import com.iamtechknow.terraview.model.Measurement;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.TreeMap;
+import java.util.List;
+import java.util.HashMap;
 
 /**
  * Implementation of a local data source by using loaders to access a SQLite database in the background.
@@ -21,11 +22,13 @@ public class LocalDataSource implements DataSource, LoaderManager.LoaderCallback
     private LoaderManager manager;
     private LoadCallback loadCallback;
     private LayerLoader loader;
+    private WVDatabase db;
 
     //Data
     private DataWrapper allData;
 
     public LocalDataSource(LoaderManager loadermanager, Context c) {
+        db = WVDatabase.getInstance(c);
         loader = new LayerLoader(c);
         manager = loadermanager;
     }
@@ -41,22 +44,27 @@ public class LocalDataSource implements DataSource, LoaderManager.LoaderCallback
     }
 
     @Override
-    public ArrayList<Layer> getLayers() {
+    public List<Layer> getLayers() {
         return allData != null ? allData.layers : null;
     }
 
     @Override
-    public TreeMap<String, ArrayList<String>> getMeasurements() {
-        return allData != null ? allData.measures : null;
+    public List<Layer> getLayersForMeasurement(Measurement m) {
+        return db.getMeasureLayerJoinDao().getLayersForMeasurement(m.getName());
     }
 
     @Override
-    public TreeMap<String, ArrayList<String>> getCategories() {
+    public List<Measurement> getMeasurementsForCategory(Category c) {
+        return db.getCatMeasureJoinDao().getMeasurementsforCategory(c.getName());
+    }
+
+    @Override
+    public List<Category> getCategories() {
         return allData != null ? allData.cats : null;
     }
 
     @Override
-    public Hashtable<String, Layer> getLayerTable() {
+    public HashMap<String, Layer> getLayerTable() {
         return allData != null ? allData.layerTable : null;
     }
 

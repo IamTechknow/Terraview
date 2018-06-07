@@ -13,7 +13,7 @@ import java.util.List;
 @Dao
 public interface MeasureLayerJoinDAO {
     @Insert
-    void insert(MeasureLayerJoin join);
+    void insert(List<MeasureLayerJoin> join);
 
     @Query("SELECT * FROM measurement INNER JOIN measure_layer_join ON measurement.name=measure_layer_join.measurement WHERE measure_layer_join.layer=:layer")
     List<Measurement> getMeasurementsForLayer(String layer);

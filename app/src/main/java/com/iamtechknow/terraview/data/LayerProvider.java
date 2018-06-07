@@ -15,12 +15,12 @@ public class LayerProvider extends ContentProvider {
     public static final String AUTHORITY = "com.iamtechknow.terraview.LayerProvider";
     private static final int SEARCH_SUGGEST = 0;
 
-    private LayerDatabase db;
+    private SearchDAO dao;
     private UriMatcher matcher;
 
     @Override
     public boolean onCreate() {
-        db = LayerDatabase.getInstance(getContext());
+        dao = WVDatabase.getInstance(getContext()).getSearchQueryDao();
         matcher = new UriMatcher(UriMatcher.NO_MATCH);
         matcher.addURI(AUTHORITY, SearchManager.SUGGEST_URI_PATH_QUERY, SEARCH_SUGGEST);
         return true;
@@ -30,7 +30,7 @@ public class LayerProvider extends ContentProvider {
     public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         switch(matcher.match(uri)) {
             case SEARCH_SUGGEST:
-                return db.searchQuery(selectionArgs[0]);
+                return dao.searchQuery(selectionArgs[0]);
             default:
                 return null;
         }

@@ -28,8 +28,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -107,8 +108,8 @@ public class Utils {
         c.set(Calendar.MILLISECOND, 0);
     }
 
-    public static Hashtable<String, Layer> getLayerTable(ArrayList<Layer> layers) {
-        Hashtable<String, Layer> temp = new Hashtable<>(layers.size());
+    public static HashMap<String, Layer> getLayerTable(List<Layer> layers) {
+        HashMap<String, Layer> temp = new HashMap<>(layers.size());
         for(Layer l : layers)
             temp.put(l.getIdentifier(), l);
         return temp;

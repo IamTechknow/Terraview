@@ -14,7 +14,7 @@ import java.util.List;
 @Dao
 public interface CatMeasureJoinDAO {
     @Insert
-    void insert(CatMeasureJoin join);
+    void insert(List<CatMeasureJoin> join);
 
     @Query("SELECT * FROM category INNER JOIN cat_measure_join ON category.name=cat_measure_join.category WHERE cat_measure_join.measurement=:measurement")
     List<Category> getCategoriesforMeasurement(String measurement);
