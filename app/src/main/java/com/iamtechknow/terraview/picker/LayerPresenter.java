@@ -2,7 +2,7 @@ package com.iamtechknow.terraview.picker;
 
 import com.iamtechknow.terraview.model.Layer;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Presenter for the layer tab of the picker activity.
@@ -18,7 +18,7 @@ public interface LayerPresenter {
 
     void useRetrofit(String description);
 
-    void updateSelectedItems(ArrayList<String> items);
+    void updateSelectedItems(List<Layer> items);
 
     void setItemChecked(int position, boolean isSelected);
 
@@ -34,5 +34,5 @@ public interface LayerPresenter {
 
     String getMeasurement();
 
-    ArrayList<String> getLayerTitlesForMeasurement(String measurement);
+    List<Layer> getLayerTitlesForMeasurement(String measurement);
 }

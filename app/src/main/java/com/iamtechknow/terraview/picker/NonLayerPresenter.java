@@ -1,7 +1,8 @@
 package com.iamtechknow.terraview.picker;
 
-import java.util.ArrayList;
-import java.util.TreeMap;
+import com.iamtechknow.terraview.model.Measurement;
+
+import java.util.List;
 
 /**
  * Presenter for the tabs that represent categories and measurements
@@ -18,11 +19,7 @@ public interface NonLayerPresenter {
 
     void handleEvent(Object event);
 
-    TreeMap<String, ArrayList<String>> getMap(boolean isCategoryTab);
-
-    ArrayList<String> getMeasurementList(String category);
-
-    ArrayList<String> getDefaultList();
+    List<Measurement> getMeasurementList(String category);
 
     void getData();
 

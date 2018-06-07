@@ -1,12 +1,13 @@
 package com.iamtechknow.terraview.picker;
 
 import com.iamtechknow.terraview.data.DataSource;
+import com.iamtechknow.terraview.model.Category;
+import com.iamtechknow.terraview.model.Measurement;
 import com.iamtechknow.terraview.model.TapEvent;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.List;
 
 import io.reactivex.disposables.Disposable;
 
@@ -43,11 +44,6 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
     }
 
     @Override
-    public TreeMap<String, ArrayList<String>> getMap(boolean isCategoryTab) {
-        return dataSource == null ? null : (isCategoryTab ? dataSource.getCategories() : dataSource.getMeasurements());
-    }
-
-    @Override
     public void emitEvent(String data) {
         if(getView() != null) {
             if(getView().isCategoryTab())
@@ -69,21 +65,9 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
     }
 
     @Override
-    public ArrayList<String> getMeasurementList(String category) {
+    public List<Measurement> getMeasurementList(String category) {
         this.category = category;
-        return dataSource.getCategories().get(category);
-    }
-
-    @Override
-    public ArrayList<String> getDefaultList() {
-        ArrayList<String> result = new ArrayList<>();
-        if(getView() != null) {
-            TreeMap<String, ArrayList<String>> map = getMap(getView().isCategoryTab());
-
-            for (Map.Entry<String, ArrayList<String>> e : map.entrySet())
-                result.add(e.getKey());
-        }
-        return result;
+        return dataSource.getMeasurementsForCategory(category);
     }
 
     @Override
@@ -129,5 +113,19 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
         busSub.dispose();
         busSub = null;
         bus = null;
+    }
+
+    //Form the list of strings to show, but we must convert the objects to Strings
+    private ArrayList<String> getDefaultList() {
+        ArrayList<String> result = new ArrayList<>();
+        if(getView() != null) {
+            if(getView().isCategoryTab())
+                for(Category c : dataSource.getCategories())
+                    result.add(c.getName());
+            else
+                for(Measurement m : dataSource.getMeasurementsForCategory(Category.getAllCategory().getName()))
+                    result.add(m.getName());
+        }
+        return result;
     }
 }

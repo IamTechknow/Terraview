@@ -20,7 +20,4 @@ public interface LayerDAO {
 
     @Query("SELECT * FROM layer")
     List<Layer> getLayers();
-
-    @Query("SELECT * FROM layer WHERE measurement = :measure")
-    List<Layer> getLayersForMeasurement(String measure);
 }

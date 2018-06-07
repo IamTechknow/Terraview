@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
@@ -77,7 +78,7 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     public void handleEvent(Object event) {
         TapEvent tap = (TapEvent) event;
         if(tap != null && getView() != null && tap.getTab() == SELECT_LAYER_TAB) {
-            ArrayList<String> layerTitles = getLayerTitlesForMeasurement(tap.getMeasurement());
+            List<Layer> layerTitles = getLayerTitlesForMeasurement(tap.getMeasurement());
             getView().updateLayerList(layerTitles);
         } else if(tap != null && getView() != null && tap.getTab() == SELECT_SUGGESTION) {
             Layer l = searchLayerById(tap.getMeasurement());
@@ -141,14 +142,14 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
      * @param titles The list of titles currently shown on the layer tab
      */
     @Override
-    public void updateSelectedItems(ArrayList<String> titles) {
+    public void updateSelectedItems(List<Layer> titles) {
         titleSet.clear();
         for(Layer l : stack)
             titleSet.add(l.getTitle());
 
         mSelectedPositions.clear();
         for (int i = 0; i < titles.size(); i++)
-            if(titleSet.contains(titles.get(i)))
+            if(titleSet.contains(titles.get(i).getTitle()))
                 setItemChecked(i, true);
     }
 
@@ -165,7 +166,7 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     @Override
     public Layer searchLayerByTitle(String title) {
         if(dataSource != null) {
-            ArrayList<Layer> layers = dataSource.getLayers();
+            List<Layer> layers = dataSource.getLayers();
 
             for (Layer l : layers)
                 if (l.getTitle().equals(title))
@@ -205,16 +206,9 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
      * @return A list of all titles of the layers belonging to the measurement
      */
     @Override
-    public ArrayList<String> getLayerTitlesForMeasurement(String measurement) {
+    public List<Layer> getLayerTitlesForMeasurement(String measurement) {
         this.measurement = measurement;
-        ArrayList<String> id_list = dataSource.getMeasurements().get(measurement), _layerlist = new ArrayList<>();
-
-        for(String id: id_list) {
-            Layer temp = searchLayerById(id);
-            if(temp != null) //Don't show items that aren't in GIBS XML
-                _layerlist.add(temp.getTitle());
-        }
-
+        List<Layer> _layerlist = dataSource.getLayersForMeasurement(measurement);
         updateSelectedItems(_layerlist);
         return _layerlist;
     }
@@ -252,9 +246,7 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
             if (measurement != null)
                 getView().updateLayerList(getLayerTitlesForMeasurement(measurement));
             else {
-                ArrayList<String> layer_list = new ArrayList<>();
-                for (Layer l: dataSource.getLayers())
-                    layer_list.add(l.getTitle());
+                List<Layer> layer_list = dataSource.getLayers();
                 getView().populateList(layer_list);
                 updateSelectedItems(layer_list);
             }

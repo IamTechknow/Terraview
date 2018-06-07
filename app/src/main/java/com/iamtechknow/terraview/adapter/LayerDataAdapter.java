@@ -11,19 +11,17 @@ import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.model.Layer;
 import com.iamtechknow.terraview.picker.LayerPresenter;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class LayerDataAdapter extends RecyclerView.Adapter<LayerDataAdapter.ViewHolder> {
     private LayerPresenter presenter;
-    private ArrayList<String> mItems;
+    private List<Layer> mItems;
 
     /**
      * Set up an empty adapter
      */
     public LayerDataAdapter(LayerPresenter _presenter) {
         super();
-
-        mItems = new ArrayList<>();
         presenter = _presenter;
     }
 
@@ -77,9 +75,9 @@ public class LayerDataAdapter extends RecyclerView.Adapter<LayerDataAdapter.View
      */
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.text.setText(mItems.get(position));
+        holder.text.setText(mItems.get(position).getTitle());
 
-        Layer l = presenter.searchLayerByTitle(mItems.get(position));
+        Layer l = mItems.get(position);
         if(l != null) {
             holder.subtitle.setText(l.getSubtitle());
             holder.icon.setOnClickListener(v -> presenter.useRetrofit(l.getDescription()));
@@ -90,10 +88,10 @@ public class LayerDataAdapter extends RecyclerView.Adapter<LayerDataAdapter.View
 
     @Override
     public int getItemCount() {
-        return mItems.size();
+        return mItems != null ? mItems.size() : 0;
     }
 
-    public void insertList(ArrayList<String> strings) {
+    public void insertList(List<Layer> strings) {
         mItems = strings;
         notifyDataSetChanged();
     }

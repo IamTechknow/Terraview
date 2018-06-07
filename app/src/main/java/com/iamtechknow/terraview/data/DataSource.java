@@ -26,9 +26,9 @@ public interface DataSource {
 
     List<Layer> getLayers();
 
-    List<Layer> getLayersForMeasurement(Measurement m);
+    List<Layer> getLayersForMeasurement(String m);
 
-    List<Measurement> getMeasurementsForCategory(Category c);
+    List<Measurement> getMeasurementsForCategory(String c);
 
     List<Category> getCategories();
 

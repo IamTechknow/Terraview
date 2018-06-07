@@ -48,14 +48,15 @@ public class LocalDataSource implements DataSource, LoaderManager.LoaderCallback
         return allData != null ? allData.layers : null;
     }
 
+    //TODO:When this is working, replace it with querying just title column
     @Override
-    public List<Layer> getLayersForMeasurement(Measurement m) {
-        return db.getMeasureLayerJoinDao().getLayersForMeasurement(m.getName());
+    public List<Layer> getLayersForMeasurement(String m) {
+        return db.getMeasureLayerJoinDao().getLayersForMeasurement(m);
     }
 
     @Override
-    public List<Measurement> getMeasurementsForCategory(Category c) {
-        return db.getCatMeasureJoinDao().getMeasurementsforCategory(c.getName());
+    public List<Measurement> getMeasurementsForCategory(String c) {
+        return db.getCatMeasureJoinDao().getMeasurementsforCategory(c);
     }
 
     @Override

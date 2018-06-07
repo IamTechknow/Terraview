@@ -9,13 +9,13 @@ import android.widget.TextView;
 import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.picker.NonLayerPresenter;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Item adapter for the category and measurement tab RecyclerViews
  */
 public class NonLayerDataAdapter extends RecyclerView.Adapter<NonLayerDataAdapter.ViewHolder> {
-    private ArrayList<String> mItems;
+    private List<String> mItems;
     private NonLayerPresenter presenter;
 
     /**
@@ -24,7 +24,6 @@ public class NonLayerDataAdapter extends RecyclerView.Adapter<NonLayerDataAdapte
     public NonLayerDataAdapter(NonLayerPresenter p) {
         super();
         presenter = p;
-        mItems = new ArrayList<>();
     }
 
     /**
@@ -63,14 +62,14 @@ public class NonLayerDataAdapter extends RecyclerView.Adapter<NonLayerDataAdapte
 
     @Override
     public int getItemCount() {
-        return mItems.size();
+        return mItems != null ? mItems.size() : 0;
     }
 
     /**
      * Called at the appropriate time by the presenter in the fragments to insert a string list
      * @param strings the data to show
      */
-    public void insertList(ArrayList<String> strings) {
+    public void insertList(List<String> strings) {
         mItems = strings;
         notifyDataSetChanged();
     }
