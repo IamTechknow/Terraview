@@ -13,10 +13,10 @@ import java.util.List;
 @Dao
 public interface LayerDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(Layer... layers);
+    void insert(List<Layer> layers);
 
     @Delete
-    void delete(Layer... layers);
+    void delete(List<Layer> layers);
 
     @Query("SELECT * FROM layer")
     List<Layer> getLayers();

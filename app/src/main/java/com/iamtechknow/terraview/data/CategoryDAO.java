@@ -13,10 +13,10 @@ import java.util.List;
 @Dao
 public interface CategoryDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(Category... categories);
+    void insert(List<Category> categories);
 
     @Delete
-    void delete(Category... categories);
+    void delete(List<Category> categories);
 
     @Query("SELECT * FROM category")
     List<Category> getCategories();

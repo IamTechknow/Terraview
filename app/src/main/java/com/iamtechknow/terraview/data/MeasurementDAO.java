@@ -10,17 +10,15 @@ import com.iamtechknow.terraview.model.Measurement;
 
 import java.util.List;
 
+//DAO to allow inserting and deleting measurements. Joins are defined in the relevant DAO
 @Dao
 public interface MeasurementDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(Measurement... measurements);
+    void insert(List<Measurement> measurements);
 
     @Delete
-    void delete(Measurement... measurements);
+    void delete(List<Measurement> measurements);
 
     @Query("SELECT * FROM measurement")
     List<Measurement> getMeasurements();
-
-    @Query("SELECT * FROM measurement WHERE value = :category")
-    List<Measurement> getMeasurementsForCategory(String category);
 }

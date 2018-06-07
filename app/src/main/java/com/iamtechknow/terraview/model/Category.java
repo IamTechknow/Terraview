@@ -1,20 +1,18 @@
 package com.iamtechknow.terraview.model;
 
-import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
-@Entity(tableName = "category")
+@Entity
 public class Category {
     @PrimaryKey
-    @ColumnInfo(name = "name")
-    private final String categoryName;
+    private final String name;
 
-    public Category(String categoryName) {
-        this.categoryName = categoryName;
+    public Category(String name) {
+        this.name = name;
     }
 
-    public String getCategoryName() {
-        return categoryName;
+    public String getName() {
+        return name;
     }
 }
