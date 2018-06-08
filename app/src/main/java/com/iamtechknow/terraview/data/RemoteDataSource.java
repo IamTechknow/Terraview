@@ -38,7 +38,7 @@ public class RemoteDataSource implements DataSource {
                                 PREFS_FILE = "settings", PREFS_DB_KEY = "last_update";
 
     //Data
-    private WVDatabase db;
+    private TVDatabase db;
     private SharedPreferences prefs;
     private List<Layer> layers;
     private List<Measurement> measurements;
@@ -46,7 +46,7 @@ public class RemoteDataSource implements DataSource {
     private HashMap<String, Layer> layerTable;
 
     public RemoteDataSource(Context c) {
-        db = WVDatabase.getInstance(c);
+        db = TVDatabase.getInstance(c);
         prefs = c.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE);
     }
 
@@ -94,12 +94,12 @@ public class RemoteDataSource implements DataSource {
 
     @Override
     public Single<List<Layer>> getLayersForMeasurement(String m) {
-        return db.getMeasureLayerJoinDao().getLayersForMeasurement(m);
+        return db.getJoinDAO().getLayersForMeasurement(m);
     }
 
     @Override
     public Single<List<Measurement>> getMeasurementsForCategory(String c) {
-        return db.getCatMeasureJoinDao().getMeasurementsforCategory(c);
+        return db.getJoinDAO().getMeasurementsforCategory(c);
     }
 
     @Override
@@ -117,12 +117,12 @@ public class RemoteDataSource implements DataSource {
      */
     private void saveToDB(List<Layer> data, List<Measurement> measures, List<Category> cats,
                           List<MeasureLayerJoin> measureJoins, List<CatMeasureJoin> catJoins, List<SearchQuery> queries) {
-        db.getLayerDao().insert(data);
-        db.getCategoryDao().insert(cats);
-        db.getMeasurementDao().insert(measures);
-        db.getMeasureLayerJoinDao().insert(measureJoins);
-        db.getCatMeasureJoinDao().insert(catJoins);
-        db.getSearchQueryDao().insert(queries);
+        db.getTVDao().insertLayers(data);
+        db.getTVDao().insertCategories(cats);
+        db.getTVDao().insertMeasurements(measures);
+        db.getTVDao().insertQueries(queries);
+        db.getJoinDAO().insertMeasureLayerJoin(measureJoins);
+        db.getJoinDAO().insertCatMeasureJoin(catJoins);
         prefs.edit().putLong(PREFS_DB_KEY, System.currentTimeMillis()).apply();
         db.close();
     }

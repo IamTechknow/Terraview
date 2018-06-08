@@ -55,8 +55,8 @@ public class EventPresenterImpl implements EventPresenter {
         view.clearList();
 
         Single<EventList> observable = currCat == 0 ? client.getOpenEvents() : client.getEventsByCategory(currCat);
-        dataSub = observable.observeOn(Schedulers.io())
-            .subscribeOn(AndroidSchedulers.mainThread())
+        dataSub = observable.subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe(this::onEventsLoaded);
     }
 

@@ -24,13 +24,13 @@ public class LocalDataSource implements DataSource, LoaderManager.LoaderCallback
     private LoaderManager manager;
     private LoadCallback loadCallback;
     private LayerLoader loader;
-    private WVDatabase db;
+    private TVDatabase db;
 
     //Data
     private DataWrapper allData;
 
     public LocalDataSource(LoaderManager loadermanager, Context c) {
-        db = WVDatabase.getInstance(c);
+        db = TVDatabase.getInstance(c);
         loader = new LayerLoader(c);
         manager = loadermanager;
     }
@@ -50,15 +50,14 @@ public class LocalDataSource implements DataSource, LoaderManager.LoaderCallback
         return allData != null ? allData.layers : null;
     }
 
-    //TODO:When this is working, replace it with querying just title column
     @Override
     public Single<List<Layer>> getLayersForMeasurement(String m) {
-        return db.getMeasureLayerJoinDao().getLayersForMeasurement(m);
+        return db.getJoinDAO().getLayersForMeasurement(m);
     }
 
     @Override
     public Single<List<Measurement>> getMeasurementsForCategory(String c) {
-        return db.getCatMeasureJoinDao().getMeasurementsforCategory(c);
+        return db.getJoinDAO().getMeasurementsforCategory(c);
     }
 
     @Override
@@ -71,18 +70,19 @@ public class LocalDataSource implements DataSource, LoaderManager.LoaderCallback
         return allData != null ? allData.layerTable : null;
     }
 
+    @NonNull
     @Override
     public Loader<DataWrapper> onCreateLoader(int id, Bundle args) {
         return loader;
     }
 
     @Override
-    public void onLoadFinished(Loader<DataWrapper> loader, DataWrapper data) {
+    public void onLoadFinished(@NonNull Loader<DataWrapper> loader, DataWrapper data) {
         allData = data;
 
         loadCallback.onDataLoaded();
     }
 
     @Override
-    public void onLoaderReset(Loader<DataWrapper> loader) {}
+    public void onLoaderReset(@NonNull Loader<DataWrapper> loader) {}
 }

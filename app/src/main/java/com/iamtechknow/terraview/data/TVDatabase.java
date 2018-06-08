@@ -13,22 +13,18 @@ import com.iamtechknow.terraview.model.Measurement;
 import com.iamtechknow.terraview.model.SearchQuery;
 
 @Database(entities = {Layer.class, Measurement.class, Category.class, SearchQuery.class, CatMeasureJoin.class, MeasureLayerJoin.class}, version = 1, exportSchema = false)
-public abstract class WVDatabase extends RoomDatabase {
-    private static WVDatabase INSTANCE;
+public abstract class TVDatabase extends RoomDatabase {
+    private static TVDatabase INSTANCE;
 
-    public static WVDatabase getInstance(Context c) {
+    public static TVDatabase getInstance(Context c) {
         if (INSTANCE == null) {
             INSTANCE = Room.databaseBuilder(c.getApplicationContext(),
-                    WVDatabase.class, "layers.sqlite")
+                    TVDatabase.class, "layers.sqlite")
                     .build();
         }
         return INSTANCE;
     }
 
-    public abstract LayerDAO getLayerDao();
-    public abstract MeasurementDAO getMeasurementDao();
-    public abstract CategoryDAO getCategoryDao();
-    public abstract SearchDAO getSearchQueryDao();
-    public abstract CatMeasureJoinDAO getCatMeasureJoinDao();
-    public abstract MeasureLayerJoinDAO getMeasureLayerJoinDao();
+    public abstract TVDao getTVDao();
+    public abstract JoinDAO getJoinDAO();
 }

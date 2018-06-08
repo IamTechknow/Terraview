@@ -14,11 +14,11 @@ public class LayerLoader extends AsyncTaskLoader<DataWrapper> {
     private List<Layer> layers;
     private List<Category> cats;
     private List<Measurement> measures;
-    private WVDatabase db;
+    private TVDatabase db;
 
     public LayerLoader(Context c) {
         super(c);
-        db = WVDatabase.getInstance(c);
+        db = TVDatabase.getInstance(c);
     }
 
     //If the data is cached, use it!
@@ -33,7 +33,7 @@ public class LayerLoader extends AsyncTaskLoader<DataWrapper> {
     //Load stuff in a background thread
     @Override
     public DataWrapper loadInBackground() {
-        return new DataWrapper(db.getLayerDao().getLayers(), db.getCategoryDao().getCategories(), db.getMeasurementDao().getMeasurements());
+        return new DataWrapper(db.getTVDao().getLayers(), db.getTVDao().getCategories(), db.getTVDao().getMeasurements());
     }
 
     @Override

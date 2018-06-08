@@ -1,6 +1,5 @@
 package com.iamtechknow.terraview.model;
 
-import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
@@ -24,34 +23,16 @@ public class Layer implements Parcelable, Comparable<Layer> {
     //Fields for XML/JSON tags that are stored to database
     @PrimaryKey
     @NonNull
-    @ColumnInfo(name = "identifier")
     private String identifier;
 
-    @ColumnInfo(name = "matrix")
     private String tileMatrixSet;
-
-    @ColumnInfo(name = "format")
     private String format;
-
-    @ColumnInfo(name = "title")
     private String title;
-
-    @ColumnInfo(name = "subtitle")
     private String subtitle;
-
-    @ColumnInfo(name = "endDate")
     private String endDate;
-
-    @ColumnInfo(name = "start")
     private String startDate;
-
-    @ColumnInfo(name = "meta")
     private String description;
-
-    @ColumnInfo(name = "palette")
     private String palette;
-
-    @ColumnInfo(name = "isbase")
     private boolean isBaseLayer;
 
     //Unless set all layers are visible by default

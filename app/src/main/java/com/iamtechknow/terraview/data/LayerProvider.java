@@ -15,12 +15,12 @@ public class LayerProvider extends ContentProvider {
     public static final String AUTHORITY = "com.iamtechknow.terraview.LayerProvider";
     private static final int SEARCH_SUGGEST = 0;
 
-    private SearchDAO dao;
+    private TVDao dao;
     private UriMatcher matcher;
 
     @Override
     public boolean onCreate() {
-        dao = WVDatabase.getInstance(getContext()).getSearchQueryDao();
+        dao = TVDatabase.getInstance(getContext()).getTVDao();
         matcher = new UriMatcher(UriMatcher.NO_MATCH);
         matcher.addURI(AUTHORITY, SearchManager.SUGGEST_URI_PATH_QUERY, SEARCH_SUGGEST);
         return true;
