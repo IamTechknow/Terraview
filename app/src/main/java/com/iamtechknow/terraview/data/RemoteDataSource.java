@@ -47,7 +47,6 @@ public class RemoteDataSource implements DataSource {
 
     public RemoteDataSource(Context c) {
         db = WVDatabase.getInstance(c);
-        db.clearAllTables();
         prefs = c.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE);
     }
 
@@ -65,6 +64,7 @@ public class RemoteDataSource implements DataSource {
 
         Observable.just(true).map(aBoolean -> {
             try {
+                db.clearAllTables();
                 Response xmlResponse = client.newCall(request).execute();
                 Response jsonResponse = client.newCall(jsonRequest).execute();
 

@@ -235,8 +235,10 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     private void cleanUp() {
         busSub.dispose();
         busSub = null;
-        dataSub.dispose();
-        dataSub = null;
+        if(dataSub != null) {
+            dataSub.dispose();
+            dataSub = null;
+        }
         bus = null;
     }
 

@@ -29,7 +29,7 @@ public class WVJsonParser {
     private HashMap<String, String> desc_map;
 
     //Join Lists and search queries
-    private ArrayList<CatMeasureJoin> catJoins;
+    private HashSet<CatMeasureJoin> catJoins;
     private ArrayList<MeasureLayerJoin> measureJoins;
     private ArrayList<SearchQuery> queries;
 
@@ -37,7 +37,7 @@ public class WVJsonParser {
         b = new BufferedReader(new InputStreamReader(is));
         categories = new ArrayList<>();
         measurements = new HashSet<>();
-        catJoins = new ArrayList<>();
+        catJoins = new HashSet<>();
         measureJoins = new ArrayList<>();
         queries = new ArrayList<>();
         desc_map = new HashMap<>();
@@ -92,7 +92,7 @@ public class WVJsonParser {
     }
 
     //Get keys, fill category list and all possible category/measurement pairs
-    private void fillCategories(ArrayList<Category> categories, ArrayList<CatMeasureJoin> joins, JsonObject cat_json) {
+    private void fillCategories(ArrayList<Category> categories, HashSet<CatMeasureJoin> joins, JsonObject cat_json) {
         for(String cat : getKeys(cat_json)) {
             categories.add(new Category(cat));
 
@@ -165,7 +165,7 @@ public class WVJsonParser {
     }
 
     public ArrayList<CatMeasureJoin> getCatJoins() {
-        return catJoins;
+        return new ArrayList<>(catJoins);
     }
 
     public ArrayList<MeasureLayerJoin> getMeasureJoins() {

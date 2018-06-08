@@ -6,6 +6,7 @@ import android.arch.persistence.room.Index;
 import android.support.annotation.NonNull;
 
 //Define the relationships between objects in both tables
+//Due to the possibility of duplicates in the JSON, we need to be able to put them in a hash set.
 @Entity(tableName = "cat_measure_join",
     primaryKeys = { "category", "measurement" },
     foreignKeys = {
@@ -27,5 +28,21 @@ public class CatMeasureJoin {
     public CatMeasureJoin(@NonNull String category, @NonNull String measurement) {
         this.category = category;
         this.measurement = measurement;
+    }
+
+    @Override
+    public int hashCode() {
+        return category.hashCode() + measurement.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(this == obj)
+            return true;
+        else if(obj instanceof CatMeasureJoin) {
+            CatMeasureJoin that = (CatMeasureJoin) obj;
+            return category.equals(that.category) && measurement.equals(that.measurement);
+        }
+        return false;
     }
 }

@@ -104,8 +104,10 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
     private void cleanUp() {
         busSub.dispose();
         busSub = null;
-        dataSub.dispose();
-        dataSub = null;
+        if(dataSub != null) {
+            dataSub.dispose();
+            dataSub = null;
+        }
         bus = null;
     }
 

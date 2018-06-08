@@ -6,6 +6,8 @@ import android.arch.persistence.room.Index;
 import android.support.annotation.NonNull;
 
 //Define the relationships between objects in both tables
+//Note that the layer parent column is for layer IDs not titles since titles are not the primary key,
+//so the ID needs to be used to search the hash table for the Layer, just like for searching.
 @Entity(tableName = "measure_layer_join",
     primaryKeys = { "measurement", "layer" },
     foreignKeys = {
