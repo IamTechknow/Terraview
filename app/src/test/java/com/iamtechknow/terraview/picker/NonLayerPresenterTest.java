@@ -4,13 +4,10 @@ import com.iamtechknow.terraview.data.DataSource;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
-
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -23,9 +20,6 @@ public class NonLayerPresenterTest {
 
     @Mock
     private DataSource data;
-
-    @Captor
-    private ArgumentCaptor<ArrayList<String>> captor;
 
     private NonLayerPresenterImpl presenter;
 
@@ -44,7 +38,7 @@ public class NonLayerPresenterTest {
 
         //When data has been loaded, the first two tabs display the data
         presenter.onDataLoaded();
-        verify(view).insertList(captor.capture());
+        verify(view).insertList(any());
         presenter.detachView();
     }
 
@@ -57,7 +51,7 @@ public class NonLayerPresenterTest {
 
         //When data loaded, presenter knows to insert measurement lists
         presenter.onDataLoaded();
-        verify(view).insertMeasurements(captor.capture());
+        verify(view).insertMeasurements(any());
         presenter.detachView();
     }
 }

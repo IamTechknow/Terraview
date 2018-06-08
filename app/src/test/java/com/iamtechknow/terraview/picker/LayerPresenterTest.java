@@ -6,8 +6,6 @@ import com.iamtechknow.terraview.data.DataSource;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -17,6 +15,7 @@ import io.reactivex.android.plugins.RxAndroidPlugins;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -32,9 +31,6 @@ public class LayerPresenterTest {
 
     @Mock
     private SparseBooleanArray array;
-
-    @Captor
-    private ArgumentCaptor<ArrayList<String>> captor;
 
     private LayerPresenterImpl presenter;
 
@@ -58,20 +54,7 @@ public class LayerPresenterTest {
 
         //Verify view has switched to layer tab and displays all layers
         verify(view, times(0)).updateLayerList(null);
-        verify(view).populateList(captor.capture());
-        presenter.detachView();
-    }
-
-    @Test
-    public void testRetrofitAndShowInfo() {
-        //When info icon is tapped
-        presenter.useRetrofit("modis/Areas_NoData");
-
-        String expectedHTML = "\n" + //HTML can be long, this one is the shortest possible
-                "      <h1 id=\"modis-terra-aqua-areas-of-no-data\">MODIS (Terra/Aqua) Areas of No Data</h1>\n" +
-                "<p>The MODIS Areas of No Data (Terra/Aqua) layer shows the areas on the earth in which the Terra or Aqua satellites have not covered on that particular day.</p>\n" +
-                "\n";
-        verify(view).showInfo(expectedHTML); //Verify expected HTML response
+        verify(view).populateList(any());
         presenter.detachView();
     }
 }

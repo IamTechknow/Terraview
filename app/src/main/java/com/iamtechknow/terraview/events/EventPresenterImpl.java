@@ -123,7 +123,8 @@ public class EventPresenterImpl implements EventPresenter {
         return currCat;
     }
 
-    private void onEventsLoaded(EventList data) {
+    @Override
+    public void onEventsLoaded(EventList data) {
         view.insertList(data.list);
     }
 }

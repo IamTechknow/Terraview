@@ -3,12 +3,11 @@ package com.iamtechknow.terraview.events;
 import com.google.android.gms.maps.model.LatLng;
 import com.iamtechknow.terraview.data.EONET;
 import com.iamtechknow.terraview.model.Event;
+import com.iamtechknow.terraview.model.EventList;
 import com.iamtechknow.terraview.picker.RxBus;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -32,9 +31,6 @@ public class EventPresenterTest {
 
     @Mock
     private Subject<Object> subject;
-
-    @Captor
-    private ArgumentCaptor<Event> eventCaptor;
 
     private EventPresenterImpl presenter;
 
@@ -62,7 +58,7 @@ public class EventPresenterTest {
 
         //Call the presenter callback to mock successful parsing
         doAnswer(invocation -> {
-            presenter.onEventsLoaded(events);
+            presenter.onEventsLoaded(new EventList(events));
             return null;
         }).when(eonet).getOpenEvents();
 
@@ -81,12 +77,12 @@ public class EventPresenterTest {
             events.add(event);
 
         doAnswer(invocation -> {
-            presenter.onEventsLoaded(events);
+            presenter.onEventsLoaded(new EventList(events));
             return null;
         }).when(eonet).getClosedEvents(0, 1);
 
         doAnswer(invocation -> {
-            presenter.onEventsLoaded(moreEvents);
+            presenter.onEventsLoaded(new EventList(moreEvents));
             return null;
         }).when(eonet).getClosedEvents(0, 10);
 
