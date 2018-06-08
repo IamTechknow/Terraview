@@ -9,5 +9,5 @@ import retrofit2.http.Path;
 //foo.fetchdata(modis, CorrectedReflectance) should yield /config/metadata/modis/CorrectedReflectance.html
 public interface MetadataAPI {
     @GET("/config/metadata/{source}/{metadata}.html")
-    Call<ResponseBody> fetchData(@Path("source") String source, @Path("metadata") String meta);
+    Call<ResponseBody> fetchData(@Path(value = "source", encoded = true) String source, @Path("metadata") String meta);
 }

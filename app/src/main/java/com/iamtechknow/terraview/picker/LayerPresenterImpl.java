@@ -96,7 +96,8 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
             return;
 
         MetadataAPI api = retrofit.create(MetadataAPI.class);
-        String[] temp = description.split("/"); //must split data for URL to work
+        int last_slash = description.lastIndexOf('/');
+        String[] temp = { description.substring(0, last_slash), description.substring(last_slash + 1)}; //must split data at the last / for URL to work
         Call<ResponseBody> result = api.fetchData(temp[0], temp[1]);
         Observable.just(result).map(call -> {
             Response<ResponseBody> r = null;
@@ -110,7 +111,7 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(r -> {
                 try {
-                    if(getView() != null)
+                    if(getView() != null && r.body() != null)
                         getView().showInfo(r.body().string());
                 } catch (IOException e) {
                     e.printStackTrace();
