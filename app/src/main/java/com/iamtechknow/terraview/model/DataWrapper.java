@@ -2,16 +2,16 @@ package com.iamtechknow.terraview.model;
 
 import com.iamtechknow.terraview.util.Utils;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.TreeMap;
+import java.util.List;
+import java.util.HashMap;
 
 public class DataWrapper {
-    public ArrayList<Layer> layers;
-    public TreeMap<String, ArrayList<String>> cats, measures;
-    public Hashtable<String, Layer> layerTable;
+    public final List<Layer> layers;
+    public final List<Category> cats;
+    public final List<Measurement> measures;
+    public final HashMap<String, Layer> layerTable;
 
-    public DataWrapper(ArrayList<Layer> _layers, TreeMap<String, ArrayList<String>> _cats, TreeMap<String, ArrayList<String>> _measures) {
+    public DataWrapper(List<Layer> _layers, List<Category> _cats, List<Measurement> _measures) {
         layers = _layers;
         cats = _cats;
         measures = _measures;

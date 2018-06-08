@@ -3,6 +3,7 @@ package com.iamtechknow.terraview.events;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -61,7 +62,7 @@ public class EventViewImpl extends Fragment implements EventView {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(RESTORE_CAT, presenter.getCurrCategory());
         outState.putBoolean(RESTORE_CLOSED, showingClosed);
@@ -94,11 +95,11 @@ public class EventViewImpl extends Fragment implements EventView {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_tabs, container, false);
 
         empty_view = rootView.findViewById(R.id.empty_view);
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
+        mRecyclerView = rootView.findViewById(R.id.recycler_view);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         adapter = new EventAdapter(presenter);

@@ -1,26 +1,29 @@
 package com.iamtechknow.terraview.data;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
+import com.iamtechknow.terraview.model.CatMeasureJoin;
+import com.iamtechknow.terraview.model.Category;
 import com.iamtechknow.terraview.model.Layer;
+import com.iamtechknow.terraview.model.MeasureLayerJoin;
+import com.iamtechknow.terraview.model.Measurement;
+import com.iamtechknow.terraview.model.SearchQuery;
 import com.iamtechknow.terraview.util.Utils;
 
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.TreeMap;
+import java.util.HashMap;
+import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import io.reactivex.Observable;
-import io.reactivex.Observer;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -35,15 +38,15 @@ public class RemoteDataSource implements DataSource {
                                 PREFS_FILE = "settings", PREFS_DB_KEY = "last_update";
 
     //Data
-    private LayerDatabase db;
+    private TVDatabase db;
     private SharedPreferences prefs;
-    private ArrayList<Layer> layers;
-    private TreeMap<String, ArrayList<String>> categories, measurements;
-    private Hashtable<String, Layer> layerTable;
+    private List<Layer> layers;
+    private List<Measurement> measurements;
+    private List<Category> categories;
+    private HashMap<String, Layer> layerTable;
 
     public RemoteDataSource(Context c) {
-        db = LayerDatabase.getInstance(c);
-        db.reset();
+        db = TVDatabase.getInstance(c);
         prefs = c.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE);
     }
 
@@ -52,15 +55,16 @@ public class RemoteDataSource implements DataSource {
      * Uses an observable to load the data in a background thread, then calls callbacks on the subscriber
      * @param callback Callbacks from the presenter to indicate completion or failure
      */
+    @SuppressLint("CheckResult")
     @Override
     public void loadData(@NonNull LoadCallback callback) {
         OkHttpClient client = new OkHttpClient();
-
         Request request = new Request.Builder().url(XML_METADATA).build();
         Request jsonRequest = new Request.Builder().url(JSON_METADATA).build();
 
         Observable.just(true).map(aBoolean -> {
             try {
+                db.clearAllTables();
                 Response xmlResponse = client.newCall(request).execute();
                 Response jsonResponse = client.newCall(jsonRequest).execute();
 
@@ -70,64 +74,55 @@ public class RemoteDataSource implements DataSource {
                 layers = reader.getResult();
                 layerTable = Utils.getLayerTable(layers);
                 parser.parse(layers, layerTable);
-                measurements = parser.getMeasurementMap();
-                categories = parser.getCategoryMap();
+                measurements = parser.getMeasurements();
+                categories = parser.getCategories();
 
-                saveToDB(layers, measurements, categories);
+                saveToDB(layers, measurements, categories, parser.getMeasureJoins(), parser.getCatJoins(), parser.getQueries());
             } catch (IOException | ParserConfigurationException | SAXException e) {
                 e.printStackTrace();
             }
             return true;
         }).subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(new Observer<Boolean>() {
-              @Override
-              public void onSubscribe(Disposable disposable) {}
-
-              @Override
-              public void onComplete() {
-                  callback.onDataLoaded();
-              }
-
-              @Override
-              public void onError(Throwable e) {
-                  Log.e(getClass().getSimpleName(), e.getMessage());
-                  callback.onDataNotAvailable();
-              }
-
-              @Override
-              public void onNext(Boolean b) {}
-          });
+          .subscribe(aBoolean -> callback.onDataLoaded());
     }
 
     @Override
-    public ArrayList<Layer> getLayers() {
+    public List<Layer> getLayers() {
         return layers;
     }
 
     @Override
-    public TreeMap<String, ArrayList<String>> getMeasurements() {
-        return measurements;
+    public Single<List<Layer>> getLayersForMeasurement(String m) {
+        return db.getJoinDAO().getLayersForMeasurement(m);
     }
 
     @Override
-    public TreeMap<String, ArrayList<String>> getCategories() {
+    public Single<List<Measurement>> getMeasurementsForCategory(String c) {
+        return db.getJoinDAO().getMeasurementsforCategory(c);
+    }
+
+    @Override
+    public List<Category> getCategories() {
         return categories;
     }
 
     @Override
-    public Hashtable<String, Layer> getLayerTable() {
+    public HashMap<String, Layer> getLayerTable() {
         return layerTable;
     }
 
     /**
      * Helper function to save layer data to local database
-     * @param data The parsed data
      */
-    private void saveToDB(ArrayList<Layer> data, TreeMap<String, ArrayList<String>> measures, TreeMap<String, ArrayList<String>> cats) {
-        db.insertLayers(data);
-        db.insertCategories(cats);
-        db.insertMeasurements(measures);
+    private void saveToDB(List<Layer> data, List<Measurement> measures, List<Category> cats,
+                          List<MeasureLayerJoin> measureJoins, List<CatMeasureJoin> catJoins, List<SearchQuery> queries) {
+        db.getTVDao().insertLayers(data);
+        db.getTVDao().insertCategories(cats);
+        db.getTVDao().insertMeasurements(measures);
+        db.getTVDao().insertQueries(queries);
+        db.getJoinDAO().insertMeasureLayerJoin(measureJoins);
+        db.getJoinDAO().insertCatMeasureJoin(catJoins);
         prefs.edit().putLong(PREFS_DB_KEY, System.currentTimeMillis()).apply();
         db.close();
     }

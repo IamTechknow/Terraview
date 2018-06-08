@@ -50,7 +50,7 @@ public class CurrLayerAdapter extends RecyclerView.Adapter<CurrLayerAdapter.Curr
         //For drag handle, Call drag listener to start a drag when image is pressed down
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN)
+            if(event.getAction() == MotionEvent.ACTION_DOWN)
                 mDragListener.onStartDrag(this);
             return false;
         }

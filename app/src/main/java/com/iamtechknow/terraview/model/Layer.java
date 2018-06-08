@@ -1,5 +1,8 @@
 package com.iamtechknow.terraview.model;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
@@ -11,36 +14,52 @@ import java.util.Locale;
 
 /**
  * POGO (Plain old Java object) that represents the XML structure for a layer in WMTSCapabilities.xml
+ * Also defines a one-to-many relationship of measurements with layers.
  */
+@Entity
 public class Layer implements Parcelable, Comparable<Layer> {
     public static final int VISIBLE = 0, TRANSPARENT = 1, INVISIBLE = 2;
 
     //Fields for XML/JSON tags that are stored to database
-    private String identifier, tileMatrixSet, format, title, subtitle, endDate, startDate, description, palette;
+    @PrimaryKey
+    @NonNull
+    private String identifier;
+
+    private String tileMatrixSet;
+    private String format;
+    private String title;
+    private String subtitle;
+    private String endDate;
+    private String startDate;
+    private String description;
+    private String palette;
     private boolean isBaseLayer;
 
     //Unless set all layers are visible by default
+    @Ignore
     private int visibility;
 
     //ISO 8601 date format
     private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
+    @Ignore
     public Layer() {}
 
-    public Layer(String _identifier, String matrixSet, String _format, String _title, String sub, String end, String start, String _description, String _palette, boolean isBase) {
-        identifier = _identifier;
-        tileMatrixSet = matrixSet;
-        format = _format;
-        title = _title;
-        subtitle = sub;
-        endDate = end;
-        startDate = start;
-        description = _description;
-        palette = _palette;
-        isBaseLayer = isBase;
+    public Layer(@NonNull String identifier, String tileMatrixSet, String format, String title, String subtitle, String endDate, String startDate, String description, String palette, boolean isBaseLayer) {
+        this.identifier = identifier;
+        this.tileMatrixSet = tileMatrixSet;
+        this.format = format;
+        this.title = title;
+        this.subtitle = subtitle;
+        this.endDate = endDate;
+        this.startDate = startDate;
+        this.description = description;
+        this.palette = palette;
+        this.isBaseLayer = isBaseLayer;
         visibility = VISIBLE;
     }
 
+    @Ignore
     protected Layer(Parcel in) {
         identifier = in.readString();
         tileMatrixSet = in.readString();
@@ -67,11 +86,12 @@ public class Layer implements Parcelable, Comparable<Layer> {
         }
     };
 
+    @NonNull
     public String getIdentifier() {
         return identifier;
     }
 
-    public void setIdentifier(String identifier) {
+    public void setIdentifier(@NonNull String identifier) {
         this.identifier = identifier;
     }
 
@@ -179,7 +199,7 @@ public class Layer implements Parcelable, Comparable<Layer> {
 
     @Override
     public int describeContents() {
-        return hashCode();
+        return 0;
     }
 
     @Override

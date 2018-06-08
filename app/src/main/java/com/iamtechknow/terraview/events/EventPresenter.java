@@ -1,6 +1,7 @@
 package com.iamtechknow.terraview.events;
 
 import com.iamtechknow.terraview.model.Event;
+import com.iamtechknow.terraview.model.EventList;
 
 public interface EventPresenter {
     void detachView();
@@ -18,4 +19,6 @@ public interface EventPresenter {
     void restoreConfig(boolean showClosed, int cat);
 
     int getCurrCategory();
+
+    void onEventsLoaded(EventList data);
 }

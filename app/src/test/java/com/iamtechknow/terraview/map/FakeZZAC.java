@@ -3,13 +3,13 @@ package com.iamtechknow.terraview.map;
 import android.os.IBinder;
 import android.os.RemoteException;
 
-import com.google.android.gms.maps.model.internal.zzw;
+import com.google.android.gms.internal.maps.zzac;
 
 /**
  * A fake object used only for mocking and testing purposes to create a TileProvider.
  * This runs on an unit testing JVM and not on Android
  */
-public class FakeZZW implements zzw {
+public class FakeZZAC implements zzac {
     @Override
     public void remove() throws RemoteException {}
 
@@ -38,12 +38,12 @@ public class FakeZZW implements zzw {
     }
 
     @Override
-    public boolean zza(zzw zzw) throws RemoteException {
+    public boolean zza(zzac zzac) throws RemoteException {
         return false;
     }
 
     @Override
-    public int hashCodeRemote() throws RemoteException {
+    public int zzi() throws RemoteException {
         return 0;
     }
 

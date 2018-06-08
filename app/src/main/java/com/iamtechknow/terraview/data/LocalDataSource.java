@@ -6,12 +6,15 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 
+import com.iamtechknow.terraview.model.Category;
 import com.iamtechknow.terraview.model.DataWrapper;
 import com.iamtechknow.terraview.model.Layer;
+import com.iamtechknow.terraview.model.Measurement;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.TreeMap;
+import java.util.List;
+import java.util.HashMap;
+
+import io.reactivex.Single;
 
 /**
  * Implementation of a local data source by using loaders to access a SQLite database in the background.
@@ -21,11 +24,13 @@ public class LocalDataSource implements DataSource, LoaderManager.LoaderCallback
     private LoaderManager manager;
     private LoadCallback loadCallback;
     private LayerLoader loader;
+    private TVDatabase db;
 
     //Data
     private DataWrapper allData;
 
     public LocalDataSource(LoaderManager loadermanager, Context c) {
+        db = TVDatabase.getInstance(c);
         loader = new LayerLoader(c);
         manager = loadermanager;
     }
@@ -41,37 +46,43 @@ public class LocalDataSource implements DataSource, LoaderManager.LoaderCallback
     }
 
     @Override
-    public ArrayList<Layer> getLayers() {
+    public List<Layer> getLayers() {
         return allData != null ? allData.layers : null;
     }
 
     @Override
-    public TreeMap<String, ArrayList<String>> getMeasurements() {
-        return allData != null ? allData.measures : null;
+    public Single<List<Layer>> getLayersForMeasurement(String m) {
+        return db.getJoinDAO().getLayersForMeasurement(m);
     }
 
     @Override
-    public TreeMap<String, ArrayList<String>> getCategories() {
+    public Single<List<Measurement>> getMeasurementsForCategory(String c) {
+        return db.getJoinDAO().getMeasurementsforCategory(c);
+    }
+
+    @Override
+    public List<Category> getCategories() {
         return allData != null ? allData.cats : null;
     }
 
     @Override
-    public Hashtable<String, Layer> getLayerTable() {
+    public HashMap<String, Layer> getLayerTable() {
         return allData != null ? allData.layerTable : null;
     }
 
+    @NonNull
     @Override
     public Loader<DataWrapper> onCreateLoader(int id, Bundle args) {
         return loader;
     }
 
     @Override
-    public void onLoadFinished(Loader<DataWrapper> loader, DataWrapper data) {
+    public void onLoadFinished(@NonNull Loader<DataWrapper> loader, DataWrapper data) {
         allData = data;
 
         loadCallback.onDataLoaded();
     }
 
     @Override
-    public void onLoaderReset(Loader<DataWrapper> loader) {}
+    public void onLoaderReset(@NonNull Loader<DataWrapper> loader) {}
 }

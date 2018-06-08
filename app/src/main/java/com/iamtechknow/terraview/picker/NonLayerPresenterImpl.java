@@ -1,14 +1,15 @@
 package com.iamtechknow.terraview.picker;
 
 import com.iamtechknow.terraview.data.DataSource;
+import com.iamtechknow.terraview.model.Category;
 import com.iamtechknow.terraview.model.TapEvent;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.TreeMap;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.iamtechknow.terraview.picker.LayerActivity.SELECT_LAYER_TAB;
 import static com.iamtechknow.terraview.picker.LayerActivity.SELECT_MEASURE_TAB;
@@ -17,7 +18,7 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
     private WeakReference<NonLayerView> viewRef;
     private DataSource dataSource;
     private RxBus bus;
-    private Disposable busSub;
+    private Disposable busSub, dataSub;
 
     //Used for state restoration in config change
     private String category;
@@ -25,6 +26,7 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
     public NonLayerPresenterImpl(RxBus _bus, DataSource source) {
         dataSource = source;
         bus = _bus;
+        category = Category.getAllCategory().getName();
     }
 
     @Override
@@ -40,11 +42,6 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
             viewRef = null;
         }
         cleanUp();
-    }
-
-    @Override
-    public TreeMap<String, ArrayList<String>> getMap(boolean isCategoryTab) {
-        return dataSource == null ? null : (isCategoryTab ? dataSource.getCategories() : dataSource.getMeasurements());
     }
 
     @Override
@@ -65,25 +62,7 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
     public void handleEvent(Object event) {
         TapEvent tap = (TapEvent) event;
         if(tap != null && tap.getTab() == SELECT_MEASURE_TAB && getView() != null && !getView().isCategoryTab())
-            getView().insertMeasurements(getMeasurementList(tap.getCategory()));
-    }
-
-    @Override
-    public ArrayList<String> getMeasurementList(String category) {
-        this.category = category;
-        return dataSource.getCategories().get(category);
-    }
-
-    @Override
-    public ArrayList<String> getDefaultList() {
-        ArrayList<String> result = new ArrayList<>();
-        if(getView() != null) {
-            TreeMap<String, ArrayList<String>> map = getMap(getView().isCategoryTab());
-
-            for (Map.Entry<String, ArrayList<String>> e : map.entrySet())
-                result.add(e.getKey());
-        }
-        return result;
+            getMeasurementListAndInsert(tap.getCategory());
     }
 
     @Override
@@ -102,23 +81,20 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
     }
 
     /**
-     * Data is loaded. Either have the view load the default list (all measurements/categories)
-     * or have the measurement tab load current measurements due to config change
+     * Data is loaded. Load categories or measurements from the category
      */
     @Override
     public void onDataLoaded() {
         if(getView() != null) {
             if(!getView().isCategoryTab() && category != null)
-                getView().insertMeasurements(getMeasurementList(category));
+                getMeasurementListAndInsert(category);
             else
-                getView().insertList(getDefaultList());
+                getView().insertList(getCategoryList());
         }
     }
 
     @Override
-    public void onDataNotAvailable() {
-
-    }
+    public void onDataNotAvailable() {}
 
     private NonLayerView getView() {
         return viewRef == null ? null : viewRef.get();
@@ -128,6 +104,28 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
     private void cleanUp() {
         busSub.dispose();
         busSub = null;
+        if(dataSub != null) {
+            dataSub.dispose();
+            dataSub = null;
+        }
         bus = null;
+    }
+
+    //Form the list of categories to show, but we must convert the objects to Strings
+    private ArrayList<String> getCategoryList() {
+        ArrayList<String> result = new ArrayList<>();
+        if(getView() != null) {
+            for(Category c : dataSource.getCategories())
+                result.add(c.getName());
+        }
+        return result;
+    }
+
+    private void getMeasurementListAndInsert(String category) {
+        this.category = category;
+        dataSub = dataSource.getMeasurementsForCategory(category)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(getView()::insertMeasurements);
     }
 }

@@ -17,6 +17,7 @@ import com.iamtechknow.terraview.model.Layer;
 import com.iamtechknow.terraview.util.Utils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class LayerFragment extends Fragment implements LayerView {
     private static final String MEAS_EXTRA = "measurement";
@@ -80,12 +81,12 @@ public class LayerFragment extends Fragment implements LayerView {
      * @param list List of titles from all available layers
      */
     @Override
-    public void populateList(ArrayList<String> list) {
+    public void populateList(List<Layer> list) {
         adapter.insertList(list);
     }
 
     @Override
-    public void updateLayerList(ArrayList<String> list) {
+    public void updateLayerList(List<Layer> list) {
         adapter.insertList(list);
     }
 

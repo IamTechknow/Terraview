@@ -2,11 +2,14 @@ package com.iamtechknow.terraview.data;
 
 import android.support.annotation.NonNull;
 
+import com.iamtechknow.terraview.model.Category;
 import com.iamtechknow.terraview.model.Layer;
+import com.iamtechknow.terraview.model.Measurement;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.TreeMap;
+import java.util.HashMap;
+import java.util.List;
+
+import io.reactivex.Single;
 
 /**
  * Contract that defines required APIs for a layer data source,
@@ -23,11 +26,13 @@ public interface DataSource {
 
     void loadData(@NonNull LoadCallback callback);
 
-    ArrayList<Layer> getLayers();
+    List<Layer> getLayers();
 
-    TreeMap<String, ArrayList<String>> getMeasurements();
+    Single<List<Layer>> getLayersForMeasurement(String m);
 
-    TreeMap<String, ArrayList<String>> getCategories();
+    Single<List<Measurement>> getMeasurementsForCategory(String c);
 
-    Hashtable<String, Layer> getLayerTable();
+    List<Category> getCategories();
+
+    HashMap<String, Layer> getLayerTable();
 }

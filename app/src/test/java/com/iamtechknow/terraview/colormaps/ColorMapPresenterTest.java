@@ -12,7 +12,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 
-import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.plugins.RxAndroidPlugins;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
@@ -57,7 +57,7 @@ public class ColorMapPresenterTest {
     @Test
     public void testShowColorMap() {
         //When request for colormap is made
-        when(api.fetchData("OMI_Aerosol_Index")).thenReturn(Observable.just(data));
+        when(api.fetchData("OMI_Aerosol_Index")).thenReturn(Single.just(data));
         presenter.parseColorMap("OMI_Aerosol_Index");
 
         //View has received colormap data to draw canvas

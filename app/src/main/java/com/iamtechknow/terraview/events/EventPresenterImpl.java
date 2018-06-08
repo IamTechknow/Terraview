@@ -1,17 +1,18 @@
 package com.iamtechknow.terraview.events;
 
 import com.iamtechknow.terraview.data.EONET;
-import com.iamtechknow.terraview.model.Category;
 import com.iamtechknow.terraview.model.Event;
+import com.iamtechknow.terraview.model.EventList;
 import com.iamtechknow.terraview.model.TapEvent;
 import com.iamtechknow.terraview.picker.RxBus;
 import com.iamtechknow.terraview.util.Utils;
 
-import java.util.ArrayList;
-
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
-public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
+public class EventPresenterImpl implements EventPresenter {
     private EventView view;
     private Disposable sub, dataSub;
     private RxBus bus;
@@ -26,7 +27,6 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
     public EventPresenterImpl(RxBus _bus, EventView v, EONET e) {
         view = v;
         client = e;
-        client.setCallback(this);
         bus = _bus;
         sub = _bus.toObserverable().subscribe(this::handleEvent);
     }
@@ -53,7 +53,11 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
         loadedEvents = true;
         showingClosed = false;
         view.clearList();
-        dataSub = currCat == 0 ? client.getOpenEvents() : client.getEventsByCategory(currCat);
+
+        Single<EventList> observable = currCat == 0 ? client.getOpenEvents() : client.getEventsByCategory(currCat);
+        dataSub = observable.subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(this::onEventsLoaded);
     }
 
     //Handle the event passed when a category is tapped
@@ -65,12 +69,17 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
             if(e.getTab() == EventActivity.SELECT_EVENT_TAB) {
                 currCat = e.getArg();
                 view.clearList();
+
+                Single<EventList> observable;
                 if(showingClosed)
-                    dataSub = client.getClosedEvents(currCat, view.getEventLimit());
+                    observable = client.getClosedEvents(currCat, view.getEventLimit());
                 else if(currCat == 0)
-                    dataSub = client.getOpenEvents();
+                    observable = client.getOpenEvents();
                 else
-                    dataSub = client.getEventsByCategory(currCat);
+                    observable = client.getEventsByCategory(currCat);
+                dataSub = observable.observeOn(Schedulers.io())
+                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::onEventsLoaded);
             }
         }
     }
@@ -97,7 +106,10 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
     public void presentClosed(int num) {
         showingClosed = true;
         view.clearList();
-        dataSub = client.getClosedEvents(currCat, num);
+        dataSub = client.getClosedEvents(currCat, num)
+            .observeOn(Schedulers.io())
+            .subscribeOn(AndroidSchedulers.mainThread())
+            .subscribe(this::onEventsLoaded);
     }
 
     @Override
@@ -112,10 +124,7 @@ public class EventPresenterImpl implements EventPresenter, EONET.LoadCallback {
     }
 
     @Override
-    public void onEventsLoaded(ArrayList<Event> data) {
-        view.insertList(data);
+    public void onEventsLoaded(EventList data) {
+        view.insertList(data.list);
     }
-
-    @Override
-    public void onCategoriesLoaded(ArrayList<Category> data) {}
 }

@@ -4,22 +4,19 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
+//Relationships with categories and layers are defined in the Join models and DAOs
 @Entity
-public class Category {
+public class Measurement {
     @PrimaryKey
     @NonNull
     private final String name;
 
-    public Category(@NonNull String name) {
+    public Measurement(@NonNull String name) {
         this.name = name;
     }
 
     @NonNull
     public String getName() {
         return name;
-    }
-
-    public static Category getAllCategory() {
-        return new Category("All");
     }
 }

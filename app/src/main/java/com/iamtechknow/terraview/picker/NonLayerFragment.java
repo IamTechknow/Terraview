@@ -12,8 +12,10 @@ import android.view.ViewGroup;
 import com.iamtechknow.terraview.Injection;
 import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.adapter.NonLayerDataAdapter;
+import com.iamtechknow.terraview.model.Measurement;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class NonLayerFragment extends Fragment implements NonLayerView {
     public static final String EXTRA_ARG = "arg", CAT_EXTRA = "category";
@@ -75,13 +77,16 @@ public class NonLayerFragment extends Fragment implements NonLayerView {
 
     //Called when presenter has finished loading data, set up lists
     @Override
-    public void insertList(ArrayList<String> list) {
+    public void insertList(List<String> list) {
         adapter.insertList(list);
     }
 
     //Called after config change or when category was tapped, only called by measurement tab presenter
     @Override
-    public void insertMeasurements(ArrayList<String> list) {
-        adapter.insertList(list);
+    public void insertMeasurements(List<Measurement> list) {
+        ArrayList<String> measurements = new ArrayList<>();
+        for(Measurement m : list)
+            measurements.add(m.getName());
+        adapter.insertList(measurements);
     }
 }

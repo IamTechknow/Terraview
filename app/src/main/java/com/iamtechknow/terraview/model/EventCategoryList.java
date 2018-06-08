@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 
-public class CategoryList {
+public class EventCategoryList {
     @SerializedName("categories")
-    public ArrayList<Category> list;
+    public ArrayList<EventCategory> list;
 }
