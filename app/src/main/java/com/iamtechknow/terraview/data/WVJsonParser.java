@@ -139,6 +139,7 @@ public class WVJsonParser {
         }
         list.removeAll(toDelete);
         Collections.sort(list);
+        Collections.sort(queries);
     }
 
     /**

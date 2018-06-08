@@ -22,7 +22,7 @@ public interface SearchDAO {
     @Delete
     void delete(List<SearchQuery> queries);
 
-    //The like query is \'query%\', which must be substituted by the arg variable for this to work
-    @Query("SELECT _id, suggest_text_1, suggest_intent_extra_data FROM search WHERE suggest_text_1 LIKE :arg ")
+    //The like query is query%, which must be substituted by the arg variable for this to work
+    @Query("SELECT _id, suggest_text_1, suggest_intent_extra_data FROM search WHERE suggest_text_1 LIKE :arg")
     Cursor searchQuery(String arg);
 }

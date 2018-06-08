@@ -10,7 +10,7 @@ import static android.app.SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA;
 import static android.app.SearchManager.SUGGEST_COLUMN_TEXT_1;
 
 @Entity(tableName = "search")
-public class SearchQuery {
+public class SearchQuery implements Comparable<SearchQuery> {
     @PrimaryKey(autoGenerate = true)
     @NonNull
     @ColumnInfo(name = "_id")
@@ -44,5 +44,10 @@ public class SearchQuery {
 
     public String getLayerId() {
         return layerId;
+    }
+
+    @Override
+    public int compareTo(@NonNull SearchQuery o) {
+        return title.compareTo(o.title);
     }
 }
