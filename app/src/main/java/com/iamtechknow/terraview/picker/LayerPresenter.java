@@ -29,8 +29,4 @@ public interface LayerPresenter {
     void getData();
 
     void changeStack(Layer l, boolean queue);
-
-    void setMeasurement(String str);
-
-    String getMeasurement();
 }

@@ -24,11 +24,13 @@ public class EventPresenterImpl implements EventPresenter {
     //Current category used for loading closed events
     private int currCat;
 
-    public EventPresenterImpl(RxBus _bus, EventView v, EONET e) {
+    public EventPresenterImpl(RxBus _bus, EventView v, EONET e, boolean closed, int cat) {
         view = v;
         client = e;
         bus = _bus;
         sub = _bus.toObserverable().subscribe(this::handleEvent);
+        currCat = cat;
+        showingClosed = closed;
     }
 
     @Override
@@ -77,8 +79,8 @@ public class EventPresenterImpl implements EventPresenter {
                     observable = client.getOpenEvents();
                 else
                     observable = client.getEventsByCategory(currCat);
-                dataSub = observable.observeOn(Schedulers.io())
-                    .subscribeOn(AndroidSchedulers.mainThread())
+                dataSub = observable.subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(this::onEventsLoaded);
             }
         }
@@ -107,15 +109,9 @@ public class EventPresenterImpl implements EventPresenter {
         showingClosed = true;
         view.clearList();
         dataSub = client.getClosedEvents(currCat, num)
-            .observeOn(Schedulers.io())
-            .subscribeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe(this::onEventsLoaded);
-    }
-
-    @Override
-    public void restoreConfig(boolean showClosed, int cat) {
-        showingClosed = showClosed;
-        currCat = cat;
     }
 
     @Override
@@ -125,6 +121,6 @@ public class EventPresenterImpl implements EventPresenter {
 
     @Override
     public void onEventsLoaded(EventList data) {
-        view.insertList(data.list);
+        view.insertList(currCat, data.list);
     }
 }

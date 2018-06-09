@@ -1,5 +1,6 @@
 package com.iamtechknow.terraview.picker;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -18,29 +19,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NonLayerFragment extends Fragment implements NonLayerView {
-    public static final String EXTRA_ARG = "arg", CAT_EXTRA = "category";
+    public static final String EXTRA_ARG = "arg";
     private boolean isCategoryTab;
 
     private NonLayerPresenter presenter;
     private NonLayerDataAdapter adapter;
+    private PickerViewModel viewModel;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        presenter = new NonLayerPresenterImpl(RxBus.getInstance(), Injection.provideLocalSource(getLoaderManager(), getActivity()));
+        viewModel = ViewModelProviders.of(this).get(PickerViewModel.class);
+        presenter = new NonLayerPresenterImpl(RxBus.getInstance(), Injection.provideLocalSource(getLoaderManager(), getActivity()), viewModel.getCategory());
+
         presenter.attachView(this);
         isCategoryTab = getArguments().getBoolean(EXTRA_ARG);
-
-        if(savedInstanceState != null && !isCategoryTab)
-            presenter.setCategory(savedInstanceState.getString(CAT_EXTRA));
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putString(CAT_EXTRA, presenter.getCategory());
     }
 
     @Override
@@ -83,7 +77,8 @@ public class NonLayerFragment extends Fragment implements NonLayerView {
 
     //Called after config change or when category was tapped, only called by measurement tab presenter
     @Override
-    public void insertMeasurements(List<Measurement> list) {
+    public void insertMeasurements(String category, List<Measurement> list) {
+        viewModel.setCategory(category);
         ArrayList<String> measurements = new ArrayList<>();
         for(Measurement m : list)
             measurements.add(m.getName());

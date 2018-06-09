@@ -20,13 +20,12 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
     private RxBus bus;
     private Disposable busSub, dataSub;
 
-    //Used for state restoration in config change
     private String category;
 
-    public NonLayerPresenterImpl(RxBus _bus, DataSource source) {
+    public NonLayerPresenterImpl(RxBus _bus, DataSource source, String category) {
         dataSource = source;
         bus = _bus;
-        category = Category.getAllCategory().getName();
+        this.category = category != null ? category : Category.getAllCategory().getName();
     }
 
     @Override
@@ -68,16 +67,6 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
     @Override
     public void getData() {
         dataSource.loadData(this);
-    }
-
-    @Override
-    public void setCategory(String cat) {
-        category = cat;
-    }
-
-    @Override
-    public String getCategory() {
-        return category;
     }
 
     /**
@@ -126,6 +115,6 @@ public class NonLayerPresenterImpl implements NonLayerPresenter, DataSource.Load
         dataSub = dataSource.getMeasurementsForCategory(category)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(getView()::insertMeasurements);
+            .subscribe(measurements -> getView().insertMeasurements(this.category, measurements));
     }
 }

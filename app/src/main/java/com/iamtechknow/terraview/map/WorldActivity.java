@@ -128,6 +128,8 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         mapPresenter.detachView();
     }
 
+    //View model not used here because ViewModel does not survive rotation changes from picker activity
+    //and returning to this activity which also is recreated, but this method works.
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
