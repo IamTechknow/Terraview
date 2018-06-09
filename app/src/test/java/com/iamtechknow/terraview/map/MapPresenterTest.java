@@ -147,6 +147,19 @@ public class MapPresenterTest {
         verify(view).showEvents();
     }
 
+    @Test
+    public void testMapTapWithNonColorMapLayer() {
+        stack.add(getVIIRS());
+        presenter.setLayersAndUpdateMap(stack, delete);
+
+        //When non colormap layer gets tapped on the map
+        presenter.onToggleColorMap(true);
+
+        //Colormap UI is not shown
+        verify(view).showColorMap(null);
+        verify(map).setToggleState(false);
+    }
+
     private Layer getVIIRS() {
         return new Layer("VIIRS_SNPP_CorrectedReflectance_TrueColor", "GoogleMapsCompatible_Level9", "jpg", "Corrected Reflectance (True Color, VIIRS, SNPP)", "Suomi NPP / VIIRS", null, "2015-11-24", null, null, true);
     }
