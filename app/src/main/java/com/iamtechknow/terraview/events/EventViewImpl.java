@@ -42,7 +42,7 @@ public class EventViewImpl extends Fragment implements EventView {
     private boolean showingClosed;
 
     //How many events to show
-    private int eventLimit = EVENT_INTERVAL;
+    private int eventLimit;
 
     private EventViewModel viewModel;
 
@@ -62,15 +62,18 @@ public class EventViewImpl extends Fragment implements EventView {
     public void onStart() {
         super.onStart();
 
-        //Either load open events or if config change happened load prior category
-        if(Utils.isOnline(getActivity()))
-            if(presenter.getCurrCategory() != EventCategory.getAll().getId() || showingClosed) { //Load events from saved or all categories
+        //Either use saved data before config change, load open events or if config change happened load prior category
+        if(Utils.isOnline(getActivity())) {
+            if(viewModel.getData() != null) {
+                insertList(viewModel.getCategory(), viewModel.getData()); //restore menu item later not here
+            } else if(presenter.getCurrCategory() != EventCategory.getAll().getId() || showingClosed) { //Load events from saved or all categories
                 if(showingClosed)
                     presenter.presentClosed(eventLimit);
                 else
                     presenter.handleEvent(new TapEvent(EventActivity.SELECT_EVENT_TAB, viewModel.getCategory()));
             } else
                 presenter.loadEvents(true);
+        }
     }
 
     @Override
@@ -133,6 +136,7 @@ public class EventViewImpl extends Fragment implements EventView {
     @Override
     public void insertList(int category, ArrayList<Event> list) {
         viewModel.setCategory(category);
+        viewModel.setData(list);
         empty_view.setVisibility(View.GONE);
         mRecyclerView.setVisibility(View.VISIBLE);
         adapter.insertList(list);
@@ -140,6 +144,7 @@ public class EventViewImpl extends Fragment implements EventView {
 
     @Override
     public void clearList() {
+        viewModel.setData(null);
         adapter.clearList();
         mRecyclerView.setVisibility(View.GONE);
         empty_view.setVisibility(View.VISIBLE);
