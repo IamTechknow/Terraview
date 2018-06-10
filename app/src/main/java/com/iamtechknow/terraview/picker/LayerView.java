@@ -7,7 +7,7 @@ import java.util.List;
 public interface LayerView {
     void populateList(List<Layer> list);
 
-    void updateLayerList(List<Layer> list);
+    void updateLayerList(String measurement, List<Layer> list);
 
     void showInfo(String html);
 }

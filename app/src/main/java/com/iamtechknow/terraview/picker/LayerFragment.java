@@ -1,5 +1,6 @@
 package com.iamtechknow.terraview.picker;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -20,29 +21,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LayerFragment extends Fragment implements LayerView {
-    private static final String MEAS_EXTRA = "measurement";
-
     private LayerPresenter presenter;
     private LayerDataAdapter adapter;
+    private PickerViewModel viewModel;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(false);
 
+        viewModel = ViewModelProviders.of(this).get(PickerViewModel.class);
         ArrayList<Layer> stack = getArguments().getParcelableArrayList(LayerActivity.RESULT_STACK),
                 delete = getArguments().getParcelableArrayList(LayerActivity.DELETE_STACK);
-        presenter = new LayerPresenterImpl(RxBus.getInstance(), stack, delete, Injection.provideLocalSource(getLoaderManager(), getActivity()), new SparseBooleanArray());
+        presenter = new LayerPresenterImpl(RxBus.getInstance(), stack, delete, Injection.provideLocalSource(getLoaderManager(), getActivity()), new SparseBooleanArray(), viewModel.getMeasurement());
         presenter.attachView(this);
-
-        if(savedInstanceState != null)
-            presenter.setMeasurement(savedInstanceState.getString(MEAS_EXTRA));
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putString(MEAS_EXTRA, presenter.getMeasurement());
     }
 
     /**
@@ -86,7 +78,8 @@ public class LayerFragment extends Fragment implements LayerView {
     }
 
     @Override
-    public void updateLayerList(List<Layer> list) {
+    public void updateLayerList(String measurement, List<Layer> list) {
+        viewModel.setMeasurement(measurement);
         adapter.insertList(list);
     }
 

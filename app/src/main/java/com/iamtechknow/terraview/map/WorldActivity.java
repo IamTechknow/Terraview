@@ -128,6 +128,8 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         mapPresenter.detachView();
     }
 
+    //View model not used here because ViewModel does not survive rotation changes from picker activity
+    //and returning to this activity which also is recreated, but this method works.
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -428,9 +430,10 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
 
     @Override
     public void showColorMap(ColorMap show) {
-        if(show == null && colormap_widget != null) //hide UI
-            colormap_widget.animate().translationY(colormap_widget.getHeight()).setDuration(ANIM_DURATION_MILLS).start();
-        else {
+        if(show == null) { //hide UI
+            if(colormap_widget != null)
+                colormap_widget.animate().translationY(colormap_widget.getHeight()).setDuration(ANIM_DURATION_MILLS).start();
+        } else {
             if(colormap_widget == null) {
                 colormap_widget = getLayoutInflater().inflate(R.layout.color_map_widget, mCoordinatorLayout, false);
                 colormap = (ColorMapView) colormap_widget.findViewById(R.id.color_map_palette);

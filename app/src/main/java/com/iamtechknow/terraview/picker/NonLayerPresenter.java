@@ -16,8 +16,4 @@ public interface NonLayerPresenter {
     void handleEvent(Object event);
 
     void getData();
-
-    void setCategory(String cat);
-
-    String getCategory();
 }

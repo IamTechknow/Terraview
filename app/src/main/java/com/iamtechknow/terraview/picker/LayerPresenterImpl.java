@@ -47,7 +47,8 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     //Used for state restoration in config change
     private String measurement;
 
-    public LayerPresenterImpl(RxBus _bus, ArrayList<Layer> list, ArrayList<Layer> delete, DataSource source, SparseBooleanArray array) {
+    public LayerPresenterImpl(RxBus _bus, ArrayList<Layer> list, ArrayList<Layer> delete,
+                              DataSource source, SparseBooleanArray array, String measurement) {
         bus = _bus;
         dataSource = source;
         stack = list;
@@ -55,6 +56,7 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
         retrofit = new Retrofit.Builder().baseUrl(BASE_URL).build();
         mSelectedPositions = array;
         titleSet = new HashSet<>();
+        this.measurement = measurement;
     }
 
     @Override
@@ -184,16 +186,6 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
         }
     }
 
-    @Override
-    public void setMeasurement(String str) {
-        measurement = str;
-    }
-
-    @Override
-    public String getMeasurement() {
-        return measurement;
-    }
-
     /**
      * If state restoration occurred and a measurement was saved (not when layer tab selected),
      * show the layer titles for that measurement, or show all the layer titles
@@ -254,7 +246,7 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(layers -> {
                 updateSelectedItems(layers);
-                getView().updateLayerList(layers);
+                getView().updateLayerList(measurement, layers);
             });
     }
 }

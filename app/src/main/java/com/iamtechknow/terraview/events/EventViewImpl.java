@@ -1,5 +1,6 @@
 package com.iamtechknow.terraview.events;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.adapter.EventAdapter;
 import com.iamtechknow.terraview.data.EONET;
 import com.iamtechknow.terraview.model.Event;
+import com.iamtechknow.terraview.model.EventCategory;
 import com.iamtechknow.terraview.model.TapEvent;
 import com.iamtechknow.terraview.picker.RxBus;
 import com.iamtechknow.terraview.util.Utils;
@@ -28,8 +30,6 @@ import java.util.ArrayList;
 
 public class EventViewImpl extends Fragment implements EventView {
     private static final int EVENT_INTERVAL = 30, EVENT_LIMIT = 300;
-    private static final String RESTORE_CAT = "cat", RESTORE_CLOSED = "closed",
-                                RESTORE_LIMIT = "limit";
 
     private EventPresenter presenter;
     private EventAdapter adapter;
@@ -42,49 +42,38 @@ public class EventViewImpl extends Fragment implements EventView {
     private boolean showingClosed;
 
     //How many events to show
-    private int eventLimit = EVENT_INTERVAL;
+    private int eventLimit;
 
-    //Hold saved state until view is created
-    private Bundle savedState;
+    private EventViewModel viewModel;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        savedState = savedInstanceState;
-        presenter = new EventPresenterImpl(RxBus.getInstance(), this, new EONET());
+        viewModel = ViewModelProviders.of(this).get(EventViewModel.class);
+        showingClosed = viewModel.isShowingClosed();
+        eventLimit = viewModel.getLimit();
 
-        if(savedInstanceState != null) {
-            showingClosed = savedInstanceState.getBoolean(RESTORE_CLOSED);
-            eventLimit = savedInstanceState.getInt(RESTORE_LIMIT);
-        }
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt(RESTORE_CAT, presenter.getCurrCategory());
-        outState.putBoolean(RESTORE_CLOSED, showingClosed);
-        outState.putInt(RESTORE_LIMIT, eventLimit);
+        presenter = new EventPresenterImpl(RxBus.getInstance(), this, new EONET(), showingClosed, viewModel.getCategory());
     }
 
     @Override
     public void onStart() {
         super.onStart();
 
-        //Either load open events or if config change happened load prior category
-        if(Utils.isOnline(getActivity()))
-            if(savedState != null) { //Load saved category
-                presenter.restoreConfig(showingClosed, savedState.getInt(RESTORE_CAT));
-
+        //Either use saved data before config change, load open events or if config change happened load prior category
+        if(Utils.isOnline(getActivity())) {
+            if(viewModel.getData() != null) {
+                insertList(viewModel.getCategory(), viewModel.getData()); //restore menu item later not here
+            } else if(presenter.getCurrCategory() != EventCategory.getAll().getId() || showingClosed) { //Load events from saved or all categories
                 if(showingClosed)
                     presenter.presentClosed(eventLimit);
                 else
-                    presenter.handleEvent(new TapEvent(EventActivity.SELECT_EVENT_TAB, savedState.getInt(RESTORE_CAT)));
-                savedState = null;
+                    presenter.handleEvent(new TapEvent(EventActivity.SELECT_EVENT_TAB, viewModel.getCategory()));
             } else
                 presenter.loadEvents(true);
+        }
     }
 
     @Override
@@ -121,13 +110,15 @@ public class EventViewImpl extends Fragment implements EventView {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         showingClosed = !showingClosed;
+        viewModel.setShowingClosed(showingClosed);
+
         item.setTitle(showingClosed ? R.string.open_toggle : R.string.closed_toggle);
         if(showingClosed) { //do show closed events
+            viewModel.setLimit(EVENT_INTERVAL);
             eventLimit = EVENT_INTERVAL;
             presenter.presentClosed(eventLimit);
         } else
             presenter.loadEvents(false);
-
         return true;
     }
 
@@ -135,13 +126,17 @@ public class EventViewImpl extends Fragment implements EventView {
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             //Check if can scroll down, if showing closed events, and can load more
-            if(!recyclerView.canScrollVertically(1) && shouldLoadMore())
+            if(!recyclerView.canScrollVertically(1) && shouldLoadMore()) {
                 presenter.presentClosed(eventLimit += EVENT_INTERVAL);
+                viewModel.setLimit(eventLimit);
+            }
         }
     };
 
     @Override
-    public void insertList(ArrayList<Event> list) {
+    public void insertList(int category, ArrayList<Event> list) {
+        viewModel.setCategory(category);
+        viewModel.setData(list);
         empty_view.setVisibility(View.GONE);
         mRecyclerView.setVisibility(View.VISIBLE);
         adapter.insertList(list);
@@ -149,6 +144,7 @@ public class EventViewImpl extends Fragment implements EventView {
 
     @Override
     public void clearList() {
+        viewModel.setData(null);
         adapter.clearList();
         mRecyclerView.setVisibility(View.GONE);
         empty_view.setVisibility(View.VISIBLE);

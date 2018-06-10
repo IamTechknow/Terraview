@@ -10,7 +10,7 @@ import java.util.List;
 public interface NonLayerView {
     void insertList(List<String> list);
 
-    void insertMeasurements(List<Measurement> list);
+    void insertMeasurements(String category, List<Measurement> list);
 
     boolean isCategoryTab();
 }
