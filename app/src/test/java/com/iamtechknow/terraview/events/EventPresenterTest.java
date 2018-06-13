@@ -7,6 +7,7 @@ import com.iamtechknow.terraview.model.EventList;
 import com.iamtechknow.terraview.picker.RxBus;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -14,6 +15,10 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import io.reactivex.Single;
+import io.reactivex.android.plugins.RxAndroidPlugins;
+import io.reactivex.plugins.RxJavaPlugins;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.Subject;
 
 import static org.mockito.Mockito.*;
@@ -21,7 +26,7 @@ import static org.mockito.Mockito.*;
 public class EventPresenterTest {
 
     @Mock
-    private EventView view;
+    private EventContract.View view;
 
     @Mock
     private EONET eonet;
@@ -36,6 +41,17 @@ public class EventPresenterTest {
 
     private Event event;
 
+    private boolean closed;
+
+    private int category;
+
+    @BeforeClass
+    public static void setupClass() {
+        //Override default schedulers to be able to run the test on a JVM
+        RxJavaPlugins.setIoSchedulerHandler(schedulerCallable -> Schedulers.trampoline());
+        RxAndroidPlugins.setInitMainThreadSchedulerHandler(scheduler -> Schedulers.trampoline());
+    }
+
     @Before
     public void setupPresenter() {
         MockitoAnnotations.initMocks(this);
@@ -47,8 +63,10 @@ public class EventPresenterTest {
         ArrayList<String> date = new ArrayList<>();
         date.add("2017-09-03T13:00:00Z");
         event = new Event("EONET_3249", "Mission Fire, CALIFORNIA",  "https://inciweb.nwcg.gov/incident/5588/", date, 8, Collections.singletonList(new LatLng(37.212777777778, -119.48277777778)));
+        closed = false;
+        category = 0;
 
-        presenter = new EventPresenterImpl(bus, view, eonet);
+        presenter = new EventPresenterImpl(bus, view, eonet, closed, category);
     }
 
     @Test
@@ -56,15 +74,13 @@ public class EventPresenterTest {
         ArrayList<Event> events = new ArrayList<>();
         events.add(event);
 
-        //Call the presenter callback to mock successful parsing
-        doAnswer(invocation -> {
-            presenter.onEventsLoaded(new EventList(events));
-            return null;
-        }).when(eonet).getOpenEvents();
+        //Since EONET is mocked, we may mock the Retrofit call by providing our own Single object
+        doAnswer(invocation -> Single.just(new EventList(events)))
+            .when(eonet).getOpenEvents();
 
         //When presenter loads open events, view presents them
         presenter.loadEvents(false);
-        verify(view).insertList(events);
+        verify(view).insertList(category, events);
 
         presenter.detachView();
     }
@@ -76,22 +92,18 @@ public class EventPresenterTest {
         for(int i = 0; i < 10; i++)
             events.add(event);
 
-        doAnswer(invocation -> {
-            presenter.onEventsLoaded(new EventList(events));
-            return null;
-        }).when(eonet).getClosedEvents(0, 1);
+        doAnswer(invocation -> Single.just(new EventList(events)))
+            .when(eonet).getClosedEvents(0, 1);
 
-        doAnswer(invocation -> {
-            presenter.onEventsLoaded(new EventList(moreEvents));
-            return null;
-        }).when(eonet).getClosedEvents(0, 10);
+        doAnswer(invocation -> Single.just(new EventList(moreEvents)))
+            .when(eonet).getClosedEvents(0, 10);
 
         //When presenter loads closed events with limits, view presents them
         presenter.presentClosed(1);
-        verify(view).insertList(events);
+        verify(view).insertList(category, events);
 
         presenter.presentClosed(10);
-        verify(view).insertList(moreEvents);
+        verify(view).insertList(category, moreEvents);
     }
 
     @Test

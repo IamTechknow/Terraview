@@ -38,8 +38,7 @@ public class MapPresenterTest {
         MockitoAnnotations.initMocks(this);
         stack = new ArrayList<>();
         delete = new ArrayList<>();
-        presenter = new WorldPresenter(map);
-        presenter.attachView(view);
+        presenter = new WorldPresenter(view, map);
 
         prepMap();
     }

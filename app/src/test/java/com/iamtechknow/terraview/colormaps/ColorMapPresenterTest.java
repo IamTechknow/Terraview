@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 
 public class ColorMapPresenterTest {
     @Mock
-    private ColorMapView view;
+    private ColorMapContract.View view;
 
     @Mock
     private ColorMapAPI api;
@@ -50,8 +50,7 @@ public class ColorMapPresenterTest {
         data = new ColorMap(entries);
 
         MockitoAnnotations.initMocks(this);
-        presenter = new ColorMapPresenterImpl(api);
-        presenter.attachView(view);
+        presenter = new ColorMapPresenterImpl(view, api);
     }
 
     @Test
