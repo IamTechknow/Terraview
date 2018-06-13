@@ -28,7 +28,7 @@ public class EventPresenterImpl implements EventContract.Presenter {
         view = v;
         client = e;
         bus = _bus;
-        sub = _bus.toObserverable().subscribe(this::handleEvent);
+        sub = _bus.toObservable().subscribe(this::handleEvent);
         currCat = cat;
         showingClosed = closed;
     }

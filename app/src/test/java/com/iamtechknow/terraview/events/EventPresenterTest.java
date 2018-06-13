@@ -57,7 +57,7 @@ public class EventPresenterTest {
         MockitoAnnotations.initMocks(this);
 
         //Init the bus correctly
-        when(bus.toObserverable()).thenReturn(subject);
+        when(bus.toObservable()).thenReturn(subject);
 
         //Add some events
         ArrayList<String> date = new ArrayList<>();

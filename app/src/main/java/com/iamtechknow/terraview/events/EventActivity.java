@@ -29,12 +29,12 @@ public class EventActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tabs);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         //Create arguments for each fragments which will be used when they're created
-        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+        ViewPager viewPager = findViewById(R.id.viewpager);
         TabAdapter adapter = new TabAdapter(getSupportFragmentManager());
 
         adapter.addFragment(new CategoryViewImpl(), getString(R.string.categories));
@@ -42,7 +42,7 @@ public class EventActivity extends AppCompatActivity {
         viewPager.setAdapter(adapter);
         viewPager.setOffscreenPageLimit(PAGE_LIMIT);
 
-        mTabLayout = (TabLayout) findViewById(R.id.tabs);
+        mTabLayout = findViewById(R.id.tabs);
         mTabLayout.setupWithViewPager(viewPager);
     }
 
@@ -64,7 +64,7 @@ public class EventActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        sub = RxBus.getInstance().toObserverable().subscribe(this::handleEvent);
+        sub = RxBus.getInstance().toObservable().subscribe(this::handleEvent);
     }
 
     @Override

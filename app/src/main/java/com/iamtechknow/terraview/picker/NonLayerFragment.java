@@ -55,7 +55,7 @@ public class NonLayerFragment extends Fragment implements NonLayerContract.View 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_tabs, container, false);
 
-        RecyclerView mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
+        RecyclerView mRecyclerView = rootView.findViewById(R.id.recycler_view);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         adapter = new NonLayerDataAdapter(presenter);

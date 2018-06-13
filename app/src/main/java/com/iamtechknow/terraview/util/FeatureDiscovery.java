@@ -31,10 +31,10 @@ public final class FeatureDiscovery {
         //Tour animation subscription
         final Disposable[] tour_sub = new Disposable[1];
 
-        DrawerLayout mDrawerLayout = (DrawerLayout) map.findViewById(R.id.drawer);
-        CoordinatorLayout mCoordinatorLayout = (CoordinatorLayout) map.findViewById(R.id.thelayout);
-        NavigationView mNavLeft = (NavigationView) map.findViewById(R.id.nav_menu);
-        Toolbar bar = (Toolbar) map.findViewById(R.id.tool_bar);
+        DrawerLayout mDrawerLayout = map.findViewById(R.id.drawer);
+        CoordinatorLayout mCoordinatorLayout = map.findViewById(R.id.thelayout);
+        NavigationView mNavLeft = map.findViewById(R.id.nav_menu);
+        Toolbar bar = map.findViewById(R.id.tool_bar);
 
         //Calculate rect bounds, based on where the home button is
         View home_icon = Utils.findNavView(bar);

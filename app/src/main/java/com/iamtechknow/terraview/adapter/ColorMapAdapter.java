@@ -28,11 +28,11 @@ public class ColorMapAdapter extends RecyclerView.Adapter<ColorMapAdapter.ViewHo
         ViewHolder(View itemView) {
             super(itemView);
 
-            text = (TextView) itemView.findViewById(R.id.color_map_id);
-            none = (TextView) itemView.findViewById(R.id.color_map_none);
-            start = (TextView) itemView.findViewById(R.id.start_date);
-            end = (TextView) itemView.findViewById(R.id.end_date);
-            canvas = (ColorMapViewImpl) itemView.findViewById(R.id.color_map_palette);
+            text = itemView.findViewById(R.id.color_map_id);
+            none = itemView.findViewById(R.id.color_map_none);
+            start = itemView.findViewById(R.id.start_date);
+            end = itemView.findViewById(R.id.end_date);
+            canvas = itemView.findViewById(R.id.color_map_palette);
         }
     }
 

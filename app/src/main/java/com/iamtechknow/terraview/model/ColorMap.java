@@ -8,7 +8,7 @@ import java.util.ArrayList;
 /**
  * Deserialized representation of a color map XML. The root element is ColorMap,
  * ColorMapEntry elements. This allows the elements to be parsed as an element list
- * Non-strict parsing is used to avoid errors with the noNamespaceSchemaLocation atttribute
+ * Non-strict parsing is used to avoid errors with the noNamespaceSchemaLocation attribute
  */
 @Root(name="ColorMap", strict = false)
 public class ColorMap {

@@ -57,7 +57,7 @@ public class LocalDataSource implements DataSource, LoaderManager.LoaderCallback
 
     @Override
     public Single<List<Measurement>> getMeasurementsForCategory(String c) {
-        return db.getJoinDAO().getMeasurementsforCategory(c);
+        return db.getJoinDAO().getMeasurementsForCategory(c);
     }
 
     @Override

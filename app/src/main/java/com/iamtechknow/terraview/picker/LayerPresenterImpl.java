@@ -50,7 +50,7 @@ public class LayerPresenterImpl implements LayerContract.Presenter, DataSource.L
                               DataSource source, SparseBooleanArray array, String measurement) {
         view = v;
         bus = _bus;
-        busSub = bus.toObserverable().subscribe(this::handleEvent);
+        busSub = bus.toObservable().subscribe(this::handleEvent);
         dataSource = source;
         stack = list;
         toDelete = delete;

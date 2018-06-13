@@ -37,9 +37,9 @@ public class LayerDataAdapter extends RecyclerView.Adapter<LayerDataAdapter.View
 
             itemView.setClickable(true);
             itemView.setOnClickListener(this);
-            text = (TextView) itemView.findViewById(R.id.item_text);
-            subtitle = (TextView) itemView.findViewById(R.id.item_sub);
-            icon = (ImageView) itemView.findViewById(R.id.item_info);
+            text = itemView.findViewById(R.id.item_text);
+            subtitle = itemView.findViewById(R.id.item_sub);
+            icon = itemView.findViewById(R.id.item_info);
         }
 
         /**

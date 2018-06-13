@@ -113,7 +113,7 @@ public class MapPresenterTest {
     }
 
     @Test
-    public void testSwaping() {
+    public void testSwapping() {
         //Add overlays, set layers
         stack.add(getVIIRS());
         stack.add(new Layer("Coastlines", "GoogleMapsCompatible_Level9", "png", "Coastlines (OSM)", "OpenStreetMaps", null, null, null, null, false));

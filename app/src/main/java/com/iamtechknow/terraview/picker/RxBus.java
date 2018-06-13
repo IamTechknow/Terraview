@@ -25,7 +25,7 @@ public class RxBus {
     }
 
 	//Returns the observable of the event bus to allow fragments to subscribe to new events
-    public Observable<Object> toObserverable() {
+    public Observable<Object> toObservable() {
         return _bus;
     }
 

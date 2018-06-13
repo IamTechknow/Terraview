@@ -82,7 +82,7 @@ public class ColorMapViewImpl extends View implements ColorMapContract.View {
 
         View parent = (View) getParent();
         parent.findViewById(R.id.empty_view).setVisibility(View.GONE);
-        val = (TextView) ((View) getParent()).findViewById(R.id.color_map_val);
+        val = ((View) getParent()).findViewById(R.id.color_map_val);
         val.setVisibility(View.VISIBLE);
 
         invalidate(); //will call onDraw()
@@ -105,8 +105,8 @@ public class ColorMapViewImpl extends View implements ColorMapContract.View {
                 index++;
             }
             View parent = (View) getParent();
-            TextView start = (TextView) parent.findViewById(R.id.color_map_start),
-                    end = (TextView) parent.findViewById(R.id.color_map_end);
+            TextView start = parent.findViewById(R.id.color_map_start),
+                    end = parent.findViewById(R.id.color_map_end);
             start.setText(colorMap.get(0).getLabel());
             end.setText(colorMap.get(index - 1).getLabel());
             val.setText(colorMap.get(index / 2).getLabel());

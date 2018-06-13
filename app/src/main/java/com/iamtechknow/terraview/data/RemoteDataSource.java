@@ -98,7 +98,7 @@ public class RemoteDataSource implements DataSource {
 
     @Override
     public Single<List<Measurement>> getMeasurementsForCategory(String c) {
-        return db.getJoinDAO().getMeasurementsforCategory(c);
+        return db.getJoinDAO().getMeasurementsForCategory(c);
     }
 
     @Override

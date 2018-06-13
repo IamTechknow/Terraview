@@ -25,7 +25,7 @@ public class AboutActivity extends AppCompatActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.tool_bar);
+        Toolbar toolbar = findViewById(R.id.tool_bar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -34,7 +34,7 @@ public class AboutActivity extends AppCompatActivity implements View.OnClickList
         findViewById(R.id.about_feedback).setOnClickListener(this);
         findViewById(R.id.about_github).setOnClickListener(this);
 
-        TextView body = (TextView) findViewById(R.id.about_ver);
+        TextView body = findViewById(R.id.about_ver);
         body.setText(Html.fromHtml(getString(R.string.about_ver, BuildConfig.VERSION_NAME)));
     }
 

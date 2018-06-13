@@ -93,11 +93,11 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
 
         //Setup UI
         mItemAdapter = new CurrLayerAdapter(this);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
-        mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.thelayout);
-        Toolbar mToolbar = (Toolbar) findViewById(R.id.tool_bar);
+        mDrawerLayout = findViewById(R.id.drawer);
+        mCoordinatorLayout = findViewById(R.id.thelayout);
+        Toolbar mToolbar = findViewById(R.id.tool_bar);
         setSupportActionBar(mToolbar);
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_menu);
+        NavigationView navigationView = findViewById(R.id.nav_menu);
         navigationView.setNavigationItemSelectedListener(this);
 
         // Adding menu icon to Toolbar
@@ -107,8 +107,8 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        //Setup the layer list - initally empty list
-        RecyclerView mCurrList = (RecyclerView) findViewById(R.id.layer_list);
+        //Setup the layer list - initially empty list
+        RecyclerView mCurrList = findViewById(R.id.layer_list);
         mCurrList.setItemAnimator(new DefaultItemAnimator());
         mCurrList.setLayoutManager(new LinearLayoutManager(this));
         mCurrList.setAdapter(mItemAdapter);
@@ -377,8 +377,8 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
             if (event_widget == null) {
                 event_widget = getLayoutInflater().inflate(R.layout.event_widget, mCoordinatorLayout, false);
                 event_widget.setTranslationY(event_widget.getHeight());
-                event_date = (TextView) event_widget.findViewById(R.id.event_date);
-                event_stepper = (SeekBar) event_widget.findViewById(R.id.event_stepper);
+                event_date = event_widget.findViewById(R.id.event_date);
+                event_stepper = event_widget.findViewById(R.id.event_stepper);
                 event_stepper.setOnSeekBarChangeListener(this);
                 mCoordinatorLayout.addView(event_widget);
             }
@@ -435,7 +435,7 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
         } else {
             if(colormap_widget == null) {
                 colormap_widget = getLayoutInflater().inflate(R.layout.color_map_widget, mCoordinatorLayout, false);
-                colormap = (ColorMapContract.View) colormap_widget.findViewById(R.id.color_map_palette);
+                colormap = colormap_widget.findViewById(R.id.color_map_palette);
                 mCoordinatorLayout.addView(colormap_widget);
 
                 //HACK: Need to invalidate it again to make the canvas appear.

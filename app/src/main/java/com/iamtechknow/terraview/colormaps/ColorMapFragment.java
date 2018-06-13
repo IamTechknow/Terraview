@@ -23,7 +23,7 @@ public class ColorMapFragment extends BottomSheetDialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.color_map_frag, container);
 
-        RecyclerView mRecyclerView = (RecyclerView) rootView.findViewById(R.id.color_map_rv);
+        RecyclerView mRecyclerView = rootView.findViewById(R.id.color_map_rv);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         if(getArguments() != null)

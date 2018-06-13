@@ -20,7 +20,7 @@ public interface JoinDAO {
     void insertCatMeasureJoin(List<CatMeasureJoin> join);
 
     @Query("SELECT measurement.* FROM measurement INNER JOIN cat_measure_join ON measurement.name=cat_measure_join.measurement WHERE cat_measure_join.category=:category")
-    Single<List<Measurement>> getMeasurementsforCategory(String category);
+    Single<List<Measurement>> getMeasurementsForCategory(String category);
 
     @Insert
     void insertMeasureLayerJoin(List<MeasureLayerJoin> join);

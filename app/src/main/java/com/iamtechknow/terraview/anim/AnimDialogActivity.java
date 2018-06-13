@@ -48,19 +48,19 @@ public class AnimDialogActivity extends AppCompatActivity implements View.OnClic
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_anim);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.tool_bar);
+        Toolbar toolbar = findViewById(R.id.tool_bar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        start = (TextView) findViewById(R.id.start_date);
-        end = (TextView) findViewById(R.id.end_date);
+        start = findViewById(R.id.start_date);
+        end = findViewById(R.id.end_date);
         start.setOnClickListener(this);
         end.setOnClickListener(this);
 
-        day = (RadioButton) findViewById(R.id.day_button);
-        month = (RadioButton) findViewById(R.id.month_button);
-        loop = (CheckBox) findViewById(R.id.loop_checkbox);
-        seekBar = (SeekBar) findViewById(R.id.anim_speed);
+        day = findViewById(R.id.day_button);
+        month = findViewById(R.id.month_button);
+        loop = findViewById(R.id.loop_checkbox);
+        seekBar = findViewById(R.id.anim_speed);
 
         Calendar c = Calendar.getInstance();
         Utils.getCalendarMidnightTime(c);

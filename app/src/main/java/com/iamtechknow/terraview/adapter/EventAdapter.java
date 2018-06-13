@@ -34,9 +34,9 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
 
             itemView.setClickable(true);
             itemView.setOnClickListener(this);
-            text = (TextView) itemView.findViewById(R.id.item_text);
-            sub = (TextView) itemView.findViewById(R.id.item_sub);
-            icon = (ImageView) itemView.findViewById(R.id.item_info);
+            text = itemView.findViewById(R.id.item_text);
+            sub = itemView.findViewById(R.id.item_sub);
+            icon = itemView.findViewById(R.id.item_info);
         }
 
         @Override

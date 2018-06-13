@@ -25,7 +25,7 @@ public class NonLayerPresenterImpl implements NonLayerContract.Presenter, DataSo
         view = v;
         dataSource = source;
         bus = _bus;
-        busSub = bus.toObserverable().subscribe(this::handleEvent);
+        busSub = bus.toObservable().subscribe(this::handleEvent);
         this.category = category != null ? category : Category.getAllCategory().getName();
     }
 

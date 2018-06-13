@@ -3,8 +3,6 @@ package com.iamtechknow.terraview.colormaps;
 import com.iamtechknow.terraview.api.ColorMapAPI;
 import com.iamtechknow.terraview.util.Utils;
 
-import java.lang.ref.WeakReference;
-
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;

@@ -41,12 +41,12 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tabs);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		//Create arguments for each fragments which will be used when they're created
-        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+        ViewPager viewPager = findViewById(R.id.viewpager);
         TabAdapter adapter = new TabAdapter(getSupportFragmentManager());
         NonLayerFragment frag1 = new NonLayerFragment(), frag2 = new NonLayerFragment();
         LayerFragment frag3 = new LayerFragment();
@@ -76,7 +76,7 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
         viewPager.setAdapter(adapter);
         viewPager.setOffscreenPageLimit(PAGE_LIMIT);
 
-        mTabLayout = (TabLayout) findViewById(R.id.tabs);
+        mTabLayout = findViewById(R.id.tabs);
         mTabLayout.setupWithViewPager(viewPager);
         mTabLayout.addOnTabSelectedListener(this);
     }
@@ -123,7 +123,7 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
     @Override
     public void onStart() {
         super.onStart();
-        subscription = RxBus.getInstance().toObserverable().subscribe(this::handleEvent);
+        subscription = RxBus.getInstance().toObservable().subscribe(this::handleEvent);
     }
 
     @Override

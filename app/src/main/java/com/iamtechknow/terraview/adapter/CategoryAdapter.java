@@ -31,7 +31,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
 
             itemView.setClickable(true);
             itemView.setOnClickListener(this);
-            text = (TextView) itemView.findViewById(R.id.item_text);
+            text = itemView.findViewById(R.id.item_text);
         }
 
         @Override

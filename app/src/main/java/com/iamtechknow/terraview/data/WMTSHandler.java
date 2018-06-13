@@ -107,7 +107,7 @@ public class WMTSHandler extends DefaultHandler {
 
     /**
      * Check if the current text is inside a desirable tag, then append it to the buffer
-     * because per spec characters() may be called mutiple times
+     * because per spec characters() may be called multiple times
      */
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException {

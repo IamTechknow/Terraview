@@ -1,6 +1,5 @@
 package com.iamtechknow.terraview.adapter;
 
-import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -38,9 +37,9 @@ public class CurrLayerAdapter extends RecyclerView.Adapter<CurrLayerAdapter.Curr
         public CurrViewHolder(View itemView) {
             super(itemView);
 
-            tv = (TextView) itemView.findViewById(R.id.curr_layer_text);
-            drag_handle = (ImageView) itemView.findViewById(R.id.curr_layer_drag_handle);
-            vis = (ImageView) itemView.findViewById(R.id.curr_layer_visibility);
+            tv = itemView.findViewById(R.id.curr_layer_text);
+            drag_handle = itemView.findViewById(R.id.curr_layer_drag_handle);
+            vis = itemView.findViewById(R.id.curr_layer_visibility);
 
             itemView.setClickable(true);
             drag_handle.setOnTouchListener(this);
