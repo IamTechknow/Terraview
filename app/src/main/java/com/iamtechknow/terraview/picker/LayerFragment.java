@@ -20,8 +20,8 @@ import com.iamtechknow.terraview.util.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LayerFragment extends Fragment implements LayerView {
-    private LayerPresenter presenter;
+public class LayerFragment extends Fragment implements LayerContract.View {
+    private LayerContract.Presenter presenter;
     private LayerDataAdapter adapter;
     private PickerViewModel viewModel;
 
@@ -33,8 +33,7 @@ public class LayerFragment extends Fragment implements LayerView {
         viewModel = ViewModelProviders.of(this).get(PickerViewModel.class);
         ArrayList<Layer> stack = getArguments().getParcelableArrayList(LayerActivity.RESULT_STACK),
                 delete = getArguments().getParcelableArrayList(LayerActivity.DELETE_STACK);
-        presenter = new LayerPresenterImpl(RxBus.getInstance(), stack, delete, Injection.provideLocalSource(getLoaderManager(), getActivity()), new SparseBooleanArray(), viewModel.getMeasurement());
-        presenter.attachView(this);
+        presenter = new LayerPresenterImpl(this, RxBus.getInstance(), stack, delete, Injection.provideLocalSource(getLoaderManager(), getActivity()), new SparseBooleanArray(), viewModel.getMeasurement());
     }
 
     /**

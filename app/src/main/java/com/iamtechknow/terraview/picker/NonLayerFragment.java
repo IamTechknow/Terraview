@@ -18,11 +18,11 @@ import com.iamtechknow.terraview.model.Measurement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NonLayerFragment extends Fragment implements NonLayerView {
+public class NonLayerFragment extends Fragment implements NonLayerContract.View {
     public static final String EXTRA_ARG = "arg";
     private boolean isCategoryTab;
 
-    private NonLayerPresenter presenter;
+    private NonLayerContract.Presenter presenter;
     private NonLayerDataAdapter adapter;
     private PickerViewModel viewModel;
 
@@ -31,9 +31,8 @@ public class NonLayerFragment extends Fragment implements NonLayerView {
         super.onCreate(savedInstanceState);
 
         viewModel = ViewModelProviders.of(this).get(PickerViewModel.class);
-        presenter = new NonLayerPresenterImpl(RxBus.getInstance(), Injection.provideLocalSource(getLoaderManager(), getActivity()), viewModel.getCategory());
+        presenter = new NonLayerPresenterImpl(this, RxBus.getInstance(), Injection.provideLocalSource(getLoaderManager(), getActivity()), viewModel.getCategory());
 
-        presenter.attachView(this);
         isCategoryTab = getArguments().getBoolean(EXTRA_ARG);
     }
 

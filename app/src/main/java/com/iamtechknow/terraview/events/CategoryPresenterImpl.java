@@ -10,15 +10,15 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class CategoryPresenterImpl implements CategoryPresenter {
-    private CategoryView view;
+public class CategoryPresenterImpl implements CategoryContract.Presenter {
+    private CategoryContract.View view;
     private RxBus bus;
     private EONET client;
     private Disposable dataSub;
 
     private boolean loadedCategories;
 
-    public CategoryPresenterImpl(RxBus _bus, CategoryView v, EONET eonet) {
+    public CategoryPresenterImpl(RxBus _bus, CategoryContract.View v, EONET eonet) {
         bus = _bus;
         view = v;
         client = eonet;

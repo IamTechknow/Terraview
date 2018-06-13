@@ -28,10 +28,10 @@ import com.iamtechknow.terraview.util.Utils;
 
 import java.util.ArrayList;
 
-public class EventViewImpl extends Fragment implements EventView {
+public class EventViewImpl extends Fragment implements EventContract.View {
     private static final int EVENT_INTERVAL = 30, EVENT_LIMIT = 300;
 
-    private EventPresenter presenter;
+    private EventContract.Presenter presenter;
     private EventAdapter adapter;
 
     //Default and empty views

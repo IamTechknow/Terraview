@@ -24,7 +24,7 @@ import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
  * View implementation for the color map list item. Needs a reference to the presenter
  * to prevent it from being GCed, and to allow it to be called to draw the color map
  */
-public class ColorMapViewImpl extends View implements ColorMapView {
+public class ColorMapViewImpl extends View implements ColorMapContract.View {
     private static final String BASE_URL = "https://gibs.earthdata.nasa.gov";
 
     private float RECT_HEIGHT = Utils.dPToPixel(getResources(), R.dimen.md_keylines);
@@ -33,7 +33,7 @@ public class ColorMapViewImpl extends View implements ColorMapView {
     private Paint mPaint;
 
     //Presenter half of the MVP contract
-    private ColorMapPresenter presenter;
+    private ColorMapContract.Presenter presenter;
 
     //List of all color map entries
     private ArrayList<ColorMapEntry> colorMap;
@@ -69,8 +69,7 @@ public class ColorMapViewImpl extends View implements ColorMapView {
                 .addConverterFactory(SimpleXmlConverterFactory.create())
                 .build();
 
-        presenter = new ColorMapPresenterImpl(retrofit.create(ColorMapAPI.class));
-        presenter.attachView(this);
+        presenter = new ColorMapPresenterImpl(this, retrofit.create(ColorMapAPI.class));
         presenter.parseColorMap(id);
     }
 

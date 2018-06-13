@@ -19,8 +19,8 @@ import com.iamtechknow.terraview.util.Utils;
 
 import java.util.ArrayList;
 
-public class CategoryViewImpl extends Fragment implements CategoryView {
-    private CategoryPresenter presenter;
+public class CategoryViewImpl extends Fragment implements CategoryContract.View {
+    private CategoryContract.Presenter presenter;
     private CategoryAdapter adapter;
 
     //Default and empty views

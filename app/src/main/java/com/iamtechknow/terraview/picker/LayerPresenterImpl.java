@@ -8,12 +8,11 @@ import com.iamtechknow.terraview.model.Layer;
 import com.iamtechknow.terraview.model.TapEvent;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -25,10 +24,10 @@ import retrofit2.Retrofit;
 import static com.iamtechknow.terraview.picker.LayerActivity.SELECT_LAYER_TAB;
 import static com.iamtechknow.terraview.picker.LayerActivity.SELECT_SUGGESTION;
 
-public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallback {
+public class LayerPresenterImpl implements LayerContract.Presenter, DataSource.LoadCallback {
     private static final String BASE_URL = "https://worldview.earthdata.nasa.gov/";
 
-    private WeakReference<LayerView> viewRef;
+    private LayerContract.View view;
     private Retrofit retrofit;
     private RxBus bus;
     private Disposable busSub, dataSub;
@@ -47,9 +46,11 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     //Used for state restoration in config change
     private String measurement;
 
-    public LayerPresenterImpl(RxBus _bus, ArrayList<Layer> list, ArrayList<Layer> delete,
+    public LayerPresenterImpl(LayerContract.View v, RxBus _bus, ArrayList<Layer> list, ArrayList<Layer> delete,
                               DataSource source, SparseBooleanArray array, String measurement) {
+        view = v;
         bus = _bus;
+        busSub = bus.toObserverable().subscribe(this::handleEvent);
         dataSource = source;
         stack = list;
         toDelete = delete;
@@ -60,26 +61,23 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
     }
 
     @Override
-    public void attachView(LayerView v) {
-        viewRef = new WeakReference<>(v);
-        busSub = bus.toObserverable().subscribe(this::handleEvent);
-    }
-
-    @Override
     public void detachView() {
-        if(viewRef != null) {
-            viewRef.clear();
-            viewRef = null;
+        busSub.dispose();
+        busSub = null;
+        if(dataSub != null) {
+            dataSub.dispose();
+            dataSub = null;
         }
-        cleanUp();
+        bus = null;
+        view = null;
     }
 
     @Override
     public void handleEvent(Object event) {
         TapEvent tap = (TapEvent) event;
-        if(tap != null && getView() != null && tap.getTab() == SELECT_LAYER_TAB) {
+        if(tap != null && tap.getTab() == SELECT_LAYER_TAB) {
             getLayerTitlesForMeasurement(tap.getMeasurement());
-        } else if(tap != null && getView() != null && tap.getTab() == SELECT_SUGGESTION) {
+        } else if(tap != null && tap.getTab() == SELECT_SUGGESTION) {
             Layer l = searchLayerById(tap.getMeasurement());
             if(!titleSet.contains(l.getTitle())) { //check if not already selected first
                 changeStack(l, true);
@@ -101,7 +99,7 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
         int last_slash = description.lastIndexOf('/');
         String[] temp = { description.substring(0, last_slash), description.substring(last_slash + 1)}; //must split data at the last / for URL to work
         Call<ResponseBody> result = api.fetchData(temp[0], temp[1]);
-        Observable.just(result).map(call -> {
+        Single.just(result).map(call -> {
             Response<ResponseBody> r = null;
             try {
                 r = call.execute();
@@ -113,8 +111,8 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(r -> {
                 try {
-                    if(getView() != null && r.body() != null)
-                        getView().showInfo(r.body().string());
+                    if(r.body() != null)
+                        view.showInfo(r.body().string());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -200,19 +198,13 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
 
     }
 
-    private LayerView getView() {
-        return viewRef == null ? null : viewRef.get();
-    }
-
     private void updateListView() { //Get all layers are those for the current measurement
-        if(getView() != null) {
-            if (measurement != null)
-                getLayerTitlesForMeasurement(measurement); //async call
-            else {
-                List<Layer> layer_list = dataSource.getLayers();
-                getView().populateList(layer_list);
-                updateSelectedItems(layer_list);
-            }
+        if (measurement != null)
+            getLayerTitlesForMeasurement(measurement); //async call
+        else {
+            List<Layer> layer_list = dataSource.getLayers();
+            view.populateList(layer_list);
+            updateSelectedItems(layer_list);
         }
     }
 
@@ -223,16 +215,6 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
      */
     private Layer searchLayerById(String id) {
         return dataSource.getLayerTable().get(id);
-    }
-
-    private void cleanUp() {
-        busSub.dispose();
-        busSub = null;
-        if(dataSub != null) {
-            dataSub.dispose();
-            dataSub = null;
-        }
-        bus = null;
     }
 
     /**
@@ -246,7 +228,7 @@ public class LayerPresenterImpl implements LayerPresenter, DataSource.LoadCallba
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(layers -> {
                 updateSelectedItems(layers);
-                getView().updateLayerList(measurement, layers);
+                view.updateLayerList(measurement, layers);
             });
     }
 }

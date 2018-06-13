@@ -7,16 +7,16 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.iamtechknow.terraview.R;
-import com.iamtechknow.terraview.events.CategoryPresenter;
+import com.iamtechknow.terraview.events.CategoryContract;
 import com.iamtechknow.terraview.model.EventCategory;
 
 import java.util.ArrayList;
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHolder> {
     private ArrayList<EventCategory> items;
-    private CategoryPresenter presenter;
+    private CategoryContract.Presenter presenter;
 
-    public CategoryAdapter(CategoryPresenter p) {
+    public CategoryAdapter(CategoryContract.Presenter p) {
         super();
         presenter = p;
         items = new ArrayList<>();

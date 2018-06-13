@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.iamtechknow.terraview.R;
-import com.iamtechknow.terraview.picker.NonLayerPresenter;
+import com.iamtechknow.terraview.picker.NonLayerContract;
 
 import java.util.List;
 
@@ -16,12 +16,12 @@ import java.util.List;
  */
 public class NonLayerDataAdapter extends RecyclerView.Adapter<NonLayerDataAdapter.ViewHolder> {
     private List<String> mItems;
-    private NonLayerPresenter presenter;
+    private NonLayerContract.Presenter presenter;
 
     /**
      * Set up an empty adapter
      */
-    public NonLayerDataAdapter(NonLayerPresenter p) {
+    public NonLayerDataAdapter(NonLayerContract.Presenter p) {
         super();
         presenter = p;
     }

@@ -12,8 +12,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class EventPresenterImpl implements EventPresenter {
-    private EventView view;
+public class EventPresenterImpl implements EventContract.Presenter {
+    private EventContract.View view;
     private Disposable sub, dataSub;
     private RxBus bus;
     private EONET client;
@@ -24,7 +24,7 @@ public class EventPresenterImpl implements EventPresenter {
     //Current category used for loading closed events
     private int currCat;
 
-    public EventPresenterImpl(RxBus _bus, EventView v, EONET e, boolean closed, int cat) {
+    public EventPresenterImpl(RxBus _bus, EventContract.View v, EONET e, boolean closed, int cat) {
         view = v;
         client = e;
         bus = _bus;

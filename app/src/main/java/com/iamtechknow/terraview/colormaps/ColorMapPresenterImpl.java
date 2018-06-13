@@ -9,20 +9,16 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class ColorMapPresenterImpl implements ColorMapPresenter {
-    private WeakReference<ColorMapView> viewRef;
+public class ColorMapPresenterImpl implements ColorMapContract.Presenter {
+    private ColorMapContract.View view;
 
     private Disposable dataSub;
 
     private ColorMapAPI api;
 
-    public ColorMapPresenterImpl(ColorMapAPI service) {
+    public ColorMapPresenterImpl(ColorMapContract.View v, ColorMapAPI service) {
+        view = v;
         api = service;
-    }
-
-    @Override
-    public void attachView(ColorMapView v) {
-        viewRef = new WeakReference<>(v);
     }
 
     @Override
@@ -31,11 +27,7 @@ public class ColorMapPresenterImpl implements ColorMapPresenter {
             dataSub.dispose();
             dataSub = null;
         }
-
-        if(viewRef != null) {
-            viewRef.clear();
-            viewRef = null;
-        }
+        view = null;
     }
 
     /**
@@ -49,10 +41,8 @@ public class ColorMapPresenterImpl implements ColorMapPresenter {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(colorMap -> {
-                if(viewRef != null && viewRef.get() != null) {
-                    Utils.cleanColorMap(colorMap);
-                    viewRef.get().setColorMapData(colorMap);
-                }
+                Utils.cleanColorMap(colorMap);
+                view.setColorMapData(colorMap);
             });
     }
 }

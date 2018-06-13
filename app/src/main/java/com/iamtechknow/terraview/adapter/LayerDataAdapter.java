@@ -9,18 +9,18 @@ import android.widget.TextView;
 
 import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.model.Layer;
-import com.iamtechknow.terraview.picker.LayerPresenter;
+import com.iamtechknow.terraview.picker.LayerContract;
 
 import java.util.List;
 
 public class LayerDataAdapter extends RecyclerView.Adapter<LayerDataAdapter.ViewHolder> {
-    private LayerPresenter presenter;
+    private LayerContract.Presenter presenter;
     private List<Layer> mItems;
 
     /**
      * Set up an empty adapter
      */
-    public LayerDataAdapter(LayerPresenter _presenter) {
+    public LayerDataAdapter(LayerContract.Presenter _presenter) {
         super();
         presenter = _presenter;
     }

@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.iamtechknow.terraview.R;
-import com.iamtechknow.terraview.events.EventPresenter;
+import com.iamtechknow.terraview.events.EventContract;
 import com.iamtechknow.terraview.model.Event;
 import com.iamtechknow.terraview.util.Utils;
 
@@ -17,9 +17,9 @@ import java.util.ArrayList;
 
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> {
     private ArrayList<Event> items;
-    private EventPresenter presenter;
+    private EventContract.Presenter presenter;
 
-    public EventAdapter(EventPresenter p) {
+    public EventAdapter(EventContract.Presenter p) {
         super();
         presenter = p;
         items = new ArrayList<>();

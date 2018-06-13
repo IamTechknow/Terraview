@@ -15,7 +15,6 @@ import com.iamtechknow.terraview.model.Event;
 import com.iamtechknow.terraview.model.Layer;
 import com.iamtechknow.terraview.util.Utils;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -29,11 +28,11 @@ import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 
 import static com.iamtechknow.terraview.map.WorldActivity.*;
 
-public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
+public class WorldPresenter implements MapContract.Presenter, DataSource.LoadCallback {
     private static final String BASE_URL = "https://gibs.earthdata.nasa.gov";
     private static final float Z_OFFSET = 5.0f, BASE_Z_OFFSET = -100.0f; //base layers cannot cover overlays
 
-    private WeakReference<MapView> mapViewRef;
+    private MapContract.View view;
     private DataSource dataSource;
 
     //Used to let presenter know to restore state after map loads
@@ -51,7 +50,8 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     private Event currEvent;
     private int currEventPoint;
 
-    public WorldPresenter(MapInteractor maps) {
+    public WorldPresenter(MapContract.View v, MapInteractor maps) {
+        view = v;
         layer_stack = new ArrayList<>();
         tileOverlays = new Hashtable<>();
         colorMaps = new Hashtable<>();
@@ -66,17 +66,8 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     }
 
     @Override
-    public void attachView(MapView v) {
-        mapViewRef = new WeakReference<>(v);
-        mapViewRef.get().setDateDialog(currentDate.getTime());
-    }
-
-    @Override
     public void detachView() {
-        if(mapViewRef != null) {
-            mapViewRef.clear();
-            mapViewRef = null;
-        }
+        view = null;
     }
 
     //Just restore model here
@@ -88,8 +79,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         currentDate = new Date(savedInstanceState.getLong(RESTORE_TIME_EXTRA));
         currEvent = savedInstanceState.getParcelable(RESTORE_EVENT_EXTRA);
 
-        if(getMapView() != null)
-            getMapView().updateDateDialog(currentDate.getTime());
+        view.updateDateDialog(currentDate.getTime());
     }
 
     //If needed, restore map tiles or set default
@@ -117,8 +107,8 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         initZOffsets();
 
         //Warn unless event widget is active to prevent spamming
-        if(isLayerStartAfterCurrent(layer_stack) && currEventPoint == 0 && getMapView() != null)
-            getMapView().warnUserAboutActiveLayers();
+        if(isLayerStartAfterCurrent(layer_stack) && currEventPoint == 0)
+            view.warnUserAboutActiveLayers();
     }
 
     @Override
@@ -163,8 +153,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         if(isRestoring)
             return;
 
-        if(getMapView() != null)
-            getMapView().setLayerList(layer_stack);
+        view.setLayerList(layer_stack);
 
         //delete layers and cached tiles
         if(delete != null)
@@ -181,8 +170,8 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
             }
         initZOffsets();
 
-        if(isLayerStartAfterCurrent(layer_stack) && getMapView() != null)
-            getMapView().warnUserAboutActiveLayers();
+        if(isLayerStartAfterCurrent(layer_stack))
+            view.warnUserAboutActiveLayers();
     }
 
     @Override
@@ -250,42 +239,35 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
 
     @Override
     public void presentColorMaps() {
-        if(getMapView() != null)
-            getMapView().showColorMaps();
+        view.showColorMaps();
     }
 
     @Override
     public void chooseLayers() {
-        if(getMapView() != null)
-            getMapView().showPicker();
+        view.showPicker();
     }
 
     @Override
     public void presentEvents() {
-        if(getMapView() != null)
-            getMapView().showEvents();
+        view.showEvents();
     }
 
     @Override
     public void presentAbout() {
-        if(getMapView() != null)
-            getMapView().showAbout();
+        view.showAbout();
     }
 
     @Override
     public void presentHelp() {
-        if(getMapView() != null)
-            getMapView().showHelp();
+        view.showHelp();
     }
 
     @Override
     public void presentAnimDialog() {
-        if(getMapView() != null) {
-            if(layer_stack.isEmpty())
-                getMapView().warnNoLayersToAnim();
-            else
-                getMapView().showAnimDialog();
-        }
+        if(layer_stack.isEmpty())
+            view.warnNoLayersToAnim();
+        else
+            view.showAnimDialog();
     }
 
     /**
@@ -297,17 +279,15 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     public void presentEvent(Event e) {
         currEvent = e;
         onDateChanged(Utils.parseISODate(e.getDates().get(0)));
-        if(getMapView() != null) {
-            if(e.getDates().size() > 1 && showColormap) { //hide colormap if event widget shown
-                onToggleColorMap(false);
-                map.setToggleState(false);
-            }
-
-            getMapView().updateDateDialog(currentDate.getTime());
-            getMapView().showEvent(e);
-            if(!isLayerStartAfterCurrent(layer_stack))
-                getMapView().showChangedEventDate(Utils.parseDateForDialog(currentDate));
+        if(e.getDates().size() > 1 && showColormap) { //hide colormap if event widget shown
+            onToggleColorMap(false);
+            map.setToggleState(false);
         }
+
+        view.updateDateDialog(currentDate.getTime());
+        view.showEvent(e);
+        if(!isLayerStartAfterCurrent(layer_stack))
+            view.showChangedEventDate(Utils.parseDateForDialog(currentDate));
 
         map.clearPolygon();
         if(e.hasPoint())
@@ -321,8 +301,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         map.clearPolygon();
         currEvent = null;
         currEventPoint = 0;
-        if(getMapView() != null)
-            getMapView().clearEvent();
+        view.clearEvent();
     }
 
     @Override
@@ -348,14 +327,12 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         layer_stack.add(terra);
         addTileOverlay(terra);
         initZOffsets();
-        if(getMapView() != null)
-            getMapView().setLayerList(layer_stack);
+        view.setLayerList(layer_stack);
     }
 
     @Override
     public void onEventProgressChanged(int progress) {
-        if(getMapView() != null)
-            getMapView().updateEventDateText(Utils.parseDateForDialog(Utils.parseISODate(currEvent.getDates().get(progress))));
+        view.updateEventDateText(Utils.parseDateForDialog(Utils.parseISODate(currEvent.getDates().get(progress))));
     }
 
     @Override
@@ -363,8 +340,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         if(progress != currEventPoint) { //Don't reload layers if same date
             currEventPoint = progress;
             onDateChanged(Utils.parseISODate(currEvent.getDates().get(progress)));
-            if (getMapView() != null)
-                getMapView().updateDateDialog(currentDate.getTime());
+            view.updateDateDialog(currentDate.getTime());
             map.moveCamera(currEvent.getPoints().get(progress));
         }
     }
@@ -372,24 +348,18 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
     @Override
     public void onToggleColorMap(boolean show) {
         showColormap = show;
-        if(getMapView() != null) {
-            if( (currEvent != null && currEvent.getDates().size() > 1) || !show) {
-                getMapView().showColorMap(null);
+        if((currEvent != null && currEvent.getDates().size() > 1) || !show) {
+            view.showColorMap(null);
+            map.setToggleState(false);
+        } else {
+            Layer l = findTopColorMap();
+            if(l != null && colorMaps.get(l.getIdentifier()) != null)
+                view.showColorMap(colorMaps.get(l.getIdentifier()));
+            else {
+                view.showColorMap(null);
                 map.setToggleState(false);
-            } else {
-                Layer l = findTopColorMap();
-                if(l != null && colorMaps.get(l.getIdentifier()) != null)
-                    getMapView().showColorMap(colorMaps.get(l.getIdentifier()));
-                else {
-                    getMapView().showColorMap(null);
-                    map.setToggleState(false);
-                }
             }
         }
-    }
-
-    private MapView getMapView() {
-        return mapViewRef == null ? null : mapViewRef.get();
     }
 
     /**
@@ -404,8 +374,7 @@ public class WorldPresenter implements MapPresenter, DataSource.LoadCallback {
         addTileOverlay(coastline);
         addTileOverlay(l);
         initZOffsets();
-        if(getMapView() != null)
-            getMapView().setLayerList(layer_stack);
+        view.setLayerList(layer_stack);
     }
 
     /**

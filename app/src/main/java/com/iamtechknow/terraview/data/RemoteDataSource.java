@@ -21,7 +21,6 @@ import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -62,7 +61,7 @@ public class RemoteDataSource implements DataSource {
         Request request = new Request.Builder().url(XML_METADATA).build();
         Request jsonRequest = new Request.Builder().url(JSON_METADATA).build();
 
-        Observable.just(true).map(aBoolean -> {
+        Single.just(true).map(aBoolean -> {
             try {
                 db.clearAllTables();
                 Response xmlResponse = client.newCall(request).execute();

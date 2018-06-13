@@ -33,8 +33,8 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.iamtechknow.terraview.about.AboutActivity;
 import com.iamtechknow.terraview.anim.AnimDialogActivity;
+import com.iamtechknow.terraview.colormaps.ColorMapContract;
 import com.iamtechknow.terraview.colormaps.ColorMapFragment;
-import com.iamtechknow.terraview.colormaps.ColorMapView;
 import com.iamtechknow.terraview.events.EventActivity;
 import com.iamtechknow.terraview.model.ColorMap;
 import com.iamtechknow.terraview.model.Event;
@@ -56,7 +56,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 
 import static com.iamtechknow.terraview.anim.AnimDialogActivity.*;
 
-public class WorldActivity extends AppCompatActivity implements MapView, OnMapReadyCallback,
+public class WorldActivity extends AppCompatActivity implements MapContract.View, OnMapReadyCallback,
         NavigationView.OnNavigationItemSelectedListener, DragAndHideListener, SeekBar.OnSeekBarChangeListener {
     public static final String RESULT_LIST = "list", PREFS_FILE = "settings", PREFS_DB_KEY = "last_update";
     public static final String RESTORE_TIME_EXTRA = "time", RESTORE_LAYER_EXTRA = "layer", RESTORE_EVENT_EXTRA = "event";
@@ -77,10 +77,10 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
 
     //Colormap Widget;
     private View colormap_widget;
-    private ColorMapView colormap;
+    private ColorMapContract.View colormap;
 
     //Presenters
-    private MapPresenter mapPresenter;
+    private MapContract.Presenter mapPresenter;
 
     private boolean eventActive;
 
@@ -89,8 +89,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mapPresenter = new WorldPresenter(new MapInteractorImpl((int) Utils.dPToPixel(getResources(), R.dimen.poly_padding)));
-        mapPresenter.attachView(this);
+        mapPresenter = new WorldPresenter(this, new MapInteractorImpl((int) Utils.dPToPixel(getResources(), R.dimen.poly_padding)));
 
         //Setup UI
         mItemAdapter = new CurrLayerAdapter(this);
@@ -436,7 +435,7 @@ public class WorldActivity extends AppCompatActivity implements MapView, OnMapRe
         } else {
             if(colormap_widget == null) {
                 colormap_widget = getLayoutInflater().inflate(R.layout.color_map_widget, mCoordinatorLayout, false);
-                colormap = (ColorMapView) colormap_widget.findViewById(R.id.color_map_palette);
+                colormap = (ColorMapContract.View) colormap_widget.findViewById(R.id.color_map_palette);
                 mCoordinatorLayout.addView(colormap_widget);
 
                 //HACK: Need to invalidate it again to make the canvas appear.
