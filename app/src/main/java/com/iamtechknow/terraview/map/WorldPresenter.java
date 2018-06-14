@@ -63,6 +63,7 @@ public class WorldPresenter implements MapContract.Presenter, DataSource.LoadCal
         c.setTime(currentDate);
         Utils.getCalendarMidnightTime(c);
         currentDate = c.getTime();
+        view.setDateDialog(currentDate.getTime());
     }
 
     @Override

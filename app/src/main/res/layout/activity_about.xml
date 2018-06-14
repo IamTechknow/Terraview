@@ -60,5 +60,15 @@
             android:minHeight="?android:listPreferredItemHeightSmall"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2"
             android:text="@string/about_github" />
+        <TextView
+            android:id="@+id/about_data"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:layout_marginStart="@dimen/text_padding_left"
+            android:layout_marginEnd="@dimen/text_padding_left"
+            android:minHeight="?android:listPreferredItemHeightSmall"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:text="@string/about_data" />
     </LinearLayout>
 </LinearLayout>

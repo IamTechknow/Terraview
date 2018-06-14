@@ -22,12 +22,18 @@ import android.support.annotation.NonNull;
         @Index(value="layer")
     }
 )
-public class MeasureLayerJoin {
+public class MeasureLayerJoin implements Comparable<MeasureLayerJoin> {
     @NonNull public final String measurement;
     @NonNull public final String layer;
 
     public MeasureLayerJoin(@NonNull String measurement, @NonNull String layer) {
         this.measurement = measurement;
         this.layer = layer;
+    }
+
+    //Since layers are listed out, we want to sort by layers
+    @Override
+    public int compareTo(@NonNull MeasureLayerJoin o) {
+        return layer.compareTo(o.layer);
     }
 }

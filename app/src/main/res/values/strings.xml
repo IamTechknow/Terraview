@@ -150,4 +150,7 @@
         <b>Terraview</b><br>
         Version %s
     ]]></string>
+    <string name="about_data">Terraview does not store or send any Personally Identifiable Information (PII) to external sources,
+        nor does it generate or send any analytical application information.
+    </string>
 </resources>

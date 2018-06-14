@@ -19,9 +19,6 @@ I worked on improvements on the project in an internship in NASA's Goddard Space
     This is found in a web page. I simplified the process of generating the URLs by creating my own API interface to use with Retrofit. No converter is used, the raw ResponseBody HTML object is returned and shown to the user.
 	Retrofit is also used in conjunction with the Simple XML framework to parse XML of colormaps data due to its consistent structure for each supported layer. 
 
-* RecyclerView features are used to help manage layers
-	The RecyclerView is used extensively to represent lists in the layer picker and the current layers list on the right hand drawer in the map Activity. In the layer picker, the RecyclerView adapters bind the list item ViewHolders to a OnClickListener that emits an event to the event bus. On the layer list, the adapter can keep track of what items are selected to populate the layer "stack" that represents the order of the layers on the map with the help of a Hash map and a [SparseBooleanArray](SparseBooleanArray) for each list item position. For the current layer list, an [ItemTouchHelper](https://developer.android.com/reference/android/support/v7/widget/helper/ItemTouchHelper.html) and callbacks are used to allow the list to be modified by gestures. List items may be swapped with adjacent entries by drag handles or long tapping, they may be swiped to the left to be removed, or hidden by the visibility icon.
-	
 * Metadata is obtained and parsed from Worldview
     Worldview's metadata may be found in the wv.json file, and contains more metadata on the layers and categories compared to
     the [WMTSCapabilities.xml](http://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml) file made available to developers who want to use GIBS's REST endpoints.
@@ -33,8 +30,9 @@ I worked on improvements on the project in an internship in NASA's Goddard Space
 <img src="art/colormaps.png" width="33%" />
 	
 ## Libraries
+* [Android Architecture Components] (https://developer.android.com/topic/libraries/architecture/)
 * [Google Maps API for Android](https://developers.google.com/maps/android/)
-* [RxJava](https://github.com/ReactiveX/RxJava) and [RxAndroid](https://github.com/ReactiveX/RxAndroid)
+* [RxJava 2](https://github.com/ReactiveX/RxJava) and [RxAndroid 2](https://github.com/ReactiveX/RxAndroid)
 * [Retrofit 2](http://square.github.io/retrofit/)
 * [Simple XML](http://simple.sourceforge.net/)
 * [Gson](https://github.com/google/gson)
@@ -43,14 +41,8 @@ I worked on improvements on the project in an internship in NASA's Goddard Space
 * [Mockito](http://mockito.org/)
 * [TapTargetView](https://github.com/KeepSafe/TapTargetView/)
 
-## Future development
-* Improve the MVP structure to simplify the WorldPresenter (in progress)
-* Seperate the utility layers, such as Coastlines, Reference Features and Labels
-* Integrate [NASA EONET](http://eonet.sci.gsfc.nasa.gov/) to allow easier discovery of natural events
-* Allow generation of GIF animations and pictures of the shown satellite data
-
 ## Requirements
-This project uses API Level 24, Google Play Services for Google Maps, and an API key for Google Maps. Replace the API key value with your own API key. Android N features are not used yet, but some Java 8 features are in use (effectively final variables, lambdas) and more may be used in the future.
+Replace the API key value with your own API key. You may also use the mockDebug build variant.
 
 ## Helpful Tutorials and samples I used:
 * [RecyclerView drag and swipe tutorial](https://medium.com/@ipaulpro/drag-and-swipe-with-recyclerview-b9456d2b1aaf#.hhn9yujya)

@@ -89,6 +89,7 @@ public class WVJsonParser {
             for(String layer : measurement_layers)
                 joins.add(new MeasureLayerJoin(measure, layer));
         }
+        Collections.sort(joins);
     }
 
     //Get keys, fill category list and all possible category/measurement pairs
@@ -103,6 +104,7 @@ public class WVJsonParser {
                 if(measurements.contains(e.getAsString()))
                     joins.add(new CatMeasureJoin(cat, e.getAsString()));
         }
+        Collections.sort(categories);
     }
 
     private void fillLayers(List<Layer> list, List<SearchQuery> queries, JsonObject layer_json) {
@@ -158,6 +160,7 @@ public class WVJsonParser {
         ArrayList<Measurement> temp = new ArrayList<>();
         for(String str : measurements)
             temp.add(new Measurement(str));
+        Collections.sort(temp);
         return temp;
     }
 
@@ -166,7 +169,9 @@ public class WVJsonParser {
     }
 
     public ArrayList<CatMeasureJoin> getCatJoins() {
-        return new ArrayList<>(catJoins);
+        ArrayList<CatMeasureJoin> temp = new ArrayList<>(catJoins);
+        Collections.sort(temp);
+        return temp;
     }
 
     public ArrayList<MeasureLayerJoin> getMeasureJoins() {

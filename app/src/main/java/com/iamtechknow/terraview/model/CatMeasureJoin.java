@@ -21,7 +21,7 @@ import android.support.annotation.NonNull;
         @Index(value="measurement")
     }
 )
-public class CatMeasureJoin {
+public class CatMeasureJoin implements Comparable<CatMeasureJoin> {
     @NonNull public final String category;
     @NonNull public final String measurement;
 
@@ -44,5 +44,11 @@ public class CatMeasureJoin {
             return category.equals(that.category) && measurement.equals(that.measurement);
         }
         return false;
+    }
+
+    //Since measurements are listed out, we want to sort by measurements
+    @Override
+    public int compareTo(@NonNull CatMeasureJoin o) {
+        return measurement.compareTo(o.measurement);
     }
 }
