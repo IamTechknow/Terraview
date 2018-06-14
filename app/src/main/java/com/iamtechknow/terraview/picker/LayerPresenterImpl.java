@@ -73,8 +73,7 @@ public class LayerPresenterImpl implements LayerContract.Presenter, DataSource.L
     }
 
     @Override
-    public void handleEvent(Object event) {
-        TapEvent tap = (TapEvent) event;
+    public void handleEvent(TapEvent tap) {
         if(tap != null && tap.getTab() == SELECT_LAYER_TAB) {
             getLayerTitlesForMeasurement(tap.getMeasurement());
         } else if(tap != null && tap.getTab() == SELECT_SUGGESTION) {

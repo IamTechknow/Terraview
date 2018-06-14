@@ -74,16 +74,16 @@ public class EventActivity extends AppCompatActivity {
         sub = null;
     }
 
-    private void handleEvent(Object event) {
-        if(event instanceof TapEvent)
-            switch(((TapEvent) event).getTab()) {
+    private void handleEvent(TapEvent event) {
+        if(event != null)
+            switch(event.getTab()) {
                 case SELECT_EVENT_TAB:
                     mTabLayout.getTabAt(EVENT_TAB).select();
                     break;
 
                 case SELECT_EVENT:
                     Bundle b = new Bundle();
-                    b.putParcelable(EVENT_EXTRA, ((TapEvent) event).getEonetEvent());
+                    b.putParcelable(EVENT_EXTRA, event.getEonetEvent());
                     setResult(RESULT_OK, new Intent().putExtras(b));
                     finish();
             }

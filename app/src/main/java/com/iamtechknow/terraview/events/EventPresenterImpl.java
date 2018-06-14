@@ -65,9 +65,8 @@ public class EventPresenterImpl implements EventContract.Presenter {
     //Handle the event passed when a category is tapped
     //Need to handle whether to send open or close events
     @Override
-    public void handleEvent(Object event) {
-        if(event instanceof TapEvent) {
-            TapEvent e = (TapEvent) event;
+    public void handleEvent(TapEvent e) {
+        if(e != null) {
             if(e.getTab() == EventActivity.SELECT_EVENT_TAB) {
                 currCat = e.getArg();
                 view.clearList();

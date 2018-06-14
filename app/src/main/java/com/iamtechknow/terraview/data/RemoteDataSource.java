@@ -34,7 +34,7 @@ import okhttp3.Response;
 public class RemoteDataSource implements DataSource {
     private static final String XML_METADATA = "https://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml",
                                 JSON_METADATA = "https://worldview.earthdata.nasa.gov/config/wv.json",
-                                PREFS_FILE = "settings", PREFS_DB_KEY = "last_update";
+                                PREFS_FILE = "settings", PREFS_DB_KEY = "last_db_update";
 
     //Data
     private TVDatabase db;

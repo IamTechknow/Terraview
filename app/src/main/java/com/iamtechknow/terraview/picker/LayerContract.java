@@ -1,6 +1,7 @@
 package com.iamtechknow.terraview.picker;
 
 import com.iamtechknow.terraview.model.Layer;
+import com.iamtechknow.terraview.model.TapEvent;
 
 import java.util.List;
 
@@ -21,7 +22,7 @@ public interface LayerContract {
     interface Presenter {
         void detachView();
 
-        void handleEvent(Object event);
+        void handleEvent(TapEvent event);
 
         void useRetrofit(String description);
 

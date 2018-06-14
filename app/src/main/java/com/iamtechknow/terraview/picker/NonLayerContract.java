@@ -1,6 +1,7 @@
 package com.iamtechknow.terraview.picker;
 
 import com.iamtechknow.terraview.model.Measurement;
+import com.iamtechknow.terraview.model.TapEvent;
 
 import java.util.List;
 
@@ -27,7 +28,7 @@ public interface NonLayerContract {
 
         void emitEvent(String data);
 
-        void handleEvent(Object event);
+        void handleEvent(TapEvent event);
 
         void getData();
     }

@@ -2,6 +2,7 @@ package com.iamtechknow.terraview.events;
 
 import com.iamtechknow.terraview.model.Event;
 import com.iamtechknow.terraview.model.EventList;
+import com.iamtechknow.terraview.model.TapEvent;
 
 import java.util.ArrayList;
 
@@ -23,7 +24,7 @@ public interface EventContract {
 
         void loadEvents ( boolean onStart);
 
-        void handleEvent (Object event);
+        void handleEvent (TapEvent event);
 
         void presentSource (String url);
 

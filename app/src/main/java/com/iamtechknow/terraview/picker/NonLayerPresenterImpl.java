@@ -51,11 +51,10 @@ public class NonLayerPresenterImpl implements NonLayerContract.Presenter, DataSo
 
     /**
      * Handle event from event bus, only used by measurement tab fragment
-     * @param event Objected emitted from the RxBus
+     * @param tap Objected emitted from the RxBus
      */
     @Override
-    public void handleEvent(Object event) {
-        TapEvent tap = (TapEvent) event;
+    public void handleEvent(TapEvent tap) {
         if(tap != null && tap.getTab() == SELECT_MEASURE_TAB  && !view.isCategoryTab())
             getMeasurementListAndInsert(tap.getCategory());
     }
@@ -70,7 +69,7 @@ public class NonLayerPresenterImpl implements NonLayerContract.Presenter, DataSo
      */
     @Override
     public void onDataLoaded() {
-        if(!view.isCategoryTab() && category != null)
+        if(!view.isCategoryTab())
             getMeasurementListAndInsert(category);
         else
             view.insertList(getCategoryList());

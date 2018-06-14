@@ -188,9 +188,9 @@ public class LayerActivity extends AppCompatActivity implements TabLayout.OnTabS
      * and in the fragment that is also listening load the right data.
      * @param event Object from the RxBus
      */
-    private void handleEvent(Object event) {
-        if(event instanceof TapEvent)
-            switch(((TapEvent) event).getTab()) {
+    private void handleEvent(TapEvent event) {
+        if(event != null)
+            switch(event.getTab()) {
                 case SELECT_LAYER_TAB:
                     mTabLayout.getTabAt(SELECT_LAYER_TAB).select();
                     break;
