@@ -19,4 +19,9 @@ public class Measurement {
     public String getName() {
         return name;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Measurement && name.equals(((Measurement) obj).name);
+    }
 }

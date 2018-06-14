@@ -13,7 +13,7 @@ import java.util.List;
 
 import io.reactivex.Single;
 
-//Interface to allow obtaining measurements for a given category (and vice versa, but not used here)
+//Interface to allow obtaining measurements for a given category and layers for given measurement
 @Dao
 public interface JoinDAO {
     @Insert

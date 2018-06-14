@@ -225,11 +225,16 @@ public class Layer implements Parcelable, Comparable<Layer> {
 
     @Override
     public boolean equals(@NonNull Object other) {
-        return other instanceof Layer && identifier.equals(((Layer) other).getIdentifier());
+        return other instanceof Layer && identifier.equals(((Layer) other).identifier);
     }
 
     @Override
     public int hashCode() {
         return identifier.hashCode(); //use identifier string hash
+    }
+
+    @Override
+    public String toString() {
+        return title;
     }
 }

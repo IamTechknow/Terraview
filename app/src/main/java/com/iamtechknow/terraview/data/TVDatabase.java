@@ -19,7 +19,7 @@ public abstract class TVDatabase extends RoomDatabase {
     public static TVDatabase getInstance(Context c) {
         if (INSTANCE == null) {
             INSTANCE = Room.databaseBuilder(c.getApplicationContext(),
-                    TVDatabase.class, "layers.sqlite")
+                    TVDatabase.class, "data.sqlite")
                     .build();
         }
         return INSTANCE;
