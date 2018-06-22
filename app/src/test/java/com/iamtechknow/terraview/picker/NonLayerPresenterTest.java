@@ -40,7 +40,6 @@ public class NonLayerPresenterTest {
     @Mock
     private DataSource data;
 
-    @Mock
     private RxBus bus;
 
     private Subject<TapEvent> subject = PublishSubject.create();

@@ -403,7 +403,7 @@ public class WorldPresenter implements MapContract.Presenter, DataSource.LoadCal
 
     //Remove all tile overlays and cached tiles, used to replace with new set
     private void removeAllTileOverlays() {
-        for(Layer l  : layer_stack)
+        for(Layer l : layer_stack)
             map.removeTile(tileOverlays.get(l.getIdentifier()), l, true);
         tileOverlays.clear();
     }

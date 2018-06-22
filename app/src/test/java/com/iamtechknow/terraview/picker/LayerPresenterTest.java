@@ -43,7 +43,6 @@ public class LayerPresenterTest {
     @Mock
     private SparseBooleanArray array;
 
-    @Mock
     private RxBus bus;
 
     private Subject<TapEvent> subject = PublishSubject.create();
