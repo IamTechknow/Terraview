@@ -30,7 +30,7 @@ I worked on improvements on the project in an internship in NASA's Goddard Space
 <img src="art/colormaps.png" width="33%" />
 	
 ## Libraries
-* [Android Architecture Components] (https://developer.android.com/topic/libraries/architecture/)
+* [Android Architecture Components](https://developer.android.com/topic/libraries/architecture/)
 * [Google Maps API for Android](https://developers.google.com/maps/android/)
 * [RxJava 2](https://github.com/ReactiveX/RxJava) and [RxAndroid 2](https://github.com/ReactiveX/RxAndroid)
 * [Retrofit 2](http://square.github.io/retrofit/)
