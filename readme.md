@@ -15,7 +15,7 @@ I worked on improvements on the project in an internship in NASA's Goddard Space
 * RecyclerView list with support for dragging and swiping items
 * Visualization of Colormaps for supported overlay layers
 * Autocomplete search feature for layer picker UI with custom ContentProvider
-* Metadata is obtained and parsed from Worldview, licensed under [NASA's open source license] (https://worldview.earthdata.nasa.gov/pages/license.html)
+* Metadata is obtained and parsed from Worldview, licensed under [NASA's open source license](https://worldview.earthdata.nasa.gov/pages/license.html)
 
 ## Testing Highlights
 * Unit tests for the Presenters and instrumentation tests for Room data access objects (DAOs)
