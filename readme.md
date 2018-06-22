@@ -5,24 +5,24 @@ GIBS is a public API providing access to satellite data and imagery from the EOS
 While this application is not directly related to NASA's [Worldview](https://worldview.earthdata.nasa.gov),
 I worked on improvements on the project in an internship in NASA's Goddard Space Flight Center and created this based on the idea a better interface could be made for mobile devices.
 
-## Decisions
-* Code is split by feature under Model-View-Presenter Architecture
-	I started this application by implementing core features within the Activities and Fragments. There are still features to be implemented which will lead to code bloat. Recently I underwent the process of converting to MVP to seperate business logic from the view to simplify the logic needed in the Activities and Fragments. In the layer picker feature, the event bus has been greatly simplified as a result to minimize coupling. There are instructmentation and unit tests to demonstrate MVP testing and code coverage. Over time I like to improve the MVP structure to create more meaningful tests, but due to dependency on Google Maps this is not very feasable.
+## Highlights
+* Implemented with MVP (model view presenter) architecture, with ViewModel to persist current data. MVVM implementation in progress
+* Google Maps API used to present web tile imagery from GIBS
+* Room library used for database and to create many-to-many relationships among the data
+* Retrofit 2 used for networking to convert JSON and XML endpoints to ordinary interfaces
+* RxJava used to implement an event bus and to coordinate asynchronous queries with Room and Retrofit APIs
+* TapTargetView used to create a simple app tour
+* RecyclerView list with support for dragging and swiping items
+* Visualization of Colormaps for supported overlay layers
+* Autocomplete search feature for layer picker UI with custom ContentProvider
+* Metadata is obtained and parsed from Worldview, licensed under [NASA's open source license] (https://worldview.earthdata.nasa.gov/pages/license.html)
 
-* RxJava is used to create an event bus and to perform networking tasks
-	Currently the ViewPager which accepts fragments to "page" through them in tabs does not allow communication through each of these fragments. 
-	The app needs a way to determine what category is selected to display the corresponding measurements in the next tab, and finally the revelant layers in the final tab. This is handled by creating an event bus in RxJava allowing the activities and fragments to have their own reference to the same event bus instance to post and consume events.
-	Observables and subscribers are also used to pass Retrofit calls to background threads and the response bodies may be subscribed upon back in the main thread. They allow tasks to run in timed intervals to make animations possible.
-
-* Retrofit is used to obtain HTML of layer information and parse XML
-    When selecting layers in the Worldview application, information and sources are displayed.
-    This is found in a web page. I simplified the process of generating the URLs by creating my own API interface to use with Retrofit. No converter is used, the raw ResponseBody HTML object is returned and shown to the user.
-	Retrofit is also used in conjunction with the Simple XML framework to parse XML of colormaps data due to its consistent structure for each supported layer. 
-
-* Metadata is obtained and parsed from Worldview
-    Worldview's metadata may be found in the wv.json file, and contains more metadata on the layers and categories compared to
-    the [WMTSCapabilities.xml](http://map1.vis.earthdata.nasa.gov/wmts-webmerc/1.0.0/WMTSCapabilities.xml) file made available to developers who want to use GIBS's REST endpoints.
-    Worldview is licensed under [NASA's open source license] (https://worldview.earthdata.nasa.gov/pages/license.html), I believe this is an appropriate use of the metadata.
+## Testing Highlights
+* Unit tests for the Presenters and instrumentation tests for Room data access objects (DAOs)
+* Espresso tests for the map and animation dialog UI
+* Mockito framework used to mock the Views
+* Mockito doAnswer-when idiom used for mock implementation of Retrofit APIs
+* Dependency injection throughout the app to make testing viable
 
 ## Screenshots
 <img src="art/map.png" width="33%" />
