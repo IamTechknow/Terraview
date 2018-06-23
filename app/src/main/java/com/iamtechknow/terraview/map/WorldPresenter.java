@@ -9,7 +9,6 @@ import com.google.android.gms.maps.model.TileOverlay;
 import com.iamtechknow.terraview.Injection;
 import com.iamtechknow.terraview.api.ColorMapAPI;
 import com.iamtechknow.terraview.data.DataSource;
-import com.iamtechknow.terraview.data.LocalDataSource;
 import com.iamtechknow.terraview.model.ColorMap;
 import com.iamtechknow.terraview.model.Event;
 import com.iamtechknow.terraview.model.Layer;
@@ -124,7 +123,7 @@ public class WorldPresenter implements MapContract.Presenter, DataSource.LoadCal
 
     @Override
     public void getLocalData(LoaderManager manager, Context c) {
-        dataSource = new LocalDataSource(manager, c);
+        dataSource = Injection.provideLocalSource(manager, c);
         dataSource.loadData(this);
     }
 

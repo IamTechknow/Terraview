@@ -1,6 +1,5 @@
 package com.iamtechknow.terraview.data;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
@@ -17,7 +16,7 @@ import java.util.HashMap;
 import io.reactivex.Single;
 
 /**
- * Implementation of a local data source by using loaders to access a SQLite database in the background.
+ * Implementation of a local data source by using loaders to access the Room database.
  */
 public class LocalDataSource implements DataSource, LoaderManager.LoaderCallbacks<DataWrapper> {
     //Loading objects
@@ -29,9 +28,9 @@ public class LocalDataSource implements DataSource, LoaderManager.LoaderCallback
     //Data
     private DataWrapper allData;
 
-    public LocalDataSource(LoaderManager loadermanager, Context c) {
-        db = TVDatabase.getInstance(c);
-        loader = new LayerLoader(c);
+    public LocalDataSource(TVDatabase _db, LayerLoader _loader, LoaderManager loadermanager) {
+        db = _db;
+        loader = _loader;
         manager = loadermanager;
     }
 

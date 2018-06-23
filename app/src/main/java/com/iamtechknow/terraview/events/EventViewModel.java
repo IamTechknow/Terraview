@@ -6,7 +6,6 @@ import com.iamtechknow.terraview.model.Event;
 
 import java.util.ArrayList;
 
-//TODO: Store list data as well to prevent redundant API calls
 public class EventViewModel extends ViewModel {
     private static final int EVENT_INTERVAL = 30;
 
