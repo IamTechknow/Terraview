@@ -17,9 +17,17 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class EONET {
     private static final String BASE = "https://eonet.sci.gsfc.nasa.gov";
+    private static EONET INSTANCE;
 
     private Retrofit retrofit;
     private EventAPI api;
+
+    public static EONET getInstance() {
+        if(INSTANCE != null) {
+            INSTANCE = new EONET();
+        }
+        return INSTANCE;
+    }
 
     public EONET() {
         retrofit = new Retrofit.Builder().baseUrl(BASE)
