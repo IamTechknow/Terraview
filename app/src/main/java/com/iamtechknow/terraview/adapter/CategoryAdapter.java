@@ -7,18 +7,18 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.iamtechknow.terraview.R;
-import com.iamtechknow.terraview.events.CategoryContract;
+import com.iamtechknow.terraview.events.CategoryViewModel;
 import com.iamtechknow.terraview.model.EventCategory;
 
 import java.util.ArrayList;
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHolder> {
     private ArrayList<EventCategory> items;
-    private CategoryContract.Presenter presenter;
+    private CategoryViewModel viewModel;
 
-    public CategoryAdapter(CategoryContract.Presenter p) {
+    public CategoryAdapter(CategoryViewModel v) {
         super();
-        presenter = p;
+        viewModel = v;
         items = new ArrayList<>();
     }
 
@@ -28,7 +28,6 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
         ViewHolder(View itemView) {
             super(itemView);
 
-
             itemView.setClickable(true);
             itemView.setOnClickListener(this);
             text = itemView.findViewById(R.id.item_text);
@@ -36,7 +35,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
 
         @Override
         public void onClick(View v) {
-            presenter.emitEvent(items.get(getAdapterPosition()).getId());
+            viewModel.emitEvent(items.get(getAdapterPosition()).getId());
         }
     }
 
@@ -59,9 +58,5 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
     public void insertList(ArrayList<EventCategory> list) {
         items = list;
         notifyDataSetChanged();
-    }
-
-    public void clearPresenter() {
-        presenter = null;
     }
 }

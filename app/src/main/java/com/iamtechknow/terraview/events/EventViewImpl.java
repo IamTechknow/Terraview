@@ -55,7 +55,7 @@ public class EventViewImpl extends Fragment implements EventContract.View {
         showingClosed = viewModel.isShowingClosed();
         eventLimit = viewModel.getLimit();
 
-        presenter = new EventPresenterImpl(RxBus.getInstance(), this, new EONET(), showingClosed, viewModel.getCategory());
+        presenter = new EventPresenterImpl(RxBus.getInstance(), this, EONET.getInstance(), showingClosed, viewModel.getCategory());
     }
 
     @Override
