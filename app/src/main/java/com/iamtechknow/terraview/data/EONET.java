@@ -29,7 +29,7 @@ public class EONET {
         return INSTANCE;
     }
 
-    public EONET() {
+    private EONET() {
         retrofit = new Retrofit.Builder().baseUrl(BASE)
             .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().registerTypeAdapter(EventList.class, new EventDeserializer()).create()))
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
@@ -50,6 +50,13 @@ public class EONET {
      */
     public Single<EventList> getEventsByCategory(int catID) {
         return api.getEventsByCategory(catID);
+    }
+
+    /**
+     * Return the raw object which will get wrapped into an observable.
+     */
+    public EventList getEventsForEventBus(int catID) {
+        return api.getEventsForEventBus(catID);
     }
 
     /**

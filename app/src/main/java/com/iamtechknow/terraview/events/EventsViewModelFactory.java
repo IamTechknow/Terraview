@@ -17,7 +17,7 @@ public class EventsViewModelFactory implements ViewModelProvider.Factory {
         if(modelClass.isAssignableFrom(CategoryViewModel.class))
             return (T) new CategoryViewModel(EONET.getInstance(), RxBus.getInstance());
         else if(modelClass.isAssignableFrom(EventViewModel.class))
-            return (T) new EventViewModel();
+            return (T) new EventViewModel(EONET.getInstance(), RxBus.getInstance());
         else
             throw new IllegalArgumentException("Unknown ViewModel Class");
     }

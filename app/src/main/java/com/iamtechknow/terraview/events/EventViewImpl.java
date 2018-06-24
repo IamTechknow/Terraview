@@ -1,11 +1,8 @@
 package com.iamtechknow.terraview.events;
 
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,20 +16,18 @@ import android.view.ViewGroup;
 
 import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.adapter.EventAdapter;
-import com.iamtechknow.terraview.data.EONET;
-import com.iamtechknow.terraview.model.Event;
 import com.iamtechknow.terraview.model.EventCategory;
+import com.iamtechknow.terraview.model.EventList;
 import com.iamtechknow.terraview.model.TapEvent;
-import com.iamtechknow.terraview.picker.RxBus;
 import com.iamtechknow.terraview.util.Utils;
 
-import java.util.ArrayList;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
-public class EventViewImpl extends Fragment implements EventContract.View {
+public class EventViewImpl extends Fragment {
     private static final int EVENT_INTERVAL = 30, EVENT_LIMIT = 300;
-
-    private EventContract.Presenter presenter;
-    private EventAdapter adapter;
 
     //Default and empty views
     private RecyclerView mRecyclerView;
@@ -44,18 +39,23 @@ public class EventViewImpl extends Fragment implements EventContract.View {
     //How many events to show
     private int eventLimit;
 
+    //MVVM objects
     private EventViewModel viewModel;
+    private EventAdapter adapter;
+    private Disposable dataSub, singleSub;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        viewModel = ViewModelProviders.of(this).get(EventViewModel.class);
+        viewModel = ViewModelProviders.of(this, new EventsViewModelFactory()).get(EventViewModel.class);
         showingClosed = viewModel.isShowingClosed();
         eventLimit = viewModel.getLimit();
-
-        presenter = new EventPresenterImpl(RxBus.getInstance(), this, EONET.getInstance(), showingClosed, viewModel.getCategory());
+        dataSub = viewModel.getLiveData()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(this::insertList);
     }
 
     @Override
@@ -64,23 +64,25 @@ public class EventViewImpl extends Fragment implements EventContract.View {
 
         //Either use saved data before config change, load open events or if config change happened load prior category
         if(Utils.isOnline(getActivity())) {
+            clearList();
             if(viewModel.getData() != null) {
-                insertList(viewModel.getCategory(), viewModel.getData()); //restore menu item later not here
-            } else if(presenter.getCurrCategory() != EventCategory.getAll().getId() || showingClosed) { //Load events from saved or all categories
+                insertList(viewModel.getData()); //restore menu item later not here
+            } else if(viewModel.getCategory() != EventCategory.getAll().getId() || showingClosed) { //Load events from saved or all categories
                 if(showingClosed)
-                    presenter.presentClosed(eventLimit);
+                    singleSub = createSub(viewModel.loadClosedEvents(eventLimit));
                 else
-                    presenter.handleEvent(new TapEvent(EventActivity.SELECT_EVENT_TAB, viewModel.getCategory()));
+                    viewModel.handleEvent(new TapEvent(EventActivity.SELECT_EVENT_TAB, viewModel.getCategory()));
             } else
-                presenter.loadEvents(true);
+                singleSub = createSub(viewModel.loadEvents(true));
         }
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        adapter.clearPresenter();
-        presenter.detachView();
+    public void onPause() {
+        super.onPause();
+        dataSub.dispose();
+        if(singleSub != null)
+            singleSub.dispose();
     }
 
     @Override
@@ -91,7 +93,7 @@ public class EventViewImpl extends Fragment implements EventContract.View {
         mRecyclerView = rootView.findViewById(R.id.recycler_view);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        adapter = new EventAdapter(presenter);
+        adapter = new EventAdapter(viewModel);
         mRecyclerView.setAdapter(adapter);
         mRecyclerView.addOnScrollListener(listener);
 
@@ -113,12 +115,12 @@ public class EventViewImpl extends Fragment implements EventContract.View {
         viewModel.setShowingClosed(showingClosed);
 
         item.setTitle(showingClosed ? R.string.open_toggle : R.string.closed_toggle);
+        clearList();
         if(showingClosed) { //do show closed events
-            viewModel.setLimit(EVENT_INTERVAL);
             eventLimit = EVENT_INTERVAL;
-            presenter.presentClosed(eventLimit);
+            singleSub = createSub(viewModel.loadClosedEvents(eventLimit));
         } else
-            presenter.loadEvents(false);
+            singleSub = createSub(viewModel.loadEvents(false));
         return true;
     }
 
@@ -127,48 +129,35 @@ public class EventViewImpl extends Fragment implements EventContract.View {
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             //Check if can scroll down, if showing closed events, and can load more
             if(!recyclerView.canScrollVertically(1) && shouldLoadMore()) {
-                presenter.presentClosed(eventLimit += EVENT_INTERVAL);
-                viewModel.setLimit(eventLimit);
+                singleSub = createSub(viewModel.loadClosedEvents(eventLimit += EVENT_INTERVAL));
             }
         }
     };
 
-    @Override
-    public void insertList(int category, ArrayList<Event> list) {
-        viewModel.setCategory(category);
-        viewModel.setData(list);
+    private void insertList(EventList data) {
+        viewModel.setData(data);
         empty_view.setVisibility(View.GONE);
         mRecyclerView.setVisibility(View.VISIBLE);
-        adapter.insertList(list);
+        adapter.insertList(data.list);
     }
 
-    @Override
-    public void clearList() {
+    private void clearList() {
         viewModel.setData(null);
         adapter.clearList();
         mRecyclerView.setVisibility(View.GONE);
         empty_view.setVisibility(View.VISIBLE);
     }
 
-    @Override
-    public void showSource(String url) {
-        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-    }
-
-    @Override
-    public void warnNoSource() {
-        if(getView() != null)
-            Snackbar.make(getView(), R.string.no_source, Snackbar.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public int getEventLimit() {
-        return eventLimit;
-    }
-
     //Is showing closed events, and is there more events to show, and not within the set limit?
     //If the list count and eventLimit aren't the same, means there are no more events to get.
     private boolean shouldLoadMore() {
         return showingClosed && eventLimit == adapter.getItemCount() && eventLimit < EVENT_LIMIT;
+    }
+
+    //Create the subscription for the Rx Retrofit APIs, here we are given a Single, not observable.
+    private Disposable createSub(Single<EventList> o) {
+        return o.subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(this::insertList);
     }
 }
