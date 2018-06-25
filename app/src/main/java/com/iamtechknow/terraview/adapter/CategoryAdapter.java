@@ -19,7 +19,6 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
     public CategoryAdapter(CategoryViewModel v) {
         super();
         viewModel = v;
-        items = new ArrayList<>();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -52,7 +51,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
 
     @Override
     public int getItemCount() {
-        return items.size();
+        return items != null ? items.size() : 0;
     }
 
     public void insertList(ArrayList<EventCategory> list) {

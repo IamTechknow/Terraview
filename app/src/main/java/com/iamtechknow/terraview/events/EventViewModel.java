@@ -11,7 +11,9 @@ import com.iamtechknow.terraview.util.Utils;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 
@@ -20,7 +22,7 @@ public class EventViewModel extends ViewModel {
 
     private EONET client;
     private RxBus bus;
-    private Disposable busSub;
+    private Disposable busSub, dataSub;
 
     //Events model state
     private int limit = EVENT_INTERVAL, category;
@@ -34,14 +36,18 @@ public class EventViewModel extends ViewModel {
         this.client = client;
         this.bus = bus;
 
-        busSub = bus.toObservable().subscribe(this::handleEvent);
+
         liveData = PublishSubject.create();
     }
 
-    @Override
-    protected void onCleared() {
-        super.onCleared();
+    public void startSub() {
+        busSub = bus.toObservable().subscribe(this::handleEvent);
+    }
+
+    //Called when activity has been paused/exited or on config change
+    public void cancelSubs() {
         busSub.dispose();
+        dataSub.dispose();
     }
 
     public int getLimit() {
@@ -50,10 +56,6 @@ public class EventViewModel extends ViewModel {
 
     public int getCategory() {
         return category;
-    }
-
-    public void setCategory(int category) {
-        this.category = category;
     }
 
     public boolean isShowingClosed() {
@@ -68,31 +70,26 @@ public class EventViewModel extends ViewModel {
         return data;
     }
 
-    public void setData(EventList data) {
-        this.data = data;
-    }
-
     public Observable<EventList> getLiveData() {
         return liveData;
     }
 
-    public Single<EventList> loadEvents(boolean onStart) {
+    public void loadEvents(boolean onStart) {
         showingClosed = false;
-        return category == 0 ? client.getOpenEvents() : client.getEventsByCategory(category);
+        dataSub = category == 0 ? createSub(client.getOpenEvents()) : createSub(client.getEventsByCategory(category));
     }
 
-    public Single<EventList> loadClosedEvents(int limit) {
+    public void loadClosedEvents(int limit) {
         this.limit = limit;
         showingClosed = true;
-        return client.getClosedEvents(category, limit);
+        dataSub = createSub(client.getClosedEvents(category, limit));
     }
 
-    //Get the data not wrapped in a Single, which will be wrapped by the subject.
-    //This is a bridge between the Rx API and a non-Rx API, like a RxRelay.
+    //Category has changed, save it and make an API call to update the live data.
     public void handleEvent(TapEvent e) {
         if(e != null && e.getTab() == EventActivity.SELECT_EVENT_TAB) {
             category = e.getArg();
-            liveData.onNext(client.getEventsForEventBus(category));
+            dataSub = showingClosed ? createSub(client.getClosedEvents(category, limit)) : createSub(client.getEventsByCategory(category));
         }
     }
 
@@ -107,5 +104,19 @@ public class EventViewModel extends ViewModel {
      */
     public boolean isSourceValid(String url) {
         return Utils.getURLPattern().matcher(url).matches();
+    }
+
+    /**
+     * Create subscription for latest API request, for which the data will be sent to
+     * the live observable when obtained. Invalidate current data too
+     */
+    private Disposable createSub(Single<EventList> o) {
+        data = null;
+        return o.subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(rawData -> {
+                data = rawData;
+                liveData.onNext(data);
+            });
     }
 }

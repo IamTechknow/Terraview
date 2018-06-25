@@ -81,8 +81,10 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     }
 
     public void clearList() {
-        items.clear();
-        notifyDataSetChanged();
+        if(items != null) {
+            items.clear();
+            notifyDataSetChanged();
+        }
     }
 
     private void showSource(Context c, String url) {

@@ -23,7 +23,7 @@ public class EONET {
     private EventAPI api;
 
     public static EONET getInstance() {
-        if(INSTANCE != null) {
+        if(INSTANCE == null) {
             INSTANCE = new EONET();
         }
         return INSTANCE;
@@ -49,14 +49,7 @@ public class EONET {
      * @param catID desired Category ID
      */
     public Single<EventList> getEventsByCategory(int catID) {
-        return api.getEventsByCategory(catID);
-    }
-
-    /**
-     * Return the raw object which will get wrapped into an observable.
-     */
-    public EventList getEventsForEventBus(int catID) {
-        return api.getEventsForEventBus(catID);
+        return catID == 0 ? api.getOpenEvents() : api.getEventsByCategory(catID);
     }
 
     /**

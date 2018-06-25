@@ -20,9 +20,6 @@ public interface EventAPI {
     @GET("/api/v2.1/categories/{cat}")
     Single<EventList> getEventsByCategory(@Path("cat") int cat);
 
-    @GET("/api/v2.1/categories/{cat}")
-    EventList getEventsForEventBus(@Path("cat") int cat);
-
     @GET("/api/v2.1/categories/{cat}/?status=closed")
     Single<EventList> getClosedEventsByCategory(@Path("cat") int cat, @Query("limit") int limit);
 }
