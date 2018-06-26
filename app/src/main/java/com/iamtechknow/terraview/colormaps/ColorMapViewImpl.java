@@ -9,37 +9,23 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.iamtechknow.terraview.R;
-import com.iamtechknow.terraview.api.ColorMapAPI;
 import com.iamtechknow.terraview.model.ColorMap;
 import com.iamtechknow.terraview.model.ColorMapEntry;
 import com.iamtechknow.terraview.util.Utils;
 
 import java.util.ArrayList;
 
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
-import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
-
 /**
- * View implementation for the color map list item. Needs a reference to the presenter
- * to prevent it from being GCed, and to allow it to be called to draw the color map
+ * View implementation for the color map list item.
  */
-public class ColorMapViewImpl extends View implements ColorMapContract.View {
-    private static final String BASE_URL = "https://gibs.earthdata.nasa.gov";
-
+public class ColorMapViewImpl extends View {
     private float RECT_HEIGHT = Utils.dPToPixel(getResources(), R.dimen.md_keylines);
 
     //Controls the color for drawing the color map
     private Paint mPaint;
 
-    //Presenter half of the MVP contract
-    private ColorMapContract.Presenter presenter;
-
     //List of all color map entries
     private ArrayList<ColorMapEntry> colorMap;
-
-    //Length of each rectangle being drawn depending on the color map size
-    private float rectLength;
 
     //Text view of the current value being shown in the color map by the slider
     private TextView val;
@@ -54,35 +40,13 @@ public class ColorMapViewImpl extends View implements ColorMapContract.View {
         mPaint = new Paint();
     }
 
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        if(presenter != null)
-            presenter.detachView();
-    }
-
-    @Override
-    public void setLayerId(String id) {
-        //Dependency injection
-        Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL)
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .addConverterFactory(SimpleXmlConverterFactory.create())
-                .build();
-
-        presenter = new ColorMapPresenterImpl(this, retrofit.create(ColorMapAPI.class));
-        presenter.parseColorMap(id);
-    }
-
-    //Called by the presenter when data is received. Calculate the length of each rectangle
-    //Then invalidate the view to have onDraw() be called. Seekbar is set when colormap exists
-    @Override
+    //Clear empty view, invalidate the view to have onDraw() be called
     public void setColorMapData(ColorMap map) {
         colorMap = map.getList();
-        rectLength = (float) getWidth() / (float) colorMap.size();
 
         View parent = (View) getParent();
         parent.findViewById(R.id.empty_view).setVisibility(View.GONE);
-        val = ((View) getParent()).findViewById(R.id.color_map_val);
+        val = parent.findViewById(R.id.color_map_val);
         val.setVisibility(View.VISIBLE);
 
         invalidate(); //will call onDraw()
@@ -90,7 +54,7 @@ public class ColorMapViewImpl extends View implements ColorMapContract.View {
 
     /**
      * Iterate through the color map to set the paint object's RGB color,
-     * then calculate the width of the rectangle to draw. Do this for all color map entries.
+     * then calculate the width (which should be non-zero by now) of the rectangle to draw.
      * Finally get the text views for the start and end labels and display them
      */
     @Override
@@ -99,6 +63,9 @@ public class ColorMapViewImpl extends View implements ColorMapContract.View {
 
         int index = 0;
         if(colorMap != null) {
+            //Length of each rectangle being drawn depending on the color map size
+            float rectLength = (float) getWidth() / (float) colorMap.size();
+
             for (ColorMapEntry e : colorMap) {
                 mPaint.setARGB(255, e.getR(), e.getG(), e.getB());
                 canvas.drawRect(index * rectLength, 0f, (index + 1) * rectLength, RECT_HEIGHT, mPaint);

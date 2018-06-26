@@ -1,5 +1,6 @@
 package com.iamtechknow.terraview.colormaps;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialogFragment;
@@ -16,6 +17,8 @@ import com.iamtechknow.terraview.adapter.ColorMapAdapter;
 public class ColorMapFragment extends BottomSheetDialogFragment {
     public static final String COLORMAP_ARG = "layers";
 
+    private ColorMapAdapter adapter;
+
     /**
      * Setup the bottom sheet behaviour and pass the current layer data to the list
      */
@@ -26,9 +29,24 @@ public class ColorMapFragment extends BottomSheetDialogFragment {
         RecyclerView mRecyclerView = rootView.findViewById(R.id.color_map_rv);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        if(getArguments() != null)
-            mRecyclerView.setAdapter(new ColorMapAdapter(getArguments().getParcelableArrayList(COLORMAP_ARG)));
+        if(getArguments() != null) {
+            adapter = new ColorMapAdapter(getArguments().getParcelableArrayList(COLORMAP_ARG),
+                    ViewModelProviders.of(this, new ColorMapViewModelFactory()).get(ColorMapViewModel.class));
+            mRecyclerView.setAdapter(adapter);
+        }
 
         return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        adapter.startSubs();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        adapter.cancelSubs();
     }
 }

@@ -8,20 +8,28 @@ import android.widget.TextView;
 
 import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.colormaps.ColorMapViewImpl;
+import com.iamtechknow.terraview.colormaps.ColorMapViewModel;
 import com.iamtechknow.terraview.model.Layer;
 import com.iamtechknow.terraview.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Locale;
 
+import io.reactivex.disposables.Disposable;
+
 public class ColorMapAdapter extends RecyclerView.Adapter<ColorMapAdapter.ViewHolder> {
     private ArrayList<Layer> mItems;
 
-    public ColorMapAdapter(ArrayList<Layer> list) {
+    private ColorMapViewModel viewModel;
+
+    private Disposable dataSub;
+
+    public ColorMapAdapter(ArrayList<Layer> list, ColorMapViewModel model) {
         mItems = list;
+        viewModel = model;
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder{
+    class ViewHolder extends RecyclerView.ViewHolder {
         TextView text, none, start, end;
         ColorMapViewImpl canvas;
 
@@ -43,15 +51,20 @@ public class ColorMapAdapter extends RecyclerView.Adapter<ColorMapAdapter.ViewHo
     }
 
     /**
-     * Upon binding, start XML parsing and draw the colormap, or set no color map text
+     * Upon binding, get the colormap, or set no color map text, then set dates
      */
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Layer l = mItems.get(position);
         holder.text.setText(l.getTitle());
         if(l.hasColorMap()) {
-            holder.itemView.findViewById(R.id.empty_view).setVisibility(View.VISIBLE);
-            holder.canvas.setLayerId(l.getPalette());
+            if(viewModel.getColorMap(l.getPalette()) != null) {
+                holder.canvas.setVisibility(View.VISIBLE);
+                holder.canvas.setColorMapData(viewModel.getColorMap(l.getPalette()));
+            } else {
+                viewModel.loadColorMap(holder.getAdapterPosition(), l.getPalette());
+                holder.itemView.findViewById(R.id.empty_view).setVisibility(View.VISIBLE);
+            }
         } else {
             holder.canvas.setVisibility(View.GONE);
             holder.itemView.findViewById(R.id.color_map_info).setVisibility(View.GONE);
@@ -78,5 +91,19 @@ public class ColorMapAdapter extends RecyclerView.Adapter<ColorMapAdapter.ViewHo
     @Override
     public int getItemCount() {
         return mItems.size();
+    }
+
+    public void startSubs() {
+        dataSub = viewModel.getLiveData().subscribe(this::onNewData);
+    }
+
+    public void cancelSubs() {
+        dataSub.dispose();
+        viewModel.cancelSub();
+    }
+
+    //Notify the adapter which item to update to show ColorMap
+    private void onNewData(int position) {
+        notifyItemChanged(position);
     }
 }

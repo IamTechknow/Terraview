@@ -33,8 +33,8 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.iamtechknow.terraview.about.AboutActivity;
 import com.iamtechknow.terraview.anim.AnimDialogActivity;
-import com.iamtechknow.terraview.colormaps.ColorMapContract;
 import com.iamtechknow.terraview.colormaps.ColorMapFragment;
+import com.iamtechknow.terraview.colormaps.ColorMapViewImpl;
 import com.iamtechknow.terraview.events.EventActivity;
 import com.iamtechknow.terraview.model.ColorMap;
 import com.iamtechknow.terraview.model.Event;
@@ -77,7 +77,7 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
 
     //Colormap Widget;
     private View colormap_widget;
-    private ColorMapContract.View colormap;
+    private ColorMapViewImpl colormap;
 
     //Presenters
     private MapContract.Presenter mapPresenter;
