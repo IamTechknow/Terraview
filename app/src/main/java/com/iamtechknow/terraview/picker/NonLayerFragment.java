@@ -18,36 +18,51 @@ import com.iamtechknow.terraview.model.Measurement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NonLayerFragment extends Fragment implements NonLayerContract.View {
+import io.reactivex.disposables.Disposable;
+
+public class NonLayerFragment extends Fragment {
     public static final String EXTRA_ARG = "arg";
     private boolean isCategoryTab;
 
-    private NonLayerContract.Presenter presenter;
     private NonLayerDataAdapter adapter;
-    private PickerViewModel viewModel;
+    private NonLayerViewModel viewModel;
+    private Disposable dataSub;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        viewModel = ViewModelProviders.of(this).get(PickerViewModel.class);
-        presenter = new NonLayerPresenterImpl(this, RxBus.getInstance(), Injection.provideLocalSource(getLoaderManager(), getActivity()), viewModel.getCategory());
-
         isCategoryTab = getArguments().getBoolean(EXTRA_ARG);
+        viewModel = ViewModelProviders.of(this, new PickerViewModelFactory(Injection.provideLocalSource(getLoaderManager(), getContext()), isCategoryTab))
+            .get(NonLayerViewModel.class);
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        presenter.getData();
+    public void onResume() {
+        super.onResume();
+        viewModel.startSubs();
+        dataSub = isCategoryTab ? viewModel.getLiveCategories().subscribe(this::insertCategories) :
+            viewModel.getLiveMeasures().subscribe(this::insertMeasurements);
+
+        if(viewModel.getMeasurements() != null && !isCategoryTab) //Use current data
+            insertMeasurements(viewModel.getMeasurements());
+        else if(viewModel.getCategories() != null && isCategoryTab)
+            insertCategories(viewModel.getCategories());
+        else
+            viewModel.getData();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        dataSub.dispose();
+        viewModel.cancelSubs();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        presenter.detachView();
-        adapter.clearPresenter();
-        presenter = null;
+        if(isCategoryTab) //destroy the loader for the category fragment so it can reload
+            getLoaderManager().destroyLoader(0);
     }
 
     //Inflate the fragment view and setup the RecyclerView
@@ -58,29 +73,20 @@ public class NonLayerFragment extends Fragment implements NonLayerContract.View 
         RecyclerView mRecyclerView = rootView.findViewById(R.id.recycler_view);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        adapter = new NonLayerDataAdapter(presenter);
+        adapter = new NonLayerDataAdapter(viewModel);
         mRecyclerView.setAdapter(adapter);
         return rootView;
     }
 
-    @Override
-    public boolean isCategoryTab() {
-        return isCategoryTab;
+    //Extract strings out of list before displaying it
+    private void insertMeasurements(List<Measurement> list) {
+        ArrayList<String> result = new ArrayList<>();
+        for (Measurement m : list)
+            result.add(m.getName());
+        adapter.insertList(result);
     }
 
-    //Called when presenter has finished loading data, set up lists
-    @Override
-    public void insertList(List<String> list) {
+    private void insertCategories(List<String> list) {
         adapter.insertList(list);
-    }
-
-    //Called after config change or when category was tapped, only called by measurement tab presenter
-    @Override
-    public void insertMeasurements(String category, List<Measurement> list) {
-        viewModel.setCategory(category);
-        ArrayList<String> measurements = new ArrayList<>();
-        for(Measurement m : list)
-            measurements.add(m.getName());
-        adapter.insertList(measurements);
     }
 }

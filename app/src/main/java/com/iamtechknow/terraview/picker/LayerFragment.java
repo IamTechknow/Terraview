@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,20 +19,23 @@ import com.iamtechknow.terraview.util.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LayerFragment extends Fragment implements LayerContract.View {
-    private LayerContract.Presenter presenter;
+import io.reactivex.disposables.Disposable;
+
+public class LayerFragment extends Fragment {
     private LayerDataAdapter adapter;
-    private PickerViewModel viewModel;
+    private LayerViewModel viewModel;
+
+    private Disposable dataSub, metadataSub;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(false);
 
-        viewModel = ViewModelProviders.of(this).get(PickerViewModel.class);
         ArrayList<Layer> stack = getArguments().getParcelableArrayList(LayerActivity.RESULT_STACK),
                 delete = getArguments().getParcelableArrayList(LayerActivity.DELETE_STACK);
-        presenter = new LayerPresenterImpl(this, RxBus.getInstance(), stack, delete, Injection.provideLocalSource(getLoaderManager(), getActivity()), new SparseBooleanArray(), viewModel.getMeasurement());
+        viewModel = ViewModelProviders.of(this, new PickerViewModelFactory(Injection.provideLocalSource(getLoaderManager(), getContext()), stack, delete))
+            .get(LayerViewModel.class);
     }
 
     /**
@@ -41,17 +43,23 @@ public class LayerFragment extends Fragment implements LayerContract.View {
      * to load all layers that are part of that measurement.
      */
     @Override
-    public void onStart() {
-        super.onStart();
-        presenter.getData();
+    public void onResume() {
+        super.onResume();
+        dataSub = viewModel.getLiveData().subscribe(this::populateList);
+        metadataSub = viewModel.getMetaLiveData().subscribe(this::showInfo);
+        viewModel.startSubs();
+        if(viewModel.getCurrData() != null)
+            populateList(viewModel.getCurrData());
+        else
+            viewModel.getData();
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        presenter.detachView();
-        adapter.clearPresenter();
-        presenter = null;
+    public void onPause() {
+        super.onPause();
+        dataSub.dispose();
+        metadataSub.dispose();
+        viewModel.cancelSubs();
     }
 
     //Inflate the fragment view and setup the RecyclerView
@@ -62,7 +70,7 @@ public class LayerFragment extends Fragment implements LayerContract.View {
         RecyclerView mRecyclerView = rootView.findViewById(R.id.recycler_view);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        adapter = new LayerDataAdapter(presenter);
+        adapter = new LayerDataAdapter(viewModel);
         mRecyclerView.setAdapter(adapter);
         return rootView;
     }
@@ -71,18 +79,10 @@ public class LayerFragment extends Fragment implements LayerContract.View {
      * Called when data is loaded to make the view populate the RecyclerView
      * @param list List of titles from all available layers
      */
-    @Override
     public void populateList(List<Layer> list) {
         adapter.insertList(list);
     }
 
-    @Override
-    public void updateLayerList(String measurement, List<Layer> list) {
-        viewModel.setMeasurement(measurement);
-        adapter.insertList(list);
-    }
-
-    @Override
     public void showInfo(String html) {
         Utils.showWebPage(getActivity(), html, getString(R.string.about));
     }

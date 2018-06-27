@@ -9,20 +9,17 @@ import android.widget.TextView;
 
 import com.iamtechknow.terraview.R;
 import com.iamtechknow.terraview.model.Layer;
-import com.iamtechknow.terraview.picker.LayerContract;
+import com.iamtechknow.terraview.picker.LayerViewModel;
 
 import java.util.List;
 
 public class LayerDataAdapter extends RecyclerView.Adapter<LayerDataAdapter.ViewHolder> {
-    private LayerContract.Presenter presenter;
+    private LayerViewModel viewModel;
     private List<Layer> mItems;
 
-    /**
-     * Set up an empty adapter
-     */
-    public LayerDataAdapter(LayerContract.Presenter _presenter) {
+    public LayerDataAdapter(LayerViewModel model) {
         super();
-        presenter = _presenter;
+        viewModel = model;
     }
 
     /**
@@ -49,12 +46,12 @@ public class LayerDataAdapter extends RecyclerView.Adapter<LayerDataAdapter.View
          */
         @Override
         public void onClick(View v) {
-            boolean prevState = presenter.isItemChecked(getAdapterPosition()); //selected when tapped?
-            presenter.setItemChecked(getLayoutPosition(), !prevState);
+            boolean prevState = viewModel.isItemChecked(getAdapterPosition()); //selected when tapped?
+            viewModel.setItemChecked(getLayoutPosition(), !prevState);
 
-            Layer temp = presenter.searchLayerByTitle(text.getText().toString());
+            Layer temp = viewModel.searchLayerByTitle(text.getText().toString());
             if(temp != null)
-                presenter.changeStack(temp, !prevState);
+                viewModel.changeStack(temp, !prevState);
 
             notifyDataSetChanged();
         }
@@ -80,10 +77,10 @@ public class LayerDataAdapter extends RecyclerView.Adapter<LayerDataAdapter.View
         Layer l = mItems.get(position);
         if(l != null) {
             holder.subtitle.setText(l.getSubtitle());
-            holder.icon.setOnClickListener(v -> presenter.useRetrofit(l.getDescription()));
+            holder.icon.setOnClickListener(v -> viewModel.useRetrofit(l.getDescription()));
         }
 
-        holder.itemView.setActivated(presenter.isItemChecked(position));
+        holder.itemView.setActivated(viewModel.isItemChecked(position));
     }
 
     @Override
@@ -91,12 +88,8 @@ public class LayerDataAdapter extends RecyclerView.Adapter<LayerDataAdapter.View
         return mItems != null ? mItems.size() : 0;
     }
 
-    public void insertList(List<Layer> strings) {
-        mItems = strings;
+    public void insertList(List<Layer> layers) {
+        mItems = layers;
         notifyDataSetChanged();
-    }
-
-    public void clearPresenter() {
-        presenter = null;
     }
 }
