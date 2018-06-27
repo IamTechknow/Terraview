@@ -14,22 +14,26 @@ import java.util.ArrayList;
 
 import io.reactivex.Single;
 import io.reactivex.android.plugins.RxAndroidPlugins;
+import io.reactivex.observers.TestObserver;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
 
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
-public class ColorMapPresenterTest {
-    @Mock
-    private ColorMapContract.View view;
-
+public class ColorMapViewModelTest {
     @Mock
     private ColorMapAPI api;
 
     private ColorMap data;
 
-    private ColorMapPresenterImpl presenter;
+    private ColorMapViewModel viewModel;
+
+    private Subject<Integer> subject = PublishSubject.create();
+
+    private TestObserver<Integer> testObserver;
 
     @BeforeClass
     public static void setupClass() {
@@ -42,6 +46,7 @@ public class ColorMapPresenterTest {
     public void setup() {
         //Add some color map entries from the Aerosol Index colormap
         ArrayList<ColorMapEntry> entries = new ArrayList<>();
+        entries.add(new ColorMapEntry("0,0,0", "Invalid", "No Data"));
         entries.add(new ColorMapEntry("240,240,240", "[0.000,0.025)", "0.000 - 0.025"));
         entries.add(new ColorMapEntry("222,222,102", "[0.975,1.000)", "0.975 - 1.000"));
         entries.add(new ColorMapEntry("229,110,0", "[2.975,3.000)", "2.975 - 3.000"));
@@ -50,17 +55,24 @@ public class ColorMapPresenterTest {
         data = new ColorMap(entries);
 
         MockitoAnnotations.initMocks(this);
-        presenter = new ColorMapPresenterImpl(view, api);
+        viewModel = new ColorMapViewModel(api, subject);
+        testObserver = new TestObserver<>();
     }
 
     @Test
     public void testShowColorMap() {
+        String palette = "OMI_Aerosol_Index";
         //When request for colormap is made
-        when(api.fetchData("OMI_Aerosol_Index")).thenReturn(Single.just(data));
-        presenter.parseColorMap("OMI_Aerosol_Index");
+        when(api.fetchData(palette)).thenReturn(Single.just(data));
+        viewModel.getLiveData().subscribe(testObserver);
 
-        //View has received colormap data to draw canvas
-        verify(view).setColorMapData(data);
-        presenter.detachView();
+        //Assert the colormap is loaded
+        viewModel.loadColorMap(0, palette);
+        assertTrue(viewModel.getColorMap(palette) != null);
+
+        for(ColorMapEntry c : viewModel.getColorMap(palette).getList())
+            assertFalse(c.isInvalid());
+
+        viewModel.cancelSub();
     }
 }

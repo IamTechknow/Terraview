@@ -47,7 +47,8 @@ public class EventViewModel extends ViewModel {
     //Called when activity has been paused/exited or on config change
     public void cancelSubs() {
         busSub.dispose();
-        dataSub.dispose();
+        if(dataSub != null)
+            dataSub.dispose();
     }
 
     public int getLimit() {
@@ -74,7 +75,7 @@ public class EventViewModel extends ViewModel {
         return liveData;
     }
 
-    public void loadEvents(boolean onStart) {
+    public void loadEvents() {
         showingClosed = false;
         dataSub = category == 0 ? createSub(client.getOpenEvents()) : createSub(client.getEventsByCategory(category));
     }

@@ -4,7 +4,6 @@ import com.iamtechknow.terraview.data.DataSource;
 import com.iamtechknow.terraview.model.Measurement;
 import com.iamtechknow.terraview.model.TapEvent;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -16,6 +15,7 @@ import java.util.List;
 
 import io.reactivex.Single;
 import io.reactivex.android.plugins.RxAndroidPlugins;
+import io.reactivex.observers.TestObserver;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
@@ -23,19 +23,11 @@ import io.reactivex.subjects.Subject;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
- * Unit test for the implementation of {@link NonLayerContract.Presenter}
+ * Unit test for the implementation of {@link NonLayerViewModel}
  */
-public class NonLayerPresenterTest {
-
-    @Mock
-    private NonLayerContract.View view;
-
-    @Mock
-    private NonLayerContract.View cat_view;
+public class NonLayerViewModelTest {
 
     @Mock
     private DataSource data;
@@ -44,7 +36,13 @@ public class NonLayerPresenterTest {
 
     private Subject<TapEvent> subject = PublishSubject.create();
 
-    private NonLayerPresenterImpl presenter;
+    private Subject<List<Measurement>> measureSub = PublishSubject.create();
+
+    private Subject<List<String>> catSub = PublishSubject.create();
+
+    private TestObserver<List<Measurement>> testObserver;
+
+    private NonLayerViewModel viewModel;
 
     private String category;
 
@@ -58,7 +56,7 @@ public class NonLayerPresenterTest {
     }
 
     @Before
-    public void setupPresenter() {
+    public void setup() {
         MockitoAnnotations.initMocks(this);
         bus = RxBus.getInstance(subject); //allows mock bus events
         category = "Test";
@@ -74,38 +72,39 @@ public class NonLayerPresenterTest {
         //Accept any category, and use the argument to determine which data to mock
         doAnswer(invocation -> Single.just(invocation.getArgument(0) == "All" ? allMeasurements : testMeasurements))
             .when(data).getMeasurementsForCategory(any());
-    }
+        testObserver = new TestObserver<>();
 
-    @After
-    public void cleanUp() {
-        presenter.detachView();
     }
 
     @Test
     public void loadAllMeasurements() {
         //Get the data and verify the presenter as a LoadCallback
-        presenter = new NonLayerPresenterImpl(view, bus, data, null);
-        presenter.getData();
-        verify(data).loadData(presenter);
+        viewModel = new NonLayerViewModel(data, bus, false, measureSub, catSub);
+        viewModel.startSubs();
+        viewModel.getLiveMeasures().subscribe(testObserver);
 
-        //Verify measurement was not set
-        presenter.onDataLoaded(); //loads data from All category
-        verify(view).insertMeasurements("All", allMeasurements);
+        //Mock load callback for DataSource
+        viewModel.getData();
+        viewModel.onDataLoaded();
+
+        //Verify the correct object was received
+        testObserver.assertValue(allMeasurements);
     }
 
     @Test
     public void testCategoryTapped() {
         //Here we need two presenters that represent the Category and Measurement tab.
-        presenter = new NonLayerPresenterImpl(view, bus, data, null);
-        NonLayerPresenterImpl cat_presenter = new NonLayerPresenterImpl(cat_view, bus, data, null);
+        viewModel = new NonLayerViewModel(data, bus, false, measureSub, catSub);
+        viewModel.startSubs();
+        viewModel.getLiveMeasures().subscribe(testObserver);
 
-        when(view.isCategoryTab()).thenReturn(false); //Mock the views as a certain tab
-        when(cat_view.isCategoryTab()).thenReturn(true);
+        NonLayerViewModel cat_vw = new NonLayerViewModel(data, bus, true, measureSub, catSub);
+        cat_vw.startSubs();
 
         //Emit tap event and load data on the mock category
-        cat_presenter.emitEvent(category);
+        cat_vw.emitEvent(category);
 
         //Verify layers for the category were shown
-        verify(view).insertMeasurements(category, testMeasurements);
+        testObserver.assertValue(testMeasurements);
     }
 }

@@ -11,38 +11,34 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
 import io.reactivex.Single;
 import io.reactivex.android.plugins.RxAndroidPlugins;
+import io.reactivex.observers.TestObserver;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-public class EventPresenterTest {
+public class EventViewModelTest {
 
-    @Mock
-    private EventContract.View view;
-
-    @Mock
-    private EONET eonet;
+    private EONET eonet; //Mocked instance
 
     private RxBus bus;
 
     private Subject<TapEvent> subject = PublishSubject.create();
 
-    private EventPresenterImpl presenter;
+    private TestObserver<EventList> testObserver;
+
+    private EventViewModel viewModel;
 
     private Event event;
-
-    private int category;
 
     @BeforeClass
     public static void setupClass() {
@@ -52,36 +48,43 @@ public class EventPresenterTest {
     }
 
     @Before
-    public void setupPresenter() {
-        MockitoAnnotations.initMocks(this);
+    public void setup() {
+        eonet = mock(EONET.class);
         bus = RxBus.getInstance(subject); //allows mock bus events
+        testObserver = new TestObserver<>();
 
         //Add some events
         ArrayList<String> date = new ArrayList<>();
         date.add("2017-09-03T13:00:00Z");
         event = new Event("EONET_3249", "Mission Fire, CALIFORNIA",  "https://inciweb.nwcg.gov/incident/5588/", date, 8, Collections.singletonList(new LatLng(37.212777777778, -119.48277777778)));
-        category = 0;
 
-        presenter = new EventPresenterImpl(bus, view, eonet, false, category);
+        viewModel = new EventViewModel(eonet, bus);
+        viewModel.startSub();
     }
 
     @After
     public void cleanUp() {
-        presenter.detachView();
+        viewModel.cancelSubs();
     }
 
     @Test
-    public void getEventsTest() {
+    public void getOpenEventsTest() {
         ArrayList<Event> events = new ArrayList<>();
         events.add(event);
+        EventList list = new EventList(events);
 
         //Since EONET is mocked, we may mock the Retrofit call by providing our own Single object
-        doAnswer(invocation -> Single.just(new EventList(events)))
+        doAnswer(invocation -> Single.just(list))
             .when(eonet).getOpenEvents();
 
-        //When presenter loads open events, view presents them
-        presenter.loadEvents(false);
-        verify(view).insertList(category, events);
+        //Act. Subscribe and fetch
+        viewModel.getLiveData().subscribe(testObserver);
+        viewModel.loadEvents();
+
+        //Verify. Get the list of events, which contains the list of values emitted
+        testObserver.assertValueCount(1);
+        testObserver.assertValue(list);
+        verify(eonet, never()).getClosedEvents(anyInt(), anyInt());
     }
 
     @Test
@@ -90,54 +93,53 @@ public class EventPresenterTest {
         events.add(event);
         for(int i = 0; i < 10; i++)
             moreEvents.add(event);
+        EventList list = new EventList(moreEvents);
 
         doAnswer(invocation -> Single.just(new EventList(events)))
             .when(eonet).getClosedEvents(0, 1);
 
-        doAnswer(invocation -> Single.just(new EventList(moreEvents)))
+        doAnswer(invocation -> Single.just(list))
             .when(eonet).getClosedEvents(0, 10);
 
-        //When presenter loads closed events with limits, view presents them
-        presenter.presentClosed(1);
-        verify(view).insertList(category, events);
+        //When subscribed to live data and requested closed events twice
+        viewModel.getLiveData().subscribe(testObserver);
+        viewModel.loadClosedEvents(1);
+        viewModel.loadClosedEvents(10);
 
-        presenter.presentClosed(10);
-        verify(view).insertList(category, moreEvents);
+        //Two separate lists are acquired
+        testObserver.assertValueCount(2);
+        testObserver.assertValueAt(1, list);
+        verify(eonet, never()).getOpenEvents();
     }
 
     @Test
     public void validSourceTest() {
-        //When presenter receives source
-        String source = "https://earthobservatory.nasa.gov/IOTD/view.php?id=90443";
-        presenter.presentSource(source);
-
-        //View presents source
-        verify(view).showSource(source);
+        //When View receives source, view model verifies it
+        assertTrue(viewModel.isSourceValid(event.getSource()));
     }
 
     @Test
     public void badSourceTest() {
-        //When presenter receives no source such as from icebergs
-        presenter.presentSource("");
-
-        //View shows snackbar message
-        verify(view).warnNoSource();
+        //When View receives source such as from icebergs, view model informs view it is invalid
+        assertFalse(viewModel.isSourceValid(""));
     }
 
     @Test
     public void testSelectCategory() {
         ArrayList<Event> events = new ArrayList<>();
         events.add(event);
-        int category = 8;
+        int category = 8; //Wildfires category
+        EventList list = new EventList(events);
 
         //Mock observables
-        doAnswer(invocation -> Single.just(new EventList(events)))
+        doAnswer(invocation -> Single.just(list))
             .when(eonet).getEventsByCategory(category);
 
         //User tap triggers event
+        viewModel.getLiveData().subscribe(testObserver);
         bus.send(new TapEvent(EventActivity.SELECT_EVENT_TAB, category));
 
-        //Verify the correct list was shown
-        verify(view).insertList(category, events);
+        verify(eonet).getEventsByCategory(category);
+        testObserver.assertValue(list);
     }
 }

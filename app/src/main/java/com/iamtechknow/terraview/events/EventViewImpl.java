@@ -79,7 +79,7 @@ public class EventViewImpl extends Fragment {
                     else
                         viewModel.handleEvent(new TapEvent(EventActivity.SELECT_EVENT_TAB, viewModel.getCategory()));
                 } else
-                    viewModel.loadEvents(true);
+                    viewModel.loadEvents();
             }
         }
     }
@@ -127,7 +127,7 @@ public class EventViewImpl extends Fragment {
             eventLimit = EVENT_INTERVAL;
             viewModel.loadClosedEvents(eventLimit);
         } else
-            viewModel.loadEvents(false);
+            viewModel.loadEvents();
         return true;
     }
 

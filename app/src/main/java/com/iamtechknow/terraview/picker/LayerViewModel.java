@@ -168,7 +168,7 @@ public class LayerViewModel extends ViewModel implements DataSource.LoadCallback
      */
     @Override
     public void onDataLoaded() {
-        updateListView();
+        updateLayerData();
     }
 
     @Override
@@ -182,7 +182,7 @@ public class LayerViewModel extends ViewModel implements DataSource.LoadCallback
             Layer l = searchLayerById(tap.getMeasurement());
             if(!titleSet.contains(l.getTitle())) { //check if not already selected first
                 changeStack(l, true);
-                updateListView(); //Without adapter, must force refresh of selected states
+                updateLayerData(); //Without adapter, must force refresh of selected states
             }
         }
     }
@@ -204,7 +204,7 @@ public class LayerViewModel extends ViewModel implements DataSource.LoadCallback
                 setItemChecked(i, true);
     }
 
-    private void updateListView() { //Get all layers for the current measurement
+    private void updateLayerData() { //Get all layers for the current measurement
         if (measurement != null)
             getLayerTitlesForMeasurement(measurement); //async call
         else {
