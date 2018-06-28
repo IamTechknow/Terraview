@@ -1,6 +1,7 @@
 package com.iamtechknow.terraview.map;
 
 import android.app.DatePickerDialog;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -53,10 +54,11 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 
 import static com.iamtechknow.terraview.anim.AnimDialogActivity.*;
 
-public class WorldActivity extends AppCompatActivity implements MapContract.View, OnMapReadyCallback,
+public class WorldActivity extends AppCompatActivity implements OnMapReadyCallback,
         NavigationView.OnNavigationItemSelectedListener, DragAndHideListener, SeekBar.OnSeekBarChangeListener {
     public static final String RESULT_LIST = "list", PREFS_FILE = "settings", PREFS_DB_KEY = "last_db_update";
     public static final String RESTORE_TIME_EXTRA = "time", RESTORE_LAYER_EXTRA = "layer", RESTORE_EVENT_EXTRA = "event";
@@ -75,12 +77,12 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
     private TextView event_date;
     private SeekBar event_stepper;
 
-    //Colormap Widget;
+    //Colormap Widget. Observable used to show/hide colormap
     private View colormap_widget;
     private ColorMapViewImpl colormap;
+    private Disposable colorMapSub;
 
-    //Presenters
-    private MapContract.Presenter mapPresenter;
+    private WorldViewModel viewModel;
 
     private boolean eventActive;
 
@@ -89,7 +91,9 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mapPresenter = new WorldPresenter(this, new MapInteractorImpl((int) Utils.dPToPixel(getResources(), R.dimen.poly_padding)));
+        viewModel = ViewModelProviders.of(this,
+            new WorldViewModelFactory(new MapInteractorImpl((int) Utils.dPToPixel(getResources(), R.dimen.poly_padding))))
+            .get(WorldViewModel.class);
 
         //Setup UI
         mItemAdapter = new CurrLayerAdapter(this);
@@ -99,6 +103,7 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
         setSupportActionBar(mToolbar);
         NavigationView navigationView = findViewById(R.id.nav_menu);
         navigationView.setNavigationItemSelectedListener(this);
+        setDateDialog(viewModel.getCurrDate().getTime());
 
         // Adding menu icon to Toolbar
         ActionBar actionBar = getSupportActionBar();
@@ -121,12 +126,6 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
         mapFragment.getMapAsync(this);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mapPresenter.detachView();
-    }
-
     //View model not used here because ViewModel does not survive rotation changes from picker activity
     //and returning to this activity which also is recreated, but this method works.
     @Override
@@ -134,17 +133,29 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
         super.onSaveInstanceState(outState);
 
         //Save current date and layers
-        outState.putParcelableArrayList(RESTORE_LAYER_EXTRA, mapPresenter.getCurrLayerStack());
-        outState.putLong(RESTORE_TIME_EXTRA, mapPresenter.getCurrDate().getTime());
-        outState.putParcelable(RESTORE_EVENT_EXTRA, mapPresenter.getCurrEvent());
+        outState.putParcelableArrayList(RESTORE_LAYER_EXTRA, viewModel.getCurrLayerStack());
+        outState.putLong(RESTORE_TIME_EXTRA, viewModel.getCurrDate().getTime());
+        outState.putParcelable(RESTORE_EVENT_EXTRA, viewModel.getCurrEvent());
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        mapPresenter.onRestoreInstanceState(savedInstanceState);
+        viewModel.onRestoreInstanceState(savedInstanceState);
         //HACK: The last item from the app tour gets re-checked upon config change, un-check it.
         ((NavigationView) findViewById(R.id.nav_menu)).getMenu().getItem(3).setChecked(false);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        colorMapSub = viewModel.getColorMapSub().subscribe(this::showColorMap);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        colorMapSub.dispose();
     }
 
     @Override
@@ -153,7 +164,7 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
         switch (item.getItemId()) {
             case android.R.id.home:
                 if(eventActive)
-                    mapPresenter.onClearEvent();
+                    clearEvent();
                 else
                     mDrawerLayout.openDrawer(GravityCompat.START);
                 return true;
@@ -166,28 +177,28 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_layerinfo:
-                mapPresenter.presentColorMaps();
+                showColorMaps();
                 break;
             case R.id.action_about:
-                mapPresenter.presentAbout();
+                showAbout();
                 break;
             case R.id.action_date:
                 mDateDialog.show();
                 break;
             case R.id.action_anim:
-                mapPresenter.presentAnimDialog();
+                showAnimDialog();
                 break;
             case R.id.action_layers:
-                mapPresenter.chooseLayers();
+                showPicker();
                 break;
             case R.id.action_layersettings:
                 mDrawerLayout.openDrawer(GravityCompat.END);
                 break;
             case R.id.action_help:
-                mapPresenter.presentHelp();
+                showHelp();
                 break;
             case R.id.action_events:
-                mapPresenter.presentEvents();
+                showEvents();
                 break;
         }
         mDrawerLayout.closeDrawer(GravityCompat.START);
@@ -200,12 +211,10 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        if(shouldUseLocalData(getSharedPreferences(PREFS_FILE, MODE_PRIVATE)))
-            mapPresenter.getLocalData(this);
-        else { //Check internet access to get layer data or set up receiver, also start tour for first timers
+        if(!shouldUseLocalData(getSharedPreferences(PREFS_FILE, MODE_PRIVATE))) { //Check internet access to get layer data or set up receiver, also start tour for first timers
             if(Utils.isOnline(this)) {
-                mapPresenter.getRemoteData(this);
-                Snackbar.make(mCoordinatorLayout, R.string.tour_new, Snackbar.LENGTH_INDEFINITE).setAction(R.string.start_tour, view -> mapPresenter.presentHelp()).show();
+                viewModel.getRemoteData(this);
+                Snackbar.make(mCoordinatorLayout, R.string.tour_new, Snackbar.LENGTH_INDEFINITE).setAction(R.string.start_tour, view -> showHelp()).show();
             } else {
                 Snackbar.make(mCoordinatorLayout, R.string.internet, Snackbar.LENGTH_LONG).show();
                 IntentFilter filter = new IntentFilter();
@@ -213,7 +222,8 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
                 registerReceiver(connectReceiver, filter);
             }
         }
-        mapPresenter.onMapReady(googleMap);
+        viewModel.onMapReady(googleMap);
+        setLayerList(viewModel.getCurrLayerStack());
     }
 
     @Override
@@ -221,19 +231,22 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
         switch(requestCode) {
             case EVENT_CODE:
                 if(resultCode == RESULT_OK)
-                    mapPresenter.presentEvent(data.getParcelableExtra(EventActivity.EVENT_EXTRA));
+                    showEvent(data.getParcelableExtra(EventActivity.EVENT_EXTRA));
                 break;
             default:
                 ArrayList<Layer> layer_stack = data.getParcelableArrayListExtra(LayerActivity.RESULT_STACK),
                         toDelete = data.getParcelableArrayListExtra(LayerActivity.DELETE_STACK);
-                mapPresenter.setLayersAndUpdateMap(layer_stack, toDelete);
+                viewModel.setLayersAndUpdateMap(layer_stack, toDelete);
+                setLayerList(viewModel.getCurrLayerStack());
+                if(viewModel.isLayerStartAfterCurrent())
+                    warnUserAboutActiveLayers();
         }
     }
 
     @Override
     public void onBackPressed() {
         if(eventActive)
-            mapPresenter.onClearEvent();
+            clearEvent();
         else
             super.onBackPressed();
     }
@@ -245,7 +258,11 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
             Calendar c = Calendar.getInstance();
             c.set(year, month, day);
             Utils.getCalendarMidnightTime(c);
-            mapPresenter.onDateChanged(c.getTime());
+            viewModel.onDateChanged(c.getTime());
+
+            //Warn unless event widget is active to prevent spamming
+            if(viewModel.isLayerStartAfterCurrent())
+                warnUserAboutActiveLayers();
         }
     };
 
@@ -257,17 +274,17 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
 
     @Override
     public void onToggleLayer(Layer l, int visibility) {
-        mapPresenter.onToggleLayer(l, visibility);
+        viewModel.onToggleLayer(l, visibility);
     }
 
     @Override
     public void onSwapNeeded(int i, int i_new) {
-        mapPresenter.onSwapNeeded(i, i_new);
+        viewModel.onSwapNeeded(i, i_new);
     }
 
     @Override
     public void onLayerSwiped(int position, Layer l) {
-        mapPresenter.onLayerSwiped(position, l);
+        viewModel.onLayerSwiped(l);
     }
 
     /**
@@ -278,32 +295,16 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION) && Utils.isOnline(context)) {
-                mapPresenter.getRemoteData(WorldActivity.this);
-                Snackbar.make(mCoordinatorLayout, R.string.tour_new, Snackbar.LENGTH_INDEFINITE).setAction(R.string.start_tour, view -> mapPresenter.presentHelp()).show();
+                viewModel.getRemoteData(WorldActivity.this);
+                Snackbar.make(mCoordinatorLayout, R.string.tour_new, Snackbar.LENGTH_INDEFINITE).setAction(R.string.start_tour, view -> showHelp()).show();
                 unregisterReceiver(this);
             }
         }
     };
 
     @Override
-    public void setDateDialog(long today) {
-        Calendar c = Calendar.getInstance();
-        c.setTimeInMillis(today);
-
-        mDateDialog = new DatePickerDialog(this, mDateListener, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
-        mDateDialog.getDatePicker().setMaxDate(today + SECONDS_PER_DAY); //HACK: Increase max date to select current day
-    }
-
-    @Override
-    public void updateDateDialog(long currDate) {
-        Calendar c = Calendar.getInstance();
-        c.setTimeInMillis(currDate);
-        mDateDialog.updateDate(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
-    }
-
-    @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        mapPresenter.onEventProgressChanged(progress);
+        event_date.setText((Utils.parseDateForDialog(Utils.parseISODate(viewModel.getCurrEvent().getDates().get(progress)))));
     }
 
     @Override
@@ -311,60 +312,77 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        mapPresenter.onEventProgressSelected(seekBar.getProgress());
+        viewModel.onEventProgressSelected(seekBar.getProgress());
+        updateDateDialog(viewModel.getCurrDate().getTime());
     }
 
-    @Override
     public void setLayerList(ArrayList<Layer> stack) {
         mItemAdapter.insertList(stack);
     }
 
-    @Override
-    public void showColorMaps() {
+    private void setDateDialog(long today) {
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(today);
+
+        mDateDialog = new DatePickerDialog(this, mDateListener, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+        mDateDialog.getDatePicker().setMaxDate(today + SECONDS_PER_DAY); //HACK: Increase max date to select current day
+    }
+
+    private void updateDateDialog(long currDate) {
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(currDate);
+        mDateDialog.updateDate(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+    }
+
+    private void showColorMaps() {
         BottomSheetDialogFragment frag = new ColorMapFragment();
         Bundle args = new Bundle();
-        args.putParcelableArrayList(ColorMapFragment.COLORMAP_ARG, mapPresenter.getCurrLayerStack());
+        args.putParcelableArrayList(ColorMapFragment.COLORMAP_ARG, viewModel.getCurrLayerStack());
 
         frag.setArguments(args);
         frag.show(getSupportFragmentManager(), frag.getTag());
     }
 
-    @Override
-    public void showAnimDialog() {
-        Intent anim_i = new Intent(WorldActivity.this, AnimDialogActivity.class)
-                .putExtra(AnimDialogActivity.ANIM_ARG, Utils.parseDateForDialog(mapPresenter.getCurrDate()))
-                .putParcelableArrayListExtra(LAYER_EXTRA, mapPresenter.getCurrLayerStack());
-        startActivity(anim_i);
+    private void showAnimDialog() {
+        if(viewModel.getCurrLayerStack().isEmpty())
+            warnNoLayersToAnim();
+        else {
+            Intent anim_i = new Intent(WorldActivity.this, AnimDialogActivity.class)
+                    .putExtra(AnimDialogActivity.ANIM_ARG, Utils.parseDateForDialog(viewModel.getCurrDate()))
+                    .putParcelableArrayListExtra(LAYER_EXTRA, viewModel.getCurrLayerStack());
+            startActivity(anim_i);
+        }
     }
 
-    @Override
-    public void showPicker() {
+    private void showPicker() {
         Intent i = new Intent(WorldActivity.this, LayerActivity.class)
-                .putParcelableArrayListExtra(RESULT_LIST, mapPresenter.getCurrLayerStack());
+                .putParcelableArrayListExtra(RESULT_LIST, viewModel.getCurrLayerStack());
         startActivityForResult(i, LAYER_CODE);
     }
 
-    @Override
-    public void showAbout() {
+    private void showAbout() {
         startActivity(new Intent(WorldActivity.this, AboutActivity.class));
     }
 
     /**
      * Implements feature discovery of Material Design as a tour of the app
      */
-    @Override
-    public void showHelp() {
+    private void showHelp() {
         FeatureDiscovery.guidedTour(this);
     }
 
-    @Override
-    public void showEvents() {
-        Intent i = new Intent(WorldActivity.this, EventActivity.class);
-        startActivityForResult(i, EVENT_CODE);
+    private void showEvents() {
+        startActivityForResult(new Intent(WorldActivity.this, EventActivity.class), EVENT_CODE);
     }
 
-    @Override
-    public void showEvent(Event e) {
+    private void showEvent(Event e) {
+        //Change current date, notify user
+        viewModel.presentEvent(e);
+        updateDateDialog(viewModel.getCurrDate().getTime());
+        showChangedEventDate(Utils.parseDateForDialog(viewModel.getCurrDate()));
+        if(viewModel.isLayerStartAfterCurrent())
+            warnUserAboutActiveLayers();
+
         eventActive = true;
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -390,8 +408,8 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
         }
     }
 
-    @Override
-    public void clearEvent() {
+    private void clearEvent() {
+        viewModel.onClearEvent();
         eventActive = false;
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -404,32 +422,28 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
             event_widget.animate().translationY(event_widget.getHeight()).setDuration(ANIM_DURATION_MILLS).start();
     }
 
-    @Override
-    public void updateEventDateText(String date) {
-        event_date.setText(date);
-    }
-
-    @Override
-    public void warnUserAboutActiveLayers() {
+    private void warnUserAboutActiveLayers() {
         Snackbar bar = Snackbar.make(mCoordinatorLayout, R.string.start_warning, Snackbar.LENGTH_LONG);
-        if(mapPresenter.isVIIRSActive())
-            bar.setAction(R.string.fix, v -> mapPresenter.fixVIIRS());
+        if(viewModel.isVIIRSActive()) {
+            bar.setDuration(Snackbar.LENGTH_INDEFINITE);
+            bar.setAction(R.string.fix, v -> {
+                viewModel.fixVIIRS();
+                setLayerList(viewModel.getCurrLayerStack());
+            });
+        }
         bar.show();
     }
 
-    @Override
-    public void warnNoLayersToAnim() {
+    private void warnNoLayersToAnim() {
         Snackbar.make(mCoordinatorLayout, getString(R.string.anim_warning_open), Snackbar.LENGTH_LONG).show();
     }
 
-    @Override
-    public void showChangedEventDate(String date) {
+    private void showChangedEventDate(String date) {
         Snackbar.make(mCoordinatorLayout, getString(R.string.event_date, date), Snackbar.LENGTH_LONG).show();
     }
 
-    @Override
-    public void showColorMap(ColorMap show) {
-        if(show == null) { //hide UI
+    private void showColorMap(ColorMap show) {
+        if(show.getList() == null) { //hide UI
             if(colormap_widget != null)
                 colormap_widget.animate().translationY(colormap_widget.getHeight()).setDuration(ANIM_DURATION_MILLS).start();
         } else {

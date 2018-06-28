@@ -1,9 +1,11 @@
 package com.iamtechknow.terraview.map;
 
+import android.arch.lifecycle.ViewModel;
 import android.content.Context;
 import android.os.Bundle;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.iamtechknow.terraview.Injection;
 import com.iamtechknow.terraview.api.ColorMapAPI;
@@ -20,20 +22,18 @@ import java.util.Hashtable;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.Subject;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 
 import static com.iamtechknow.terraview.map.WorldActivity.*;
 
-public class WorldPresenter implements MapContract.Presenter, DataSource.LoadCallback {
+public class WorldViewModel extends ViewModel implements OnMapReadyCallback, MapInteractor.ToggleListener, DataSource.LoadCallback {
     private static final String BASE_URL = "https://gibs.earthdata.nasa.gov";
     private static final float Z_OFFSET = 5.0f, BASE_Z_OFFSET = -100.0f; //base layers cannot cover overlays
 
-    private MapContract.View view;
-    private DataSource dataSource;
-
-    //Used to let presenter know to restore state after map loads
+    //Used to let view model know to restore state after map loads
     private boolean isRestoring;
 
     //Needed to update colormap if layers get swapped/deleted
@@ -48,40 +48,32 @@ public class WorldPresenter implements MapContract.Presenter, DataSource.LoadCal
     private Event currEvent;
     private int currEventPoint;
 
-    public WorldPresenter(MapContract.View v, MapInteractor maps) {
-        view = v;
+    //Mechanism to pass null or valid ColorMap for View to react
+    private Subject<ColorMap> colorMapSub;
+
+    public WorldViewModel(MapInteractor maps, Subject<ColorMap> sub) {
         layer_stack = new ArrayList<>();
         tileOverlays = new Hashtable<>();
         colorMaps = new Hashtable<>();
         map = maps;
         map.setToggleListener(this);
+        colorMapSub = sub;
 
         currentDate = new Date();
         Calendar c = Calendar.getInstance();
         c.setTime(currentDate);
         Utils.getCalendarMidnightTime(c);
         currentDate = c.getTime();
-        view.setDateDialog(currentDate.getTime());
     }
 
-    @Override
-    public void detachView() {
-        view = null;
-    }
-
-    //Just restore model here
-    @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         isRestoring = true;
 
         layer_stack = savedInstanceState.getParcelableArrayList(RESTORE_LAYER_EXTRA);
         currentDate = new Date(savedInstanceState.getLong(RESTORE_TIME_EXTRA));
         currEvent = savedInstanceState.getParcelable(RESTORE_EVENT_EXTRA);
-
-        view.updateDateDialog(currentDate.getTime());
     }
 
-    //If needed, restore map tiles or set default
     @Override
     public void onMapReady(GoogleMap gMaps) {
         map.onMapReady(gMaps);
@@ -97,39 +89,32 @@ public class WorldPresenter implements MapContract.Presenter, DataSource.LoadCal
             showDefaultTiles();
     }
 
-    @Override
     public void onDateChanged(Date date) {
         currentDate = date;
         removeAllTileOverlays();
         for(Layer l: layer_stack)
             addTileOverlay(l);
         initZOffsets();
-
-        //Warn unless event widget is active to prevent spamming
-        if(isLayerStartAfterCurrent(layer_stack) && currEventPoint == 0)
-            view.warnUserAboutActiveLayers();
     }
 
-    @Override
     public Date getCurrDate() {
         return currentDate;
     }
 
-    @Override
     public Event getCurrEvent() {
         return currEvent;
     }
 
-    @Override
-    public void getLocalData(Context c) {
-        dataSource = Injection.provideLocalSource(c);
-        dataSource.loadData(this);
+    public ArrayList<Layer> getCurrLayerStack(){
+        return layer_stack;
     }
 
-    @Override
+    public Subject<ColorMap> getColorMapSub() {
+        return colorMapSub;
+    }
+
     public void getRemoteData(Context c) {
-        dataSource = Injection.provideRemoteSource(c);
-        dataSource.loadData(this);
+        Injection.provideRemoteSource(c).loadData(this);
     }
 
     @Override
@@ -146,13 +131,10 @@ public class WorldPresenter implements MapContract.Presenter, DataSource.LoadCal
      * @param stack list representing current layers to be shown
      * @param delete list of layers to delete first
      */
-    @Override
     public void setLayersAndUpdateMap(ArrayList<Layer> stack, ArrayList<Layer> delete) {
         layer_stack = stack;
         if(isRestoring)
             return;
-
-        view.setLayerList(layer_stack);
 
         //delete layers and cached tiles
         if(delete != null)
@@ -168,12 +150,8 @@ public class WorldPresenter implements MapContract.Presenter, DataSource.LoadCal
                     getColorMapForId(l.getIdentifier(), l.getPalette());
             }
         initZOffsets();
-
-        if(isLayerStartAfterCurrent(layer_stack))
-            view.warnUserAboutActiveLayers();
     }
 
-    @Override
     public void onSwapNeeded(int i, int i_new) {
         //Get the tile overlays and change the z-indices.
         //If one of the tile overlays is a base layer, neither Z-order changes
@@ -199,7 +177,6 @@ public class WorldPresenter implements MapContract.Presenter, DataSource.LoadCal
      * @param l The layer corresponding to the tile overlay
      * @param visibility Invisible, visible, 50% transparent
      */
-    @Override
     public void onToggleLayer(Layer l, int visibility) {
         l.setVisible(visibility);
         switch(visibility) {
@@ -216,11 +193,9 @@ public class WorldPresenter implements MapContract.Presenter, DataSource.LoadCal
     }
 
     /**
-     * Called start the current layer adapter to delete a layer at the model level
-     * @param position the position of the deleted list item
+     * Called by the current layer adapter to delete a layer at the model level
      */
-    @Override
-    public void onLayerSwiped(int position, Layer l) {
+    public void onLayerSwiped(Layer l) {
         //If deleted layer was only layer with colormap, hide UI
         if(showColormap && findTopColorMap() == null) {
             showColormap = false;
@@ -231,50 +206,11 @@ public class WorldPresenter implements MapContract.Presenter, DataSource.LoadCal
         map.removeTile(tileOverlays.remove(l.getIdentifier()), l, false);
     }
 
-    @Override
-    public ArrayList<Layer> getCurrLayerStack(){
-        return layer_stack;
-    }
-
-    @Override
-    public void presentColorMaps() {
-        view.showColorMaps();
-    }
-
-    @Override
-    public void chooseLayers() {
-        view.showPicker();
-    }
-
-    @Override
-    public void presentEvents() {
-        view.showEvents();
-    }
-
-    @Override
-    public void presentAbout() {
-        view.showAbout();
-    }
-
-    @Override
-    public void presentHelp() {
-        view.showHelp();
-    }
-
-    @Override
-    public void presentAnimDialog() {
-        if(layer_stack.isEmpty())
-            view.warnNoLayersToAnim();
-        else
-            view.showAnimDialog();
-    }
-
     /**
      * Change all layers to the event date and animate the camera.
      * Also warn the user if the date change affects viewable data.
      * @param e the selected event data
      */
-    @Override
     public void presentEvent(Event e) {
         currEvent = e;
         onDateChanged(Utils.parseISODate(e.getDates().get(0)));
@@ -283,11 +219,6 @@ public class WorldPresenter implements MapContract.Presenter, DataSource.LoadCal
             map.setToggleState(false);
         }
 
-        view.updateDateDialog(currentDate.getTime());
-        view.showEvent(e);
-        if(!isLayerStartAfterCurrent(layer_stack))
-            view.showChangedEventDate(Utils.parseDateForDialog(currentDate));
-
         map.clearPolygon();
         if(e.hasPoint())
             map.moveCamera(e.getPoints().get(0));
@@ -295,15 +226,12 @@ public class WorldPresenter implements MapContract.Presenter, DataSource.LoadCal
             map.drawPolygon(e.getPolygon());
     }
 
-    @Override
     public void onClearEvent() {
         map.clearPolygon();
         currEvent = null;
         currEventPoint = 0;
-        view.clearEvent();
     }
 
-    @Override
     public boolean isVIIRSActive() {
         TileOverlay viirs = tileOverlays.get("VIIRS_SNPP_CorrectedReflectance_TrueColor");
         return viirs != null && viirs.isVisible();
@@ -313,7 +241,6 @@ public class WorldPresenter implements MapContract.Presenter, DataSource.LoadCal
      * If the VIIRS layer is active but current date is before its start date,
      * disable it and add the Terra satellite layer.
      */
-    @Override
     public void fixVIIRS() {
         for(Layer viirs_layer : layer_stack)
             if(viirs_layer.getIdentifier().equals("VIIRS_SNPP_CorrectedReflectance_TrueColor"))
@@ -326,20 +253,12 @@ public class WorldPresenter implements MapContract.Presenter, DataSource.LoadCal
         layer_stack.add(terra);
         addTileOverlay(terra);
         initZOffsets();
-        view.setLayerList(layer_stack);
     }
 
-    @Override
-    public void onEventProgressChanged(int progress) {
-        view.updateEventDateText(Utils.parseDateForDialog(Utils.parseISODate(currEvent.getDates().get(progress))));
-    }
-
-    @Override
     public void onEventProgressSelected(int progress) {
         if(progress != currEventPoint) { //Don't reload layers if same date
             currEventPoint = progress;
             onDateChanged(Utils.parseISODate(currEvent.getDates().get(progress)));
-            view.updateDateDialog(currentDate.getTime());
             map.moveCamera(currEvent.getPoints().get(progress));
         }
     }
@@ -347,18 +266,18 @@ public class WorldPresenter implements MapContract.Presenter, DataSource.LoadCal
     @Override
     public void onToggleColorMap(boolean show) {
         showColormap = show;
+        ColorMap toShow = new ColorMap(null); //dummy object
         if((currEvent != null && currEvent.getDates().size() > 1) || !show) {
-            view.showColorMap(null);
             map.setToggleState(false);
         } else {
             Layer l = findTopColorMap();
             if(l != null && colorMaps.get(l.getIdentifier()) != null)
-                view.showColorMap(colorMaps.get(l.getIdentifier()));
-            else {
-                view.showColorMap(null);
+                toShow = colorMaps.get(l.getIdentifier());
+            else
                 map.setToggleState(false);
-            }
         }
+        if(colorMapSub.hasObservers())
+            colorMapSub.onNext(toShow);
     }
 
     /**
@@ -373,7 +292,6 @@ public class WorldPresenter implements MapContract.Presenter, DataSource.LoadCal
         addTileOverlay(coastline);
         addTileOverlay(l);
         initZOffsets();
-        view.setLayerList(layer_stack);
     }
 
     /**
@@ -407,9 +325,9 @@ public class WorldPresenter implements MapContract.Presenter, DataSource.LoadCal
     }
 
     //Called when a layer is added or date is changed, verify if data cannot be shown
-    private boolean isLayerStartAfterCurrent(ArrayList<Layer> list) {
-        for(Layer l : list)
-            if(currentDate.compareTo(Utils.parseISODate(l.getStartDate())) < 0)
+    public boolean isLayerStartAfterCurrent() {
+        for(Layer l : layer_stack)
+            if(currentDate.compareTo(Utils.parseISODate(l.getStartDate())) < 0 && l.getVisibility() != Layer.INVISIBLE && currEventPoint == 0)
                 return true;
         return false;
     }
