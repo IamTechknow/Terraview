@@ -7,6 +7,8 @@ import android.support.annotation.NonNull;
 import com.iamtechknow.terraview.data.EONET;
 import com.iamtechknow.terraview.picker.RxBus;
 
+import io.reactivex.subjects.PublishSubject;
+
 /**
  * View Model Factory to inject dependencies needed by the EONET ViewModels.
  */
@@ -19,7 +21,7 @@ public class EventsViewModelFactory implements ViewModelProvider.Factory {
         if(modelClass.isAssignableFrom(CategoryViewModel.class))
             return (T) new CategoryViewModel(client, RxBus.getInstance());
         else if(modelClass.isAssignableFrom(EventViewModel.class))
-            return (T) new EventViewModel(client, RxBus.getInstance());
+            return (T) new EventViewModel(client, RxBus.getInstance(), PublishSubject.create());
         else
             throw new IllegalArgumentException("Unknown ViewModel Class");
     }

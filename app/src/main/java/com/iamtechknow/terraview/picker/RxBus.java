@@ -31,9 +31,10 @@ public class RxBus {
         _bus = subject;
     }
 
-	//Posts an event to the observer of the subject
+	//Posts an event to all observers of the subject
     public void send(TapEvent o) {
-        _bus.onNext(o);
+        if(hasObservers())
+            _bus.onNext(o);
     }
 
 	//Returns the observable of the event bus to allow fragments to subscribe to new events

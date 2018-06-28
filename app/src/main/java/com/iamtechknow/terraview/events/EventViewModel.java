@@ -14,7 +14,6 @@ import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 
 public class EventViewModel extends ViewModel {
@@ -32,12 +31,10 @@ public class EventViewModel extends ViewModel {
     //EventList live data treated as a variable
     private Subject<EventList> liveData;
 
-    public EventViewModel(EONET client, RxBus bus) {
+    public EventViewModel(EONET client, RxBus bus, Subject<EventList> sub) {
         this.client = client;
         this.bus = bus;
-
-
-        liveData = PublishSubject.create();
+        liveData = sub;
     }
 
     public void startSub() {
@@ -117,7 +114,8 @@ public class EventViewModel extends ViewModel {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(rawData -> {
                 data = rawData;
-                liveData.onNext(data);
+                if(liveData.hasObservers())
+                    liveData.onNext(data);
             });
     }
 }

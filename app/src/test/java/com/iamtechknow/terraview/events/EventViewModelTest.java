@@ -34,6 +34,8 @@ public class EventViewModelTest {
 
     private Subject<TapEvent> subject = PublishSubject.create();
 
+    private Subject<EventList> eventSubject = PublishSubject.create();
+
     private TestObserver<EventList> testObserver;
 
     private EventViewModel viewModel;
@@ -58,13 +60,31 @@ public class EventViewModelTest {
         date.add("2017-09-03T13:00:00Z");
         event = new Event("EONET_3249", "Mission Fire, CALIFORNIA",  "https://inciweb.nwcg.gov/incident/5588/", date, 8, Collections.singletonList(new LatLng(37.212777777778, -119.48277777778)));
 
-        viewModel = new EventViewModel(eonet, bus);
+        viewModel = new EventViewModel(eonet, bus, eventSubject);
         viewModel.startSub();
     }
 
     @After
     public void cleanUp() {
         viewModel.cancelSubs();
+    }
+
+    @Test
+    public void testNoSubscription() {
+        ArrayList<Event> events = new ArrayList<>();
+        events.add(event);
+        EventList list = new EventList(events);
+
+        doAnswer(invocation -> Single.just(list))
+            .when(eonet).getOpenEvents();
+
+        //load data then subscribe
+        viewModel.loadEvents();
+        viewModel.getLiveData().subscribe(testObserver);
+
+        //Data has been updated, but View does not know
+        assertTrue(viewModel.getData() != null);
+        testObserver.assertValueCount(0);
     }
 
     @Test

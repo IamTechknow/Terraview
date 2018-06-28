@@ -112,7 +112,7 @@ public class LayerViewModel extends ViewModel implements DataSource.LoadCallback
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(r -> {
                 try {
-                    if(r.body() != null)
+                    if(r.body() != null && metaLiveData.hasObservers())
                         metaLiveData.onNext(r.body().string());
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -210,7 +210,8 @@ public class LayerViewModel extends ViewModel implements DataSource.LoadCallback
         else {
             currData = dataSource.getLayers();
             updateSelectedItems(currData);
-            liveData.onNext(currData);
+            if(liveData.hasObservers())
+                liveData.onNext(currData);
         }
     }
 
@@ -229,7 +230,8 @@ public class LayerViewModel extends ViewModel implements DataSource.LoadCallback
             .subscribe(layers -> {
                 currData = layers;
                 updateSelectedItems(layers);
-                liveData.onNext(layers);
+                if(liveData.hasObservers())
+                    liveData.onNext(layers);
             }));
     }
 }

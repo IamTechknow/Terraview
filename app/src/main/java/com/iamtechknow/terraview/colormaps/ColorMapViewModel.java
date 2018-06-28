@@ -48,7 +48,8 @@ public class ColorMapViewModel extends ViewModel {
             .subscribe(colorMap -> {
                 Utils.cleanColorMap(colorMap);
                 data.put(id, colorMap);
-                liveData.onNext(position);
+                if(liveData.hasObservers())
+                    liveData.onNext(position);
             });
     }
 

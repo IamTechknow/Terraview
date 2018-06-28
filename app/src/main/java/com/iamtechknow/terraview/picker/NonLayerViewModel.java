@@ -88,7 +88,8 @@ public class NonLayerViewModel extends ViewModel implements DataSource.LoadCallb
             getMeasurementList(category);
         else {
             categories = getCategoryList();
-            liveCategories.onNext(categories);
+            if(liveCategories.hasObservers())
+                liveCategories.onNext(categories);
         }
     }
 
@@ -115,7 +116,8 @@ public class NonLayerViewModel extends ViewModel implements DataSource.LoadCallb
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(measurements -> {
                 this.measurements = measurements;
-                liveMeasures.onNext(measurements);
+                if(liveMeasures.hasObservers())
+                    liveMeasures.onNext(measurements);
             });
     }
 }
