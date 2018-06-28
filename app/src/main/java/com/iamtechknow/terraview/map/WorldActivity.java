@@ -201,7 +201,7 @@ public class WorldActivity extends AppCompatActivity implements MapContract.View
     @Override
     public void onMapReady(GoogleMap googleMap) {
         if(shouldUseLocalData(getSharedPreferences(PREFS_FILE, MODE_PRIVATE)))
-            mapPresenter.getLocalData(getSupportLoaderManager(), this);
+            mapPresenter.getLocalData(this);
         else { //Check internet access to get layer data or set up receiver, also start tour for first timers
             if(Utils.isOnline(this)) {
                 mapPresenter.getRemoteData(this);

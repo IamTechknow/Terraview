@@ -1,52 +1,75 @@
 package com.iamtechknow.terraview.data;
 
-import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 
 import com.iamtechknow.terraview.model.Category;
-import com.iamtechknow.terraview.model.DataWrapper;
 import com.iamtechknow.terraview.model.Layer;
 import com.iamtechknow.terraview.model.Measurement;
+import com.iamtechknow.terraview.util.Utils;
 
 import java.util.List;
 import java.util.HashMap;
 
 import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Implementation of a local data source by using loaders to access the Room database.
  */
-public class LocalDataSource implements DataSource, LoaderManager.LoaderCallbacks<DataWrapper> {
-    //Loading objects
-    private LoaderManager manager;
-    private LoadCallback loadCallback;
-    private LayerLoader loader;
+public class LocalDataSource implements DataSource {
     private TVDatabase db;
 
-    //Data
-    private DataWrapper allData;
+    //Cached data
+    private CompositeDisposable subs;
+    private List<Layer> layers;
+    private List<Measurement> measurements;
+    private List<Category> categories;
+    private HashMap<String, Layer> layerMap;
 
-    public LocalDataSource(TVDatabase _db, LayerLoader _loader, LoaderManager loadermanager) {
+    public LocalDataSource(TVDatabase _db) {
         db = _db;
-        loader = _loader;
-        manager = loadermanager;
+        subs = new CompositeDisposable();
     }
 
     /**
-     * Presenter call to start the load with loader callbacks
-     * @param callback Used upon load completion to inform the presenter
+     * ViewModel call to start loading data
+     * @param callback Used upon load completion to inform the viewModel
      */
     @Override
     public void loadData(@NonNull LoadCallback callback) {
-        loadCallback = callback;
-        manager.initLoader(0, null, this);
+        subs.add(db.getTVDao().getMeasurements()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(measures -> measurements = measures)
+        );
+
+        subs.add(db.getTVDao().getCategories()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(cats -> categories = cats)
+        );
+
+        subs.add(db.getTVDao().getLayers()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(layers1 -> {
+                layers = layers1;
+                layerMap = Utils.getLayerTable(layers);
+                callback.onDataLoaded();
+            })
+        );
     }
 
     @Override
     public List<Layer> getLayers() {
-        return allData != null ? allData.layers : null;
+        return layers;
+    }
+
+    @Override
+    public List<Category> getCategories() {
+        return categories;
     }
 
     @Override
@@ -60,28 +83,7 @@ public class LocalDataSource implements DataSource, LoaderManager.LoaderCallback
     }
 
     @Override
-    public List<Category> getCategories() {
-        return allData != null ? allData.cats : null;
-    }
-
-    @Override
     public HashMap<String, Layer> getLayerTable() {
-        return allData != null ? allData.layerTable : null;
+        return layerMap;
     }
-
-    @NonNull
-    @Override
-    public Loader<DataWrapper> onCreateLoader(int id, Bundle args) {
-        return loader;
-    }
-
-    @Override
-    public void onLoadFinished(@NonNull Loader<DataWrapper> loader, DataWrapper data) {
-        allData = data;
-
-        loadCallback.onDataLoaded();
-    }
-
-    @Override
-    public void onLoaderReset(@NonNull Loader<DataWrapper> loader) {}
 }

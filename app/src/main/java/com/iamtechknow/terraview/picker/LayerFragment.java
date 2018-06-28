@@ -34,7 +34,7 @@ public class LayerFragment extends Fragment {
 
         ArrayList<Layer> stack = getArguments().getParcelableArrayList(LayerActivity.RESULT_STACK),
                 delete = getArguments().getParcelableArrayList(LayerActivity.DELETE_STACK);
-        viewModel = ViewModelProviders.of(this, new PickerViewModelFactory(Injection.provideLocalSource(getLoaderManager(), getContext()), stack, delete))
+        viewModel = ViewModelProviders.of(this, new PickerViewModelFactory(Injection.provideLocalSource(getContext()), stack, delete))
             .get(LayerViewModel.class);
     }
 

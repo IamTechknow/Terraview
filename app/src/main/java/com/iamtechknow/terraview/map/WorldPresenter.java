@@ -2,7 +2,6 @@ package com.iamtechknow.terraview.map;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.TileOverlay;
@@ -122,8 +121,8 @@ public class WorldPresenter implements MapContract.Presenter, DataSource.LoadCal
     }
 
     @Override
-    public void getLocalData(LoaderManager manager, Context c) {
-        dataSource = Injection.provideLocalSource(manager, c);
+    public void getLocalData(Context c) {
+        dataSource = Injection.provideLocalSource(c);
         dataSource.loadData(this);
     }
 

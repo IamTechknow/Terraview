@@ -2,7 +2,6 @@ package com.iamtechknow.terraview;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v4.app.LoaderManager;
 
 import com.iamtechknow.terraview.data.*;
 
@@ -17,7 +16,7 @@ public class Injection {
         return new RemoteDataSource(TVDatabase.getInstance(c), c.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE));
     }
 
-    public static DataSource provideLocalSource(@NonNull LoaderManager manager, @NonNull Context c) {
-        return new LocalDataSource(TVDatabase.getInstance(c), new LayerLoader(c), manager);
+    public static DataSource provideLocalSource(@NonNull Context c) {
+        return new LocalDataSource(TVDatabase.getInstance(c));
     }
 }

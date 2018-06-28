@@ -81,12 +81,17 @@ public class RemoteDataSource implements DataSource {
             return true;
         }).subscribeOn(Schedulers.io())
           .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(aBoolean -> callback.onDataLoaded());
+          .subscribe(aBoolean -> callback.onDataLoaded(), throwable -> callback.onDataNotAvailable());
     }
 
     @Override
     public List<Layer> getLayers() {
         return layers;
+    }
+
+    @Override
+    public List<Category> getCategories() {
+        return categories;
     }
 
     @Override
@@ -97,11 +102,6 @@ public class RemoteDataSource implements DataSource {
     @Override
     public Single<List<Measurement>> getMeasurementsForCategory(String c) {
         return db.getJoinDAO().getMeasurementsForCategory(c);
-    }
-
-    @Override
-    public List<Category> getCategories() {
-        return categories;
     }
 
     @Override

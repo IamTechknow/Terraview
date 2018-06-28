@@ -32,7 +32,7 @@ public class NonLayerFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         isCategoryTab = getArguments().getBoolean(EXTRA_ARG);
-        viewModel = ViewModelProviders.of(this, new PickerViewModelFactory(Injection.provideLocalSource(getLoaderManager(), getContext()), isCategoryTab))
+        viewModel = ViewModelProviders.of(this, new PickerViewModelFactory(Injection.provideLocalSource(getContext()), isCategoryTab))
             .get(NonLayerViewModel.class);
     }
 
@@ -43,12 +43,7 @@ public class NonLayerFragment extends Fragment {
         dataSub = isCategoryTab ? viewModel.getLiveCategories().subscribe(this::insertCategories) :
             viewModel.getLiveMeasures().subscribe(this::insertMeasurements);
 
-        if(viewModel.getMeasurements() != null && !isCategoryTab) //Use current data
-            insertMeasurements(viewModel.getMeasurements());
-        else if(viewModel.getCategories() != null && isCategoryTab)
-            insertCategories(viewModel.getCategories());
-        else
-            viewModel.getData();
+        viewModel.getData();
     }
 
     @Override

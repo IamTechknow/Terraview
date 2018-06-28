@@ -28,11 +28,11 @@ public interface DataSource {
 
     List<Layer> getLayers();
 
+    List<Category> getCategories();
+
     Single<List<Layer>> getLayersForMeasurement(String m);
 
     Single<List<Measurement>> getMeasurementsForCategory(String c);
-
-    List<Category> getCategories();
 
     HashMap<String, Layer> getLayerTable();
 }

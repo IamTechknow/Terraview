@@ -13,25 +13,27 @@ import com.iamtechknow.terraview.model.SearchQuery;
 
 import java.util.List;
 
+import io.reactivex.Single;
+
 @Dao
 public interface TVDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertLayers(List<Layer> layers);
 
     @Query("SELECT * FROM layer")
-    List<Layer> getLayers();
+    Single<List<Layer>> getLayers();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertCategories(List<Category> categories);
 
     @Query("SELECT * FROM category")
-    List<Category> getCategories();
+    Single<List<Category>> getCategories();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertMeasurements(List<Measurement> measurements);
 
     @Query("SELECT * FROM measurement")
-    List<Measurement> getMeasurements();
+    Single<List<Measurement>> getMeasurements();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertQueries(List<SearchQuery> queries);

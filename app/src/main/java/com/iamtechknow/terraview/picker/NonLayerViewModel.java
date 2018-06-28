@@ -81,7 +81,6 @@ public class NonLayerViewModel extends ViewModel implements DataSource.LoadCallb
         return categories;
     }
 
-    //FIXME: Replace loader, as they don't work right after config change (they do before that)
     @Override
     public void onDataLoaded() {
         if(!forCategoryTab)

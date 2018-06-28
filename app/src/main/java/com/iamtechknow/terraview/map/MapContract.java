@@ -2,7 +2,6 @@ package com.iamtechknow.terraview.map;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
 
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.iamtechknow.terraview.model.ColorMap;
@@ -66,7 +65,7 @@ public interface MapContract {
 
         void getRemoteData(Context c);
 
-        void getLocalData(LoaderManager manager, Context c);
+        void getLocalData(Context c);
 
         void setLayersAndUpdateMap(ArrayList<Layer> stack, ArrayList<Layer> delete);
 
