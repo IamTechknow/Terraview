@@ -11,55 +11,55 @@ import com.google.android.gms.internal.maps.zzac;
  */
 public class FakeZZAC implements zzac {
     @Override
-    public void remove() throws RemoteException {}
+    public void remove() {}
 
     @Override
-    public void clearTileCache() throws RemoteException {}
+    public void clearTileCache() {}
 
     @Override
-    public String getId() throws RemoteException {
+    public String getId() {
         return null;
     }
 
     @Override
-    public void setZIndex(float v) throws RemoteException {}
+    public void setZIndex(float v) {}
 
     @Override
-    public float getZIndex() throws RemoteException {
+    public float getZIndex() {
         return 0;
     }
 
     @Override
-    public void setVisible(boolean b) throws RemoteException {}
+    public void setVisible(boolean b) {}
 
     @Override
-    public boolean isVisible() throws RemoteException {
+    public boolean isVisible() {
         return false;
     }
 
     @Override
-    public boolean zza(zzac zzac) throws RemoteException {
+    public boolean zza(zzac zzac) {
         return false;
     }
 
     @Override
-    public int zzi() throws RemoteException {
+    public int zzi() {
         return 0;
     }
 
     @Override
-    public void setFadeIn(boolean b) throws RemoteException {}
+    public void setFadeIn(boolean b) {}
 
     @Override
-    public boolean getFadeIn() throws RemoteException {
+    public boolean getFadeIn() {
         return false;
     }
 
     @Override
-    public void setTransparency(float v) throws RemoteException {}
+    public void setTransparency(float v) {}
 
     @Override
-    public float getTransparency() throws RemoteException {
+    public float getTransparency() {
         return 0;
     }
 

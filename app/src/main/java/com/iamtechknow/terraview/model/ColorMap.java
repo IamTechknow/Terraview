@@ -23,4 +23,15 @@ public class ColorMap {
     public ArrayList<ColorMapEntry> getList() {
         return list;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(this == obj)
+            return true;
+        if(obj instanceof ColorMap) {
+            ColorMap that = (ColorMap) obj;
+            return (list == null && that.list == null) || (list != null && that.list != null && list.equals(that.list));
+        }
+        return false;
+    }
 }

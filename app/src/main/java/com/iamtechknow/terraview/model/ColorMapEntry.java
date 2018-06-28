@@ -76,6 +76,6 @@ public class ColorMapEntry {
         if(obj == null || !(obj instanceof ColorMapEntry))
             return false;
         ColorMapEntry entry = (ColorMapEntry) obj;
-        return r == entry.getR() && g == entry.getG() && b == entry.getB();
+        return val.equals(entry.val) && r == entry.r && g == entry.g && b == entry.b;
     }
 }
