@@ -1,6 +1,5 @@
-package com.iamtechknow.terraview;
+package com.iamtechknow.terraview.map;
 
-import android.annotation.SuppressLint;
 import android.support.test.espresso.ViewAction;
 import android.support.test.espresso.action.CoordinatesProvider;
 import android.support.test.espresso.action.GeneralLocation;
@@ -13,8 +12,9 @@ import android.support.test.runner.AndroidJUnit4;
 import android.support.v4.view.GravityCompat;
 
 import com.dannyroa.espresso_samples.recyclerview.RecyclerViewMatcher;
+import com.iamtechknow.terraview.R;
+import com.iamtechknow.terraview.SizeMatcher;
 import com.iamtechknow.terraview.colormaps.ColorMapViewImpl;
-import com.iamtechknow.terraview.map.WorldActivity;
 
 import static android.support.test.InstrumentationRegistry.getTargetContext;
 import static android.support.test.espresso.Espresso.onView;
@@ -22,8 +22,8 @@ import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition;
 import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
+import static android.support.test.espresso.matcher.ViewMatchers.hasFocus;
 import static android.support.test.espresso.matcher.ViewMatchers.isDescendantOfA;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withClassName;
 import static android.support.test.espresso.matcher.ViewMatchers.withContentDescription;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
@@ -37,7 +37,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * A test that starts up and verifies that the two default layers are shown on the map, then swipes them away.
+ * Black box tests for the main map activity. View and ViewModel internals are not modified.
  */
 
 @RunWith(AndroidJUnit4.class)
@@ -83,7 +83,6 @@ public class WorldActivityTest {
     /**
      * Select two layer items from the picker and verify color map views exist.
      */
-    @SuppressLint("PrivateResource")
     @Test
     public void colorMapsTest() {
         //Go to layer picker and layer tab
@@ -91,9 +90,10 @@ public class WorldActivityTest {
         onView(withText(getTargetContext().getString(R.string.layers))).perform(click());
         onView(allOf(withText("Layers"), isDescendantOfA(withId(R.id.tabs)))).perform(click());
 
-        //Need to get the recycler view in view pager that is visible on screen
-        onView(allOf(withId(R.id.recycler_view), isDisplayed())).perform(actionOnItemAtPosition(0, click()));
-        onView(allOf(withId(R.id.recycler_view), isDisplayed())).perform(actionOnItemAtPosition(1, click()));
+        //Need to get the recycler view in view pager that has focus on screen
+        onView(allOf(withId(R.id.recycler_view), hasFocus()))
+                .perform(actionOnItemAtPosition(0, click()))
+                .perform(actionOnItemAtPosition(1, click()));
 
         //Press home button to go back, go to colormaps screen
         onView(withContentDescription(R.string.abc_action_bar_up_description)).perform(click());

@@ -27,7 +27,7 @@ public class DataTest extends DbTest {
         db.getTVDao().insertLayers(data);
 
         //Test that first layer on list is Coastlines
-        List<Layer> loaded = db.getTVDao().getLayers();
+        List<Layer> loaded = db.getTVDao().getLayers().blockingGet();
         assertEquals(data.get(0), loaded.get(0));
     }
 

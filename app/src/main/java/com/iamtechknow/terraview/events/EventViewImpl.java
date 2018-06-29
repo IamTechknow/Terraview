@@ -1,8 +1,10 @@
 package com.iamtechknow.terraview.events;
 
+import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -22,12 +24,13 @@ import com.iamtechknow.terraview.model.TapEvent;
 import com.iamtechknow.terraview.picker.RxBus;
 import com.iamtechknow.terraview.util.Utils;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class EventViewImpl extends Fragment {
     private static final int EVENT_INTERVAL = 30, EVENT_LIMIT = 300;
+
+    @VisibleForTesting
+    ViewModelProvider.Factory factory;
 
     //Default and empty views
     private RecyclerView mRecyclerView;
@@ -50,7 +53,7 @@ public class EventViewImpl extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        viewModel = ViewModelProviders.of(this, new EventsViewModelFactory()).get(EventViewModel.class);
+        viewModel = ViewModelProviders.of(this, factory != null ? factory : new EventsViewModelFactory()).get(EventViewModel.class);
         showingClosed = viewModel.isShowingClosed();
         eventLimit = viewModel.getLimit();
         bus = RxBus.getInstance();
@@ -62,10 +65,7 @@ public class EventViewImpl extends Fragment {
         viewModel.startSub();
         busSub = bus.toObservable().subscribe(this::handleEvent);
         //Create subscription for the live data which gets triggered after each API request.
-        liveSub = viewModel.getLiveData()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::insertList);
+        liveSub = viewModel.getLiveData().subscribe(this::insertList);
 
         //Either use saved data before config change, load open events or if config change happened load prior category
         if(Utils.isOnline(getActivity())) {

@@ -1,4 +1,4 @@
-package com.iamtechknow.terraview;
+package com.iamtechknow.terraview.anim;
 
 import android.support.test.espresso.contrib.PickerActions;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
@@ -6,14 +6,13 @@ import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.widget.DatePicker;
 
-import com.iamtechknow.terraview.anim.AnimDialogActivity;
+import com.iamtechknow.terraview.R;
 
 import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static android.support.test.InstrumentationRegistry.getTargetContext;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
@@ -21,7 +20,11 @@ import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static android.support.test.espresso.matcher.ViewMatchers.withClassName;
+import static org.hamcrest.CoreMatchers.allOf;
 
+/**
+ * Black box test for the animation dialog.
+ */
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class DialogTest {
@@ -33,8 +36,7 @@ public class DialogTest {
     public void errorShownOnIncompleteDialog() {
         //Press animate, verify Snackbar text
         onView(withId(R.id.anim_start)).perform(click());
-        String msg = getTargetContext().getString(R.string.anim_warning);
-        onView(withText(msg)).check(matches(isDisplayed()));
+        onView(allOf(withId(android.support.design.R.id.snackbar_text), withText(R.string.anim_warning))).check(matches(isDisplayed()));
     }
 
     @Test
@@ -55,7 +57,6 @@ public class DialogTest {
 
         //Press animate and verify Snackbar text
         onView(withId(R.id.anim_start)).perform(click());
-        String msg = getTargetContext().getString(R.string.anim_warning_before);
-        onView(withText(msg)).check(matches(isDisplayed()));
+        onView(allOf(withId(android.support.design.R.id.snackbar_text), withText(R.string.anim_warning_before))).check(matches(isDisplayed()));
     }
 }
