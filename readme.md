@@ -6,7 +6,7 @@ While this application is not directly related to NASA's [Worldview](https://wor
 I worked on improvements on the project in an internship in NASA's Goddard Space Flight Center and created this based on the idea a better interface could be made for mobile devices.
 
 ## Highlights
-* Implemented with MVP (model view presenter) architecture, with ViewModel to persist current data. MVVM implementation in progress
+* Implemented with MVP (model view presenter) architecture, with ViewModel to persist current data. MVVM implementation in separate branch
 * Google Maps API used to present web tile imagery from GIBS
 * Room library used for database and to create many-to-many relationships among the data
 * Retrofit 2 used for networking to convert JSON and XML endpoints to ordinary interfaces
@@ -19,7 +19,7 @@ I worked on improvements on the project in an internship in NASA's Goddard Space
 
 ## Testing Highlights
 * Unit tests for the Presenters and instrumentation tests for Room data access objects (DAOs)
-* Espresso tests for the map and animation dialog UI
+* Espresso tests for the map and animation dialog UI (more in MVVM branch)
 * Mockito framework used to mock the Views
 * Mockito doAnswer-when idiom used for mock implementation of Retrofit APIs
 * Dependency injection throughout the app to make testing viable
@@ -42,7 +42,7 @@ I worked on improvements on the project in an internship in NASA's Goddard Space
 * [TapTargetView](https://github.com/KeepSafe/TapTargetView/)
 
 ## Requirements
-Replace the API key value with your own API key. You may also use the mockDebug build variant.
+To build, replace the API key value with your own API key. You can run the included tests without a key.
 
 ## Helpful Tutorials and samples I used:
 * [RecyclerView drag and swipe tutorial](https://medium.com/@ipaulpro/drag-and-swipe-with-recyclerview-b9456d2b1aaf#.hhn9yujya)
@@ -51,7 +51,7 @@ Replace the API key value with your own API key. You may also use the mockDebug 
 * [Android MVP Unit Testing](http://verybadalloc.com/android/adding-unit-tests-to-MVP-project.html)
 * [Testing RecyclerView with Espresso](https://spin.atomicobject.com/2016/04/15/espresso-testing-recyclerviews/)
 * [RxJava Android Samples](https://github.com/kaushikgopal/RxJava-Android-Samples)
-* [Google I/O app repository](https://github.com/google/iosched)
+* [GithubBrowserSample](https://github.com/googlesamples/android-architecture-components/tree/master/GithubBrowserSample)
 * [GIBS API for Developers](https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+API+for+Developers)
 
 ## Acknowledgements
