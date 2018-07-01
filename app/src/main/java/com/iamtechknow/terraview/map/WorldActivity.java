@@ -61,7 +61,7 @@ import static com.iamtechknow.terraview.anim.AnimDialogActivity.*;
 public class WorldActivity extends AppCompatActivity implements OnMapReadyCallback,
         NavigationView.OnNavigationItemSelectedListener, DragAndHideListener, SeekBar.OnSeekBarChangeListener {
     public static final String RESULT_LIST = "list", PREFS_FILE = "settings", PREFS_DB_KEY = "last_db_update";
-    public static final String RESTORE_TIME_EXTRA = "time", RESTORE_LAYER_EXTRA = "layer", RESTORE_EVENT_EXTRA = "event";
+    public static final String RESTORE_LAYER_EXTRA = "layer";
     public static final int LAYER_CODE = 1, EVENT_CODE = 2, SECONDS_PER_DAY = 86400000, WEEK = SECONDS_PER_DAY * 7, DEFAULT_HOME_ICON = 0,
                             ANIM_DURATION_MILLS = 250;
 
@@ -131,11 +131,7 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
-        //Save current date and layers
         outState.putParcelableArrayList(RESTORE_LAYER_EXTRA, viewModel.getCurrLayerStack());
-        outState.putLong(RESTORE_TIME_EXTRA, viewModel.getCurrDate().getTime());
-        outState.putParcelable(RESTORE_EVENT_EXTRA, viewModel.getCurrEvent());
     }
 
     @Override
@@ -224,13 +220,17 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
         }
         viewModel.onMapReady(googleMap);
         setLayerList(viewModel.getCurrLayerStack());
+
+        //If an event was saved, present it here
+        if(viewModel.getCurrEvent() != null)
+            showEvent(viewModel.getCurrEvent());
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch(requestCode) {
             case EVENT_CODE:
-                if(resultCode == RESULT_OK)
+                if(resultCode == RESULT_OK) //in config change, save event, present later
                     showEvent(data.getParcelableExtra(EventActivity.EVENT_EXTRA));
                 break;
             default:
@@ -257,8 +257,7 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
         public void onDateSet(DatePicker view, int year, int month, int day) {
             Calendar c = Calendar.getInstance();
             c.set(year, month, day);
-            Utils.getCalendarMidnightTime(c);
-            viewModel.onDateChanged(c.getTime());
+            viewModel.onDateChanged(Utils.getCalendarMidnightTime(c));
 
             //Warn unless event widget is active to prevent spamming
             if(viewModel.isLayerStartAfterCurrent())
@@ -378,6 +377,9 @@ public class WorldActivity extends AppCompatActivity implements OnMapReadyCallba
     private void showEvent(Event e) {
         //Change current date, notify user
         viewModel.presentEvent(e);
+        if(!viewModel.isGMapsAvailable()) //account for config change
+            return;
+
         updateDateDialog(viewModel.getCurrDate().getTime());
         showChangedEventDate(Utils.parseDateForDialog(viewModel.getCurrDate()));
         if(viewModel.isLayerStartAfterCurrent())

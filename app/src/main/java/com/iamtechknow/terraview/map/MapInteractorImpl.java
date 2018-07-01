@@ -88,6 +88,11 @@ public class MapInteractorImpl implements MapInteractor {
     }
 
     @Override
+    public boolean isGMapsAvailable() {
+        return gMaps != null;
+    }
+
+    @Override
     public TileOverlay addTile(Layer layer, String date) {
         CacheTileProvider provider = new CacheTileProvider(layer, date,this);
         return gMaps.addTileOverlay(new TileOverlayOptions().tileProvider(provider).fadeIn(false));

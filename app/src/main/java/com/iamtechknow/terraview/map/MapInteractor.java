@@ -20,6 +20,8 @@ public interface MapInteractor extends OnMapReadyCallback, GoogleMap.OnMapLongCl
         void onToggleColorMap(boolean show);
     }
 
+    boolean isGMapsAvailable();
+
     TileOverlay addTile(Layer l, String date);
 
     void removeTile(TileOverlay tile, Layer l, boolean isDateChange);

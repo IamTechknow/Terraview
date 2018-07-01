@@ -44,27 +44,14 @@ public class WorldViewModelTest {
         delete = new ArrayList<>();
         viewModel = new WorldViewModel(map, subject);
 
-        prepMap();
+        prepMap(); //Properly mock the MapInteractor
     }
 
-    /**
-     * Properly mock the MapInteractor
-     */
     private void prepMap() {
         //Mock creating a new tile overlay and mock getting the GoogleMap
         //This method may break upon changes to the GMaps library
         when(map.addTile(any(Layer.class), any(String.class))).thenReturn(new TileOverlay(new FakeZZAC()));
         viewModel.onMapReady(null);
-    }
-
-    //Test presenter initialization
-    @Test
-    public void testMockInit() {
-        Date currentDate = new Date();
-        Calendar c = Calendar.getInstance();
-        c.setTime(currentDate);
-        Utils.getCalendarMidnightTime(c);
-
     }
 
     @Test

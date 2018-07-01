@@ -101,11 +101,12 @@ public class Utils {
      * Set the calendar time to midnight
      * @param c The calendar object to use
      */
-    public static void getCalendarMidnightTime(Calendar c) {
+    public static Date getCalendarMidnightTime(Calendar c) {
         c.set(Calendar.HOUR_OF_DAY, 0);
         c.set(Calendar.MINUTE, 0);
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
+        return c.getTime();
     }
 
     public static HashMap<String, Layer> getLayerTable(List<Layer> layers) {

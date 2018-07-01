@@ -60,31 +60,26 @@ public class WorldViewModel extends ViewModel implements OnMapReadyCallback, Map
         colorMapSub = sub;
 
         currentDate = new Date();
-        Calendar c = Calendar.getInstance();
-        c.setTime(currentDate);
-        Utils.getCalendarMidnightTime(c);
-        currentDate = c.getTime();
     }
 
+    //Needed to account for config change when user selects layers or events
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         isRestoring = true;
-
         layer_stack = savedInstanceState.getParcelableArrayList(RESTORE_LAYER_EXTRA);
-        currentDate = new Date(savedInstanceState.getLong(RESTORE_TIME_EXTRA));
-        currEvent = savedInstanceState.getParcelable(RESTORE_EVENT_EXTRA);
     }
 
+    //Map is ready, set up the map interactor and current date.
     @Override
     public void onMapReady(GoogleMap gMaps) {
         map.onMapReady(gMaps);
+        Calendar c = Calendar.getInstance();
+        c.setTime(currentDate);
+        currentDate = Utils.getCalendarMidnightTime(c);
 
         if(isRestoring) {
             isRestoring = false;
             setLayersAndUpdateMap(layer_stack, null);
             onDateChanged(currentDate);
-
-            if(currEvent != null)
-                presentEvent(currEvent);
         } else
             showDefaultTiles();
     }
@@ -213,6 +208,9 @@ public class WorldViewModel extends ViewModel implements OnMapReadyCallback, Map
      */
     public void presentEvent(Event e) {
         currEvent = e;
+        if(!isGMapsAvailable())
+            return;
+
         onDateChanged(Utils.parseISODate(e.getDates().get(0)));
         if(e.getDates().size() > 1 && showColormap) { //hide colormap if event widget shown
             onToggleColorMap(false);
@@ -278,6 +276,10 @@ public class WorldViewModel extends ViewModel implements OnMapReadyCallback, Map
         }
         if(colorMapSub.hasObservers())
             colorMapSub.onNext(toShow);
+    }
+
+    public boolean isGMapsAvailable() {
+        return map.isGMapsAvailable();
     }
 
     /**
